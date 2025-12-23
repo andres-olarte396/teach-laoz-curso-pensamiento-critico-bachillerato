@@ -69,37 +69,54 @@ export const CoursePage: React.FC = () => {
       if (!content?.html) return;
 
       // 1. Process Mermaid Diagrams
-      const mermaidTargets = Array.from(document.querySelectorAll('code.language-mermaid, pre.mermaid'));
-      for (const el of mermaidTargets) {
-        const id = `mermaid-svg-${Math.random().toString(36).substr(2, 9)}`;
-        const code = el.textContent || '';
-        const parent = el.tagName === 'CODE' ? el.parentElement : el;
+      // 1. Process Mermaid Diagrams
+      // Strategy: Find explicit mermaid blocks OR heuristic blocks that look like mermaid
+      const mermaidCandidates = Array.from(document.querySelectorAll('pre > code'));
+      
+      for (const el of mermaidCandidates) {
+        const isExplicit = el.classList.contains('language-mermaid') || el.parentElement?.classList.contains('mermaid');
+        const textContent = el.textContent?.trim() || '';
+        
+        // Heuristic: Check for common mermaid patterns if not explicitly tagged
+        // but ensure we don't accidentally capture bash or other code that just mentions 'graph'
+        const isHeuristic = !el.className.includes('language-') && (
+          textContent.startsWith('graph ') || 
+          textContent.startsWith('sequenceDiagram') || 
+          textContent.startsWith('stateDiagram') || 
+          textContent.startsWith('classDiagram') ||
+          textContent.startsWith('erDiagram') ||
+          textContent.startsWith('flowchart')
+        );
 
-        if (parent && (parent.tagName === 'PRE' || parent.tagName === 'DIV')) {
-          try {
-            // Fix: Decode HTML entities that might confuse Mermaid (e.g. &gt; to >)
-            const decodeHtml = (html: string) => {
-              const txt = document.createElement("textarea");
-              txt.innerHTML = html;
-              return txt.value;
-            };
-            
-            const cleanCode = decodeHtml(code)
-              .replace(/\\n/g, '\n') // Ensure newlines are real
-              .replace(/^"|"$/g, ''); // Remove wrapping quotes if any
+        if (isExplicit || isHeuristic) {
+          const id = `mermaid-svg-${Math.random().toString(36).substr(2, 9)}`;
+          const parent = el.parentElement;
 
-            const { svg } = await mermaid.render(id, cleanCode);
-            const div = document.createElement('div');
-            div.className = 'mermaid';
-            div.innerHTML = svg;
-            parent.replaceWith(div);
-          } catch (err) {
-            console.error('Mermaid render error:', err);
-            // Fallback: Show error but keep code visible for debug
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-200 text-xs font-mono overflow-auto';
-            errorDiv.textContent = `Mermaid Syntax Error: ${(err as Error).message}\n\nCode:\n${code}`;
-            parent.replaceWith(errorDiv);
+          if (parent && (parent.tagName === 'PRE' || parent.tagName === 'DIV')) {
+            try {
+              // Fix: Decode HTML entities and sanitize
+              const decodeHtml = (html: string) => {
+                const txt = document.createElement("textarea");
+                txt.innerHTML = html;
+                return txt.value;
+              };
+              
+              const cleanCode = decodeHtml(textContent)
+                .replace(/\\n/g, '\n')
+                .replace(/^"|"$/g, '');
+
+              const { svg } = await mermaid.render(id, cleanCode);
+              const div = document.createElement('div');
+              div.className = 'mermaid';
+              div.innerHTML = svg;
+              parent.replaceWith(div);
+            } catch (err) {
+              console.error('Mermaid render error:', err);
+              const errorDiv = document.createElement('div');
+              errorDiv.className = 'p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-200 text-xs font-mono overflow-auto';
+              errorDiv.textContent = `Mermaid Syntax Error: ${(err as Error).message}\n\nCode:\n${textContent}`;
+              parent.replaceWith(errorDiv);
+            }
           }
         }
       }
@@ -312,16 +329,16 @@ export const CoursePage: React.FC = () => {
         className="max-w-4xl mx-auto pb-20"
       >
         {/* Breadcrumbs & Utilities */}
-        <div className="flex items-center justify-between mb-10 print:hidden">
-          <nav className="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-widest">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10 print:hidden">
+          <nav className="flex flex-wrap items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-widest">
             <Link to="/" className="hover:text-primary transition-colors">
               <Home size={14} />
             </Link>
             {breadcrumbs.map((crumb, i) => (
               <React.Fragment key={i}>
-                <ChevronRightIcon size={12} className="text-slate-700" />
+                <ChevronRightIcon size={12} className="text-slate-700 flex-shrink-0" />
                 <span className={i === breadcrumbs.length - 1 ? "text-primary/80" : "hover:text-slate-300 transition-colors cursor-default"}>
-                  {crumb.replace(/-/g, ' ').replace('.md', '')}
+                  {crumb.replace(/^teach-laoz-curso-?/i, '').replace(/-/g, ' ').replace('.md', '')}
                 </span>
               </React.Fragment>
             ))}
@@ -329,7 +346,7 @@ export const CoursePage: React.FC = () => {
           
           <button 
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all text-xs font-bold uppercase tracking-wider"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all text-xs font-bold uppercase tracking-wider"
           >
             <Printer size={14} />
             Imprimir

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Book, ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -65,13 +65,21 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-72 h-screen border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl flex flex-col sticky top-0 print:hidden">
-      <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(var(--color-primary),0.3)]">
-          <Book className="text-white" size={24} />
+      <div className="p-6 pb-2">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20 bg-primary shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+           <span className="text-white font-black italic text-2xl pr-0.5">L</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-black text-white tracking-tighter leading-none">
+              Teach <span className="text-primary italic">LAOZ</span>
+            </span>
+            <span className="text-[0.65rem] text-slate-400 font-bold tracking-[0.2em] uppercase">
+              Learning System
+            </span>
+          </div>
         </div>
-        <h1 className="text-xl font-bold tracking-tight bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent">
-          Teach LAOZ
-        </h1>
+        <div className="h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent mb-2" />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 custom-scrollbar">
