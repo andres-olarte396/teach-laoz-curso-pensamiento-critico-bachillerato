@@ -1,0 +1,290 @@
+@import 'tailwindcss';
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@theme {
+  --color-primary: oklch(0.6 0.25 260);
+  --color-secondary: oklch(0.7 0.2 150);
+  --color-accent: oklch(0.8 0.15 30);
+
+  --background-glass: rgba(255, 255, 255, 0.05);
+  --border-glass: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-50 font-sans antialiased;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full hover: bg-slate-600;
+}
+
+/* Content Enhancements & Typography */
+.content-area {
+  --tw-prose-body: theme('colors.slate.300');
+  --tw-prose-headings: theme('colors.white');
+  --tw-prose-links: theme('colors.blue.400');
+  --tw-prose-bold: theme('colors.white');
+  --tw-prose-counters: theme('colors.slate.500');
+  --tw-prose-bullets: theme('colors.slate.600');
+  --tw-prose-hr: theme('colors.slate.800');
+  --tw-prose-quotes: theme('colors.slate.100');
+  --tw-prose-quote-borders: theme('colors.blue.500');
+  --tw-prose-captions: theme('colors.slate.500');
+  --tw-prose-code: theme('colors.blue.300');
+  --tw-prose-pre-code: theme('colors.slate.200');
+  --tw-prose-pre-bg: theme('colors.slate.950');
+  --tw-prose-th-borders: theme('colors.slate.700');
+  --tw-prose-td-borders: theme('colors.slate.800');
+
+  line-height: 1.75;
+  letter-spacing: -0.011em;
+}
+
+.content-area h1 {
+  @apply text-5xl font-black mb-12 tracking-tight leading-[1.1];
+}
+
+.content-area h2 {
+  @apply text-3xl font-bold mt-16 mb-6 tracking-tight border-b border-slate-800/50 pb-4;
+}
+
+.content-area h3 {
+  @apply text-xl font-bold mt-10 mb-4 tracking-tight text-slate-100;
+}
+
+.content-area p {
+  @apply mb-6 text-lg;
+}
+
+.content-area ul,
+.content-area ol {
+  @apply mb-8 ml-4;
+}
+
+.content-area li {
+  @apply mb-3;
+}
+
+.mermaid {
+  @apply flex justify-center my-12 bg-slate-900/40 p-10 rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden;
+}
+
+.katex-display {
+  @apply my-12 py-6 bg-blue-500/5 rounded-2xl border border-blue-500/10 overflow-x-auto overflow-y-hidden text-center text-xl;
+}
+
+.content-area blockquote {
+  @apply my-10 pl-8 pr-6 py-6 bg-gradient-to-r from-blue-500/10 to-transparent border-l-4 border-blue-500 rounded-r-2xl italic text-slate-200;
+}
+
+.content-area table {
+  @apply w-full my-10 border-collapse text-left text-sm;
+}
+
+.content-area th {
+  @apply py-4 px-4 font-bold text-white border-b border-slate-700 bg-slate-900/50;
+}
+
+.content-area td {
+  @apply py-4 px-4 border-b border-slate-800/50 text-slate-400;
+}
+
+.content-area a {
+  @apply relative text-primary font-semibold no-underline transition-all duration-300;
+  background-image: linear-gradient(to right,
+      theme('colors.primary.400'),
+      theme('colors.primary.400'));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 2px;
+}
+
+.content-area a:hover {
+  @apply text-white;
+  background-size: 100% 2px;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+.content-area pre {
+  @apply my-10 rounded-2xl border border-slate-800 shadow-2xl !bg-slate-950 overflow-hidden !p-0;
+}
+
+.content-area pre>code {
+  @apply block p-[2em] !bg-transparent;
+}
+
+/* Code Headers */
+.code-header {
+  @apply flex items-center justify-between px-6 py-3 bg-slate-900 border-b border-slate-800/50 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500;
+}
+
+.code-lang-label {
+  @apply flex items-center gap-2;
+}
+
+.code-lang-label::before {
+  content: '';
+  @apply w-1.5 h-1.5 rounded-full bg-slate-700;
+}
+
+/* Language specific accents */
+.code-lang-typescript .code-lang-label,
+.code-lang-ts .code-lang-label {
+  @apply text-blue-400;
+}
+
+.code-lang-typescript .code-lang-label::before,
+.code-lang-ts .code-lang-label::before {
+  @apply bg-blue-400 shadow-[0_0_8px_rgba(56, 189, 248, 0.5)];
+}
+
+.code-lang-javascript .code-lang-label,
+.code-lang-js .code-lang-label {
+  @apply text-yellow-400;
+}
+
+.code-lang-javascript .code-lang-label::before,
+.code-lang-js .code-lang-label::before {
+  @apply bg-yellow-400 shadow-[0_0_8px_rgba(250, 204, 21, 0.5)];
+}
+
+.code-lang-json .code-lang-label {
+  @apply text-orange-400;
+}
+
+.code-lang-json .code-lang-label::before {
+  @apply bg-orange-400 shadow-[0_0_8px_rgba(251, 146, 60, 0.5)];
+}
+
+.code-lang-bash .code-lang-label,
+.code-lang-sh .code-lang-label {
+  @apply text-emerald-400;
+}
+
+.code-lang-bash .code-lang-label::before,
+.code-lang-sh .code-lang-label::before {
+  @apply bg-emerald-400 shadow-[0_0_8px_rgba(52, 211, 153, 0.5)];
+}
+
+.code-copy-btn {
+  @apply p-1.5 rounded-md hover: bg-slate-800 text-slate-600 hover:text-white transition-all duration-200 opacity-0 group-hover:opacity-100;
+}
+
+.content-area pre {
+  @apply group;
+}
+
+.content-area pre:hover .code-copy-btn {
+  @apply opacity-100;
+}
+
+.code-copy-btn.copied {
+  @apply text-emerald-400;
+}
+
+.content-area pre>code {
+  @apply block p-6 !bg-transparent;
+}
+
+.content-area img {
+  @apply my-12 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0, 0, 0, 0.5)] border border-white/5 mx-auto block hover: scale-[1.02] transition-transform duration-500;
+}
+
+/* Print Styles */
+@media print {
+
+  /* 1. Hide everything by default at the root level */
+  #root>div>*:not(main) {
+    display: none !important;
+  }
+
+  /* 2. Hide everything inside main except the content area */
+  main>div>*:not(div:has(.content-area)) {
+    display: none !important;
+  }
+
+  /* 3. Hide UI components explicitly */
+  aside,
+  footer,
+  nav,
+  button,
+  .print\:hidden,
+  .no-print,
+  .code-copy-btn,
+  div[class*='blur'] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* 4. Reset layout for print */
+  html,
+  body,
+  #root,
+  #root>div,
+  main,
+  .flex-1,
+  .overflow-y-auto {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+    position: static !important;
+  }
+
+  /* 5. Content Area Typography & Spacing */
+  .content-area {
+    display: block !important;
+    visibility: visible !important;
+    color: black !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .content-area * {
+    color: black !important;
+    background-color: transparent !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Code blocks cleanup */
+  .content-area pre {
+    @apply !bg-slate-50 border border-slate-300 !text-black;
+    page-break-inside: avoid;
+    white-space: pre-wrap !important;
+    background: #f8fafc !important;
+  }
+
+  .content-area .code-header {
+    @apply !bg-slate-100 border-slate-300 !text-black font-bold;
+    background: #f1f5f9 !important;
+  }
+
+  .content-area img {
+    @apply rounded-lg border border-slate-200;
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}

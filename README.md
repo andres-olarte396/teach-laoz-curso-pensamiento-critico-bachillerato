@@ -1,0 +1,125 @@
+# Teach LAOZ - Learning Management System
+
+Sistema técnico de gestión de aprendizaje para contenido educativo B2B.
+
+## 📋 Descripción
+
+Plataforma para crear, distribuir y comercializar cursos técnicos especializados, construidos sobre contenido en Markdown con soporte para recursos multimedia, diagramas y fórmulas matemáticas.
+
+## 🎯 Características principales
+
+- ✅ Renderizado de Markdown a HTML con soporte técnico
+- ✅ Navegación tipo repositorio (GitHub-style)
+- ✅ Soporte para Mermaid (diagramas)
+- ✅ Soporte para LaTeX (fórmulas matemáticas)
+- ✅ Gestión de recursos (PDFs, imágenes, audio, video)
+- ✅ Arquitectura limpia y extensible
+- ✅ Independencia del contenido
+
+## 🏗️ Arquitectura
+
+Este proyecto sigue principios de **Clean Architecture**:
+
+- **Domain**: Entidades y contratos
+- **Application**: Casos de uso
+- **Infrastructure**: Implementaciones concretas
+- **Interface**: API HTTP
+
+Ver [TECHNICAL_ARCHITECTURE.md](./docs/TECHNICAL_ARCHITECTURE.md) para más detalles.
+
+## 🚀 Quick Start
+
+### Prerequisitos
+
+- Node.js 20+ LTS
+- npm 10+
+
+### Instalación
+
+```bash
+# Instalar dependencias
+npm install
+
+# Copiar variables de entorno
+cp .env.example .env
+
+# Iniciar en modo desarrollo
+npm run dev
+```
+
+### Scripts disponibles
+
+```bash
+npm run dev           # Desarrollo con hot-reload
+npm run build         # Compilar TypeScript
+npm start             # Ejecutar versión compilada
+npm test              # Ejecutar tests
+npm run test:coverage # Tests con coverage
+npm run lint          # Linting
+npm run format        # Formateo de código
+```
+
+## 📁 Estructura de carpetas
+
+```
+src/
+├── domain/           # Núcleo del negocio
+├── application/      # Casos de uso
+├── infrastructure/   # Implementaciones
+├── interface/        # API HTTP
+└── shared/           # Utilidades compartidas
+```
+
+## 📚 Documentación
+
+Ver [docs/README.md](./docs/README.md) para el índice completo de documentación.
+
+### Documentos principales:
+
+- [STATUS_REPORT.md](./docs/STATUS_REPORT.md) - 🆕 Reporte de estado del proyecto
+- [REQUERIMENT.md](./docs/REQUERIMENT.md) - Documento de requerimientos completo
+- [SYSTEM_DEFINITIONS.md](./docs/SYSTEM_DEFINITIONS.md) - Definiciones del sistema
+- [TECHNICAL_ARCHITECTURE.md](./docs/TECHNICAL_ARCHITECTURE.md) - Arquitectura técnica detallada
+- [SETUP.md](./docs/SETUP.md) - Guía de instalación y configuración
+
+## 🔧 Stack tecnológico
+
+- **Runtime**: Node.js 20+
+- **Lenguaje**: TypeScript 5.x
+- **Framework**: Fastify 4.x
+- **Markdown**: Unified ecosystem (remark/rehype)
+- **Testing**: Vitest
+- **Linting**: ESLint + Prettier
+
+## 📝 Roadmap
+
+### Fase 1 - Motor de contenido (actual)
+- [ ] ContentRepository
+- [ ] MarkdownRenderingService
+- [ ] Navegación y menú dinámico
+
+### Fase 2 - Modelo educativo
+- [ ] Frontmatter estandarizado
+- [ ] Identidad estable de cursos
+
+### Fase 3 - LMS básico
+- [ ] Usuarios y autenticación
+- [ ] Progreso por curso
+- [ ] Evaluaciones
+
+### Fase 4 - Analítica
+- [ ] Eventos de aprendizaje
+- [ ] Estadísticas
+- [ ] Multi-tenant
+
+## 🤝 Contribuir
+
+Este proyecto sigue principios de Clean Code y Clean Architecture. Por favor lee la documentación técnica antes de contribuir.
+
+## 📄 Licencia
+
+MIT
+
+## 👥 Autores
+
+LAOZ Development Team
