@@ -59,6 +59,41 @@ npm run lint          # Linting
 npm run format        # Formateo de código
 ```
 
+## 🛠️ Scripts de Automatización
+
+El proyecto incluye scripts en la carpeta `scripts/` para facilitar tareas comunes:
+
+### 1. Iniciar Entorno de Desarrollo
+```powershell
+.\scripts\start-dev.ps1
+```
+Abre automáticamente terminales para Backend y Frontend.
+
+### 2. Cargar Datos Iniciales (Seed)
+```bash
+# Desde la raíz backend
+npm run seed --prefix backend
+```
+Crea un usuario administrador por defecto (`admin@teachlaoz.com` / `admin`).
+
+### 3. Descargar Cursos
+```bash
+npx tsx scripts/download-courses.ts
+```
+Descarga los cursos listados en `courses-list.md` a la carpeta `content/courses`.
+
+## 🐳 Docker Deployment
+
+Puedes ejecutar todo el stack (Frontend + Backend + Base de Datos) usando Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+El sistema estará disponible en:
+- **Frontend**: http://localhost:80
+- **Backend API**: http://localhost:3000
+
 ## 📁 Estructura de carpetas
 
 ```

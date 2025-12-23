@@ -29,6 +29,7 @@ Este documento define las decisiones técnicas concretas para implementar el sis
 ### 2.3 Renderizado de Markdown
 
 #### Motor principal
+
 - **Unified** ecosystem:
   - `remark` - parser Markdown
   - `remark-parse` - parsing
@@ -36,12 +37,14 @@ Este documento define las decisiones técnicas concretas para implementar el sis
   - `rehype-stringify` - serialización HTML
 
 #### Plugins esenciales
+
 - `remark-gfm` - GitHub Flavored Markdown
 - `rehype-highlight` - resaltado de código
 - `rehype-slug` - IDs en headings
 - `rehype-autolink-headings` - enlaces automáticos
 
 #### Extensiones especiales
+
 - **Mermaid**: `remark-mermaidjs`
 - **LaTeX**: `remark-math` + `rehype-katex`
 - **Sanitización**: `rehype-sanitize`
@@ -206,6 +209,7 @@ teach-laoz-learning-management-system/
 ```
 
 **Reglas:**
+
 - Domain **nunca** importa de otras capas
 - Application solo importa de Domain
 - Infrastructure implementa interfaces de Domain
@@ -400,6 +404,7 @@ fastify.setErrorHandler((error, request, reply) => {
 Lista el contenido raíz.
 
 **Response:**
+
 ```json
 {
   "items": [
@@ -418,6 +423,7 @@ Lista el contenido raíz.
 Obtiene contenido de una ruta específica.
 
 **Carpeta:**
+
 ```json
 {
   "type": "directory",
@@ -427,6 +433,7 @@ Obtiene contenido de una ruta específica.
 ```
 
 **Markdown:**
+
 ```json
 {
   "type": "markdown",
@@ -440,6 +447,7 @@ Obtiene contenido de una ruta específica.
 ```
 
 **Binario:**
+
 - Content-Type apropiado
 - Stream del archivo
 
@@ -513,6 +521,7 @@ Genera menú dinámico.
 ## 12. Roadmap de implementación
 
 ### Fase 1.1 - Setup inicial (1-2 días)
+
 - [x] Estructura de carpetas
 - [ ] Configuración TypeScript
 - [ ] ESLint + Prettier
@@ -520,29 +529,34 @@ Genera menú dinámico.
 - [ ] Entidades básicas
 
 ### Fase 1.2 - Domain & Application (3-4 días)
+
 - [ ] ContentNode, ContentPath, ContentType
 - [ ] IContentRepository interface
 - [ ] IMarkdownRenderer interface
 - [ ] Casos de uso básicos
 
 ### Fase 1.3 - Infrastructure (4-5 días)
+
 - [ ] LocalFileSystemRepository
 - [ ] UnifiedMarkdownRenderer (con Mermaid y LaTeX)
 - [ ] Configuration management
 
 ### Fase 1.4 - Interface Layer (3-4 días)
+
 - [ ] Fastify setup
 - [ ] Routes y controllers
 - [ ] Error handling
 - [ ] Validación de schemas
 
 ### Fase 1.5 - Testing & Polish (2-3 días)
+
 - [ ] Unit tests
 - [ ] Integration tests
 - [ ] Documentación API
 - [ ] Content de ejemplo
 
 ### Fase 1.6 - Features avanzadas (3-5 días)
+
 - [ ] Generación de menú dinámico
 - [ ] Soporte completo de frontmatter
 - [ ] Cache de renderizado
@@ -554,13 +568,15 @@ Genera menú dinámico.
 
 ## 13. Decisiones técnicas pendientes
 
-### Para revisar en Fase 2:
+### Para revisar en Fase 2
+
 - Sistema de cache (Redis vs in-memory)
 - Versionado de contenido (Git integration)
 - Búsqueda full-text (Elastic vs local)
 - CDN para assets estáticos
 
-### Para Fase 3 (LMS):
+### Para Fase 3 (LMS)
+
 - Base de datos (PostgreSQL recomendado)
 - ORM (Prisma vs TypeORM)
 - Autenticación (JWT vs sessions)

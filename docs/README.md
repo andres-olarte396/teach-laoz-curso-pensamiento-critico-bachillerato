@@ -75,6 +75,13 @@ Instrucciones prácticas para inicializar el proyecto:
 
 ---
 
+### 5. Blog
+**Artículos y novedades**
+
+- [Bienvenida al blog](../content/blog/welcome.md) — Primer artículo de bienvenida, novedades y visión del sistema.
+
+---
+
 ## 🗺️ Flujo de lectura recomendado
 
 ```mermaid
