@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { Video, Music, FileText as FileTextIcon, Download, HardDrive, AlertCircle } from 'lucide-react';
+import { Video, Music, FileText as FileTextIcon, Download, HardDrive } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import type { ContentResponse } from '../services/apiService';
 
@@ -393,10 +393,10 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
   };
 
   return (
-    <div className={`prose prose-invert prose-slate max-w-none 
-      prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
+    <div className={`prose dark:prose-invert prose-slate max-w-none 
+      dark:prose-headings:text-white prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight
       prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-      prose-code:text-accent prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800
+      dark:prose-code:text-accent prose-code:text-emerald-600 dark:prose-pre:bg-slate-900 prose-pre:bg-slate-100 dark:prose-pre:border dark:prose-pre:border-slate-800 prose-pre:border-slate-200
       prose-img:rounded-3xl prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:py-1
       print:prose-slate print:prose-headings:text-black print:text-black
       ${className || ''}
