@@ -54,4 +54,9 @@ export const apiService = {
     const response = await apiClient.get<{ data: { social: { github: string, twitter: string, linkedin: string } } }>('/config');
     return response.data;
   },
+
+  submitContact: async (data: { name: string; email: string; subject: string; message: string }) => {
+    const response = await apiClient.post<{ message: string }>('/contact', data);
+    return response.data;
+  },
 };
