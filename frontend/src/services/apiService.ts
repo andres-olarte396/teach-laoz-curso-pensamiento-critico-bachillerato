@@ -27,7 +27,7 @@ export interface ContentResponse {
   frontmatter?: Record<string, any>;
   toc?: any[];
   relatedAssets?: {
-    type: 'audio' | 'video' | 'exercise' | 'evaluation';
+    type: 'audio' | 'video' | 'exercise' | 'evaluation' | 'script';
     path: string;
     name: string;
     url?: string;

@@ -25,7 +25,7 @@ export class GenerateMenu {
     
     const item: MenuItemDto = {
       id: name,
-      title: name, // Should ideally come from metadata/frontmatter
+      title: this.formatTitle(name),
       path,
       type: isDirectory ? 'directory' : 'markdown',
     };
@@ -51,5 +51,21 @@ export class GenerateMenu {
     }
 
     return item;
+  }
+
+  private formatTitle(name: string): string {
+    // 1. Remove extension
+    let title = name.replace(/\.[^/.]+$/, "");
+    
+    // 2. Remove prefix
+    title = title.replace(/^teach-laoz-curso-/, "");
+    
+    // 3. Replace separators
+    title = title.replace(/[-_]/g, " ");
+
+    // 4. Title Case
+    return title.replace(/\w\S*/g, (txt) => {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    }).trim();
   }
 }

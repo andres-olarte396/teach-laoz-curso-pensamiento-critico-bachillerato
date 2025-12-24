@@ -1,7 +1,7 @@
 import { ContentType } from '@domain/value-objects/ContentType.js';
 
 export interface RelatedAsset {
-  type: 'audio' | 'video' | 'exercise' | 'evaluation';
+  type: 'audio' | 'video' | 'exercise' | 'evaluation' | 'script';
   path: string;
   name: string; // The full filename or a display name
   url?: string; // Optional full URL if needed
