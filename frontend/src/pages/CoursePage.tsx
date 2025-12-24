@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
-import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon, Volume2, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentRenderer } from '../components/ContentRenderer';
+
+import { useTts } from '../hooks/useTts';
 
 export const CoursePage: React.FC = () => {
   const { '*' : path } = useParams();
@@ -14,12 +16,29 @@ export const CoursePage: React.FC = () => {
   const [navContext, setNavContext] = useState<{ prev: MenuItem | null, next: MenuItem | null } | null>(null);
   const [showAudio, setShowAudio] = useState(false);
   const [showScript, setShowScript] = useState(false);
+  
+  const { 
+    isReading, 
+    isPaused, 
+    startReading, 
+    pauseReading, 
+    resumeReading, 
+    stopReading 
+  } = useTts({
+    contentSelector: '.content-area'
+  });
+
+  useEffect(() => {
+    return () => stopReading();
+  }, [path, stopReading]);
 
   useEffect(() => {
     const fetchContent = async () => {
       if (!path) return;
       setLoading(true);
       setError(null);
+      stopReading();
+      
       try {
         const data = await apiService.getContent(path);
         setContent(data);
@@ -98,7 +117,6 @@ export const CoursePage: React.FC = () => {
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="max-w-4xl mx-auto pb-20"
       >
-        {/* Breadcrumbs & Utilities */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10 print:hidden">
           <nav className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">
             <Link to="/" className="hover:text-[var(--color-primary)] transition-colors">
@@ -114,66 +132,68 @@ export const CoursePage: React.FC = () => {
             ))}
           </nav>
           
-          <button 
-            onClick={() => window.print()}
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
-          >
-            <Printer size={14} />
-            Imprimir
-          </button>
-
-          {/* Related Assets Buttons */}
-          <div className="flex flex-wrap gap-2">
-            {content.relatedAssets?.find(a => a.type === 'audio') && (
+          <div className="flex items-center gap-2">
+            {!isReading ? (
               <button 
-                onClick={() => setShowAudio(!showAudio)}
-                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${showAudio ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500'}`}
+                onClick={startReading}
+                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]"
               >
-                <Music size={14} />
-                Escuchar
+                <Volume2 size={14} />
+                Leer Contenido
               </button>
+            ) : (
+                <div className="flex items-center gap-2">
+                  {isPaused ? (
+                    <button 
+                        onClick={resumeReading}
+                        className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20"
+                        title="Reanudar"
+                    >
+                        <Volume2 size={14} />
+                        Reanudar
+                    </button>
+                  ) : (
+                    <button 
+                        onClick={pauseReading}
+                        className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500 text-orange-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-orange-500/20"
+                        title="Pausar"
+                    >
+                         {/* We can use Pause icon if we import it, or just use text/Volume2 for now. User asked for controls. */}
+                         {/* I will stick to Volume2 or I can import Pause icon. I'll import Pause. */}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                        Pausar
+                    </button>
+                  )}
+                  
+                  <button 
+                    onClick={stopReading}
+                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500 text-red-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-red-500/20"
+                    title="Detener"
+                  >
+                    <Square size={14} fill="currentColor" />
+                    Detener
+                  </button>
+                </div>
             )}
 
-            {content.relatedAssets?.find(a => a.type === 'script') && (
-              <button 
-                onClick={() => setShowScript(!showScript)}
-                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${showScript ? 'bg-blue-500/10 border-blue-500 text-blue-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-blue-500 hover:border-blue-500'}`}
-              >
-                <FileText size={14} />
-                Ver Guión
-              </button>
-            )}
-
-            {content.relatedAssets?.find(a => a.type === 'exercise') && (
-              <Link 
-                to={`/course/${content.relatedAssets.find(a => a.type === 'exercise')?.path}`}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-orange-500 hover:border-orange-500 transition-all text-xs font-bold uppercase tracking-wider"
-              >
-                <CheckSquare size={14} />
-                Ejercicios
-              </Link>
-            )}
-
-            {content.relatedAssets?.find(a => a.type === 'evaluation') && (
-              <Link 
-                to={`/course/${content.relatedAssets.find(a => a.type === 'evaluation')?.path}`}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-purple-500 hover:border-purple-500 transition-all text-xs font-bold uppercase tracking-wider"
-              >
-                <Brain size={14} />
-                Presentar Test
-              </Link>
-            )}
+            <button 
+              onClick={() => window.print()}
+              className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
+            >
+              <Printer size={14} />
+              Imprimir
+            </button>
           </div>
         </div>
 
         {/* Content Section */}
         <ContentRenderer 
-          html={content.html} 
+          html={content.html || ''} 
           path={path}
           metadata={{
-            mimeType: content.metadata.mimeType || 'application/octet-stream',
-            size: content.metadata.size,
-            lastModified: content.metadata.lastModified,
+            mimeType: content.metadata?.mimeType || 'application/octet-stream',
+            size: content.metadata?.size || 0,
+            lastModified: content.metadata?.lastModified || new Date().toISOString(),
             name: content.name,
             poster: content.frontmatter?.poster,
             relatedAssets: content.relatedAssets,
@@ -183,6 +203,55 @@ export const CoursePage: React.FC = () => {
           onCloseAudio={() => setShowAudio(false)}
           onCloseScript={() => setShowScript(false)}
         />
+
+        {/* Action Buttons & Assets (Moved from Top) */}
+        <div className="mt-12 flex flex-col gap-6 print:hidden border-t border-slate-800/50 pt-8">
+             {/* Related Assets Buttons */}
+             {content.relatedAssets && content.relatedAssets.length > 0 && (
+              <div className="flex flex-wrap gap-3 justify-center">
+                {content.relatedAssets?.find(a => a.type === 'audio') && (
+                  <button 
+                    onClick={() => setShowAudio(!showAudio)}
+                    className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl border transition-all text-sm font-bold uppercase tracking-wider min-w-[140px] justify-center ${showAudio ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500 hover:bg-emerald-500/5'}`}
+                  >
+                    <Music size={16} />
+                    Escuchar
+                  </button>
+                )}
+
+                {content.relatedAssets?.find(a => a.type === 'script') && (
+                  <button 
+                    onClick={() => setShowScript(!showScript)}
+                    className={`flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl border transition-all text-sm font-bold uppercase tracking-wider min-w-[140px] justify-center ${showScript ? 'bg-blue-500/10 border-blue-500 text-blue-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-blue-500 hover:border-blue-500 hover:bg-blue-500/5'}`}
+                  >
+                    <FileText size={16} />
+                    Ver Guión
+                  </button>
+                )}
+
+                {content.relatedAssets?.find(a => a.type === 'exercise') && (
+                  <Link 
+                    to={`/course/${content.relatedAssets.find(a => a.type === 'exercise')?.path}`}
+                    className="flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-orange-500 hover:border-orange-500 hover:bg-orange-500/5 transition-all text-sm font-bold uppercase tracking-wider min-w-[140px] justify-center"
+                  >
+                    <CheckSquare size={16} />
+                    Ejercicios
+                  </Link>
+                )}
+
+                {content.relatedAssets?.find(a => a.type === 'evaluation') && (
+                  <Link 
+                    to={`/course/${content.relatedAssets.find(a => a.type === 'evaluation')?.path}`}
+                    className="flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-purple-500 hover:border-purple-500 hover:bg-purple-500/5 transition-all text-sm font-bold uppercase tracking-wider min-w-[140px] justify-center"
+                  >
+                    <Brain size={16} />
+                    Presentar Test
+                  </Link>
+                )}
+              </div>
+            )}
+
+        </div>
 
         {/* Sequential Navigation */}
         <div className="mt-16 grid grid-cols-2 gap-6 print:hidden">

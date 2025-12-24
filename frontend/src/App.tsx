@@ -20,6 +20,14 @@ const ProtectedRoute = () => {
 
 import { ThemeProvider } from './context/ThemeContext';
 
+import { ContactPage } from './pages/ContactPage';
+import { LearningPathsPage } from './pages/LearningPathsPage';
+import { CommunityPage } from './pages/CommunityPage';
+import { CertificationsPage } from './pages/CertificationsPage';
+import { DocumentationPage } from './pages/DocumentationPage';
+import { SupportPage } from './pages/SupportPage';
+import { TermsPage } from './pages/TermsPage';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
@@ -36,6 +44,19 @@ function App() {
               {/* Public Blog Routes */}
               <Route path="/blog" element={<BlogListPage />} />
               <Route path="/blog/:slug" element={<BlogPostPage />} />
+              
+              {/* Contact Route */}
+              <Route path="/contact" element={<ContactPage />} />
+
+              {/* New Platform Routes */}
+              <Route path="/learning-paths" element={<LearningPathsPage />} />
+              <Route path="/community" element={<CommunityPage />} />
+              <Route path="/certifications" element={<CertificationsPage />} />
+
+              {/* New Resource Routes */}
+              <Route path="/documentation" element={<DocumentationPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/terms" element={<TermsPage />} />
 
               {/* Protected Course Routes */}
               <Route element={<ProtectedRoute />}>

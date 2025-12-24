@@ -100,13 +100,15 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
       }
 
       // 2. Process Code Block Headers
-      const codeBlocks = document.querySelectorAll('pre > code[class*="language-"]');
+      const codeBlocks = document.querySelectorAll('pre > code');
       codeBlocks.forEach((code) => {
         const pre = code.parentElement;
-        if (!pre || pre.querySelector('.code-header')) return;
+        // Avoid double-processing or processing mermaid diagrams that might have been processed but wrapper left? 
+        // Or if it's already processed (has a header)
+        if (!pre || pre.querySelector('div.flex') || pre.classList.contains('mermaid')) return;
 
         const langClass = Array.from(code.classList).find(c => c.startsWith('language-'));
-        const lang = langClass ? langClass.replace('language-', '') : 'code';
+        const lang = langClass ? langClass.replace('language-', '') : 'text';
 
         const displayNames: Record<string, string> = {
           sh: 'TERMINAL',
@@ -123,7 +125,10 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
           html: 'HTML',
           css: 'CSS',
           go: 'GO',
-          json: 'JSON'
+          json: 'JSON',
+          text: 'TEXTO',
+          plaintext: 'TEXTO',
+          txt: 'TEXTO'
         };
         
         const header = document.createElement('div');
@@ -135,7 +140,8 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
         langLabel.textContent = displayNames[lang.toLowerCase()] || lang.toUpperCase();
         
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'code-copy-btn';
+        const btnBase = 'flex items-center justify-center p-1 rounded transition-all duration-200 text-slate-400 hover:text-white hover:bg-white/10 opacity-70 hover:opacity-100';
+        copyBtn.className = btnBase;
         copyBtn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         `;
@@ -144,9 +150,14 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
           copyBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17 4 12"/></svg>
           `;
-          copyBtn.classList.add('copied');
+          // Add success styles
+          copyBtn.classList.add('text-emerald-500', 'opacity-100');
+          copyBtn.classList.remove('text-slate-400', 'opacity-70');
+          
           setTimeout(() => {
-             copyBtn.classList.remove('copied');
+             // Revert styles
+             copyBtn.classList.remove('text-emerald-500', 'opacity-100');
+             copyBtn.classList.add('text-slate-400', 'opacity-70');
              copyBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
              `;

@@ -1,11 +1,12 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '../context/AuthContext';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,9 +15,10 @@ function cn(...inputs: ClassValue[]) {
 interface NavItemProps {
   item: MenuItem;
   depth?: number;
+  isCollapsed?: boolean;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ item, depth = 0 }) => {
+const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
   const isActive = location.pathname === `/course/${item.path}`;
@@ -35,9 +37,11 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0 }) => {
         to={item.type === 'markdown' ? `/course/${item.path}` : '#'}
         onClick={toggleOpen}
         className={cn(
-          "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group",
-          isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-slate-900 text-slate-400 hover:text-slate-100"
+          "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
+          isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-slate-900 text-slate-400 hover:text-slate-100",
+          isCollapsed && "justify-center"
         )}
+        title={isCollapsed ? item.title : undefined}
       >
         <span className="w-4 h-4 flex items-center justify-center">
           {hasChildren ? (
@@ -46,13 +50,13 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0 }) => {
             item.type === 'directory' ? <Folder size={14} /> : <FileText size={14} />
           )}
         </span>
-        <span className="text-sm truncate font-medium">{item.title}</span>
+        {!isCollapsed && <span className="text-sm truncate font-medium">{item.title}</span>}
       </Link>
       
-      {hasChildren && isOpen && (
+      {!isCollapsed && hasChildren && isOpen && (
         <div className="mt-1 flex flex-col gap-1 ml-5 pl-2 border-l border-slate-800">
           {item.children?.map((child) => (
-            <NavItem key={child.id} item={child} depth={depth + 1} />
+            <NavItem key={child.id} item={child} depth={depth + 1} isCollapsed={isCollapsed} />
           ))}
         </div>
       )}
@@ -62,59 +66,182 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0 }) => {
 
 export const Sidebar: React.FC = () => {
   const { courses, loading, error } = useMenu();
+  const { logout } = useAuth();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isCoursesOpen, setIsCoursesOpen] = React.useState(true);
 
   return (
-    <aside className="w-72 h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white">
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+    <aside className={cn(
+      "h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white transition-all duration-300",
+      isCollapsed ? "w-20" : "w-72"
+    )}>
+      <div className="p-6 pb-2 relative group">
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-8 bg-slate-800 text-slate-400 p-1 rounded-full border border-slate-700 hover:text-white hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
+          title={isCollapsed ? "Expandir menú" : "Contraer menú"}
+        >
+          {isCollapsed ? <ChevronRight size={14} /> : <PanelLeftClose size={14} />}
+        </button>
+
+        <div className={cn("flex items-center gap-3 mb-6", isCollapsed && "justify-center")}>
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] shrink-0">
            <span className="text-white font-black italic text-2xl pr-0.5">L</span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-black text-white tracking-tighter leading-none">
-              Teach <span className="text-emerald-500 italic">LAOZ</span>
-            </span>
-            <span className="text-[0.65rem] text-slate-500 font-bold tracking-[0.2em] uppercase">
-              Learning System
-            </span>
-          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xl font-black text-white tracking-tighter leading-none whitespace-nowrap">
+                Teach <span className="text-emerald-500 italic">LAOZ</span>
+              </span>
+              <span className="text-[0.65rem] text-slate-500 font-bold tracking-[0.2em] uppercase whitespace-nowrap">
+                Learning System
+              </span>
+            </div>
+          )}
         </div>
         <div className="h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent mb-2" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 custom-scrollbar">
-        <div className="px-3 mb-2">
-           <Link 
-            to="/blog" 
-            className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-100 transition-all font-medium mb-4 border border-slate-800 bg-slate-900/50"
-          >
-            <span className="w-4 h-4 flex items-center justify-center"><FileText size={14} className="text-primary" /></span>
-             <span>Blog</span>
-          </Link>
+      <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 custom-scrollbar">
+        
+        {/* PLATAFORMA SECTION */}
+        <div>
+          {!isCollapsed && <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Plataforma</h2>}
+          <div className="space-y-1">
+             <button 
+                onClick={() => !isCollapsed && setIsCoursesOpen(!isCoursesOpen)}
+                className={cn(
+                  "w-full px-3 py-2 flex items-center gap-2 text-primary bg-primary/10 rounded-lg mb-2 transition-all hover:bg-primary/20", 
+                  isCollapsed && "justify-center cursor-default bg-transparent hover:bg-transparent p-0"
+                )}
+                title={isCollapsed ? "Cursos" : (isCoursesOpen ? "Contraer cursos" : "Expandir cursos")}
+             >
+                {!isCollapsed ? (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold tracking-wider uppercase">Cursos</span>
+                    {isCoursesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                  </div>
+                ) : (
+                  <div className="w-full flex justify-center py-2 bg-primary/10 rounded-lg">
+                    <Folder size={16} />
+                  </div>
+                )}
+             </button>
+             
+             {/* Dynamic Courses List */}
+             {(!isCollapsed && isCoursesOpen) && (
+               <>
+                 {loading && (
+                  <div className="px-3 space-y-2">
+                    {[1, 2].map(i => (
+                      <div key={i} className="h-6 bg-slate-900/50 animate-pulse rounded-md" />
+                    ))}
+                  </div>
+                )}
 
-          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cursos</h2>
+                {error && (
+                  <div className="px-3 py-2 text-xs text-red-400 bg-red-400/10 rounded-lg">
+                    Error al cargar cursos.
+                  </div>
+                )}
+
+                {courses.map((course) => (
+                  <NavItem key={course.id} item={course} isCollapsed={isCollapsed} />
+                ))}
+               </>
+             )}
+
+            <Link 
+              to="/learning-paths" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              title="Rutas de aprendizaje"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Map size={14} /></span>
+              {!isCollapsed && <span>Rutas de aprendizaje</span>}
+            </Link>
+
+            <Link 
+              to="/community" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Comunidad"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Users size={14} /></span>
+              {!isCollapsed && <span>Comunidad</span>}
+            </Link>
+
+            <Link 
+              to="/certifications" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Certificaciones"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Award size={14} /></span>
+              {!isCollapsed && <span>Certificaciones</span>}
+            </Link>
+          </div>
         </div>
 
-        {loading && (
-          <div className="p-4 space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-8 bg-slate-900/50 animate-pulse rounded-lg" />
-            ))}
-          </div>
-        )}
+        {/* RECURSOS SECTION */}
+        <div>
+          {!isCollapsed && <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Recursos</h2>}
+          <div className="space-y-1">
+            <Link 
+              to="/documentation" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Documentación"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Book size={14} /></span>
+              {!isCollapsed && <span>Documentación</span>}
+            </Link>
 
-        {error && (
-          <div className="p-4 text-xs text-red-400 bg-red-400/10 rounded-lg">
-            Error al cargar el contenido.
-          </div>
-        )}
+             <Link 
+              to="/blog" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Blog"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><FileText size={14} /></span>
+               {!isCollapsed && <span>Blog</span>}
+            </Link>
 
-        {courses.map((course) => (
-          <NavItem key={course.id} item={course} />
-        ))}
+            <Link 
+              to="/support" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Soporte"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><LifeBuoy size={14} /></span>
+              {!isCollapsed && <span>Soporte</span>}
+            </Link>
+
+             <Link 
+              to="/terms" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+               title="Términos"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Shield size={14} /></span>
+              {!isCollapsed && <span>Términos</span>}
+            </Link>
+             
+             <Link 
+              to="/contact" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium mt-2"
+               title="Contáctanos"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Mail size={14} /></span>
+               {!isCollapsed && <span>Contáctanos</span>}
+            </Link>
+          </div>
+        </div>
       </nav>
 
       <div className="p-4 border-t border-slate-900 flex flex-col gap-4">
+        <button 
+          onClick={logout}
+          className="flex items-center justify-center gap-2 w-full py-2 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all text-xs font-bold uppercase tracking-wider group"
+           title="Cerrar Sesión"
+        >
+          <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+          {!isCollapsed && <span>Cerrar Sesión</span>}
+        </button>
+
         <div className="flex justify-center">
             <ThemeToggle />
         </div>
@@ -122,10 +249,12 @@ export const Sidebar: React.FC = () => {
           <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-300">LMS v1.0</span>
-            <span className="text-[10px] text-slate-500">Online</span>
-          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xs font-medium text-slate-300 whitespace-nowrap">LMS v1.0</span>
+              <span className="text-[10px] text-slate-500 whitespace-nowrap">Online</span>
+            </div>
+          )}
         </div>
       </div>
     </aside>
