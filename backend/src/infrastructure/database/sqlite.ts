@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import Database, { Database as DatabaseType } from 'better-sqlite3';
 import path from 'path';
 import { env } from '../config/environment.js';
 import { logger } from '../../shared/logger/logger.js';
@@ -7,7 +7,7 @@ const dbPath = path.resolve('lms.db');
 
 logger.info(`💾 Opening SQLite database at ${dbPath}`);
 
-export const db = new Database(dbPath, { 
+export const db: DatabaseType = new Database(dbPath, { 
   verbose: env.NODE_ENV === 'development' ? console.log : undefined 
 });
 

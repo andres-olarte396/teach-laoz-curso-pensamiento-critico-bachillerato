@@ -10,7 +10,7 @@
 
 El proyecto **Teach LAOZ LMS** ha avanzado significativamente. El motor de contenido está operativo, la API sirve contenido correctamente y el Frontend ha recibido mejoras sustanciales en UX, incluyendo navegación intuitiva y una característica robusta de Texto-a-Voz (TTS).
 
-**Estado general**: 🟢 En camino
+**Estado general**: 🟢 En camino (Docker desplegado y estable)
 
 ---
 

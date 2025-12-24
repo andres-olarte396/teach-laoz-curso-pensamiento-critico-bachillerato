@@ -1,10 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { IContentRepository } from '@domain/repositories/IContentRepository.js';
-import { ContentNode, ContentMetadata } from '@domain/entities/ContentNode.js';
-import { ContentType } from '@domain/value-objects/ContentType.js';
+import { IContentRepository } from '../../domain/repositories/IContentRepository.js';
+import { ContentNode, ContentMetadata } from '../../domain/entities/ContentNode.js';
+import { ContentType } from '../../domain/value-objects/ContentType.js';
 import { env } from '../config/environment.js';
-import { logger } from '@shared/logger/logger.js';
+import { logger } from '../../shared/logger/logger.js';
 
 export class LocalFileSystemRepository implements IContentRepository {
   private readonly basePath: string;

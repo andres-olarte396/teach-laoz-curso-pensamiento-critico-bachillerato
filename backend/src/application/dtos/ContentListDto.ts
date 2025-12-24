@@ -1,4 +1,4 @@
-import { ContentType } from '@domain/value-objects/ContentType.js';
+import { ContentType } from '../../domain/value-objects/ContentType.js';
 
 export interface ContentItemDto {
   path: string;

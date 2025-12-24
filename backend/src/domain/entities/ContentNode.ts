@@ -1,5 +1,5 @@
-import { ContentPath } from '@domain/value-objects/ContentPath.js';
-import { ContentType } from '@domain/value-objects/ContentType.js';
+import { ContentPath } from '../value-objects/ContentPath.js';
+import { ContentType } from '../value-objects/ContentType.js';
 
 /**
  * Metadata adicional del contenido

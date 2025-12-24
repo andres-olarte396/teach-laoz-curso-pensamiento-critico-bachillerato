@@ -1,4 +1,4 @@
-import { DomainError } from '@application/errors/DomainError.js';
+import { DomainError } from '../../application/errors/DomainError.js';
 
 /**
  * Value Object: Ruta de contenido normalizada y validada

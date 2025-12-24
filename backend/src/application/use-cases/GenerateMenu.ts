@@ -1,6 +1,6 @@
-import { IContentRepository } from '@domain/repositories/IContentRepository.js';
-import { MenuDto, MenuItemDto } from '@application/dtos/MenuDto.js';
-import { logger } from '@shared/logger/logger.js';
+import { IContentRepository } from '../../domain/repositories/IContentRepository.js';
+import { MenuDto, MenuItemDto } from '../dtos/MenuDto.js';
+import { logger } from '../../shared/logger/logger.js';
 
 export class GenerateMenu {
   constructor(private readonly contentRepository: IContentRepository) {}

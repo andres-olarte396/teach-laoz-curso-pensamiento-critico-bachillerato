@@ -1,4 +1,4 @@
-import { ContentNode, ContentMetadata } from '@domain/entities/ContentNode.js';
+import { ContentNode, ContentMetadata } from '../entities/ContentNode.js';
 
 /**
  * Contrato del repositorio de contenido

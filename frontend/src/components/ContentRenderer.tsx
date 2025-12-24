@@ -261,7 +261,7 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
     if (!path && !rawHtml.includes('<img')) return rawHtml; // Optimization 
 
     const currentDir = path ? (path.substring(0, path.lastIndexOf('/')) || '') : '';
-    const assetsBaseUrl = 'http://localhost:3000/assets';
+    const assetsBaseUrl = '/api/content-assets';
     
     let processed = rawHtml.replace(/<img([^>]*)src="([^"]+)"([^>]*)\/?>/g, (match, p1, src, p3) => {
       if (src.startsWith('http') || src.startsWith('data:')) return match;
@@ -298,7 +298,7 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
 
   const renderMedia = () => {
     if (!metadata || !path) return null;
-    const assetsBaseUrl = 'http://localhost:3000/assets';
+    const assetsBaseUrl = '/api/content-assets';
     const fileUrl = `${assetsBaseUrl}/${path}`.replace(/\/+/g, '/').replace('http:/', 'http://');
     const mime = metadata.mimeType;
 
@@ -425,7 +425,7 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
                  </button>
                </div>
                
-               <audio controls autoPlay className="w-full h-8 accent-emerald-500" src={`http://localhost:3000/assets/${asset.path}`}>
+               <audio controls autoPlay className="w-full h-8 accent-emerald-500" src={`/api/content-assets/${asset.path}`}>
                  Tu navegador no soporta el elemento de audio.
                </audio>
              </div>
@@ -440,7 +440,7 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
                </div>
                <div className="aspect-video bg-black">
                  <video controls className="w-full h-full">
-                   <source src={`http://localhost:3000/assets/${asset.path}`} />
+                   <source src={`/api/content-assets/${asset.path}`} />
                    Tu navegador no soporta el elemento de video.
                  </video>
                </div>

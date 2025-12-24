@@ -1,6 +1,6 @@
-import { IContentRepository } from '@domain/repositories/IContentRepository.js';
-import { ContentListDto, ContentItemDto } from '@application/dtos/ContentListDto.js';
-import { ContentPath } from '@domain/value-objects/ContentPath.js';
+import { IContentRepository } from '../../domain/repositories/IContentRepository.js';
+import { ContentListDto, ContentItemDto } from '../dtos/ContentListDto.js';
+import { ContentPath } from '../../domain/value-objects/ContentPath.js';
 
 export class ListContent {
   constructor(private readonly contentRepository: IContentRepository) {}

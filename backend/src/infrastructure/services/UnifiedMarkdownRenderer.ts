@@ -11,7 +11,7 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkFrontmatter from 'remark-frontmatter';
 import YAML from 'yaml';
-import { IMarkdownRenderer, RenderOptions, RenderResult, TocItem } from '@domain/services/IMarkdownRenderer.js';
+import { IMarkdownRenderer, RenderOptions, RenderResult, TocItem } from '../../domain/services/IMarkdownRenderer.js';
 import { env } from '../config/environment.js';
 
 export class UnifiedMarkdownRenderer implements IMarkdownRenderer {

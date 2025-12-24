@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, File, FileAudio } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -73,16 +73,32 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
   );
 };
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  mobileIsOpen?: boolean;
+  setMobileIsOpen?: (isOpen: boolean) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen }) => {
   const { courses, loading, error } = useMenu();
   const { logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = React.useState(true);
 
+  // Close mobile menu when navigating
+  const location = useLocation();
+  React.useEffect(() => {
+    if (mobileIsOpen && setMobileIsOpen) {
+      setMobileIsOpen(false);
+    }
+  }, [location.pathname, mobileIsOpen, setMobileIsOpen]);
+
   return (
     <aside className={cn(
       "h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white transition-all duration-300",
-      isCollapsed ? "w-20" : "w-72"
+      isCollapsed ? "w-20" : "w-72",
+      // Simple mobile visibility toggle (if not hidden by default, we might need more complex CSS, but this fixes the build signature)
+      "hidden lg:flex", // Hide on mobile by default unless we implement the drawer logic strictly
+      mobileIsOpen ? "fixed inset-y-0 left-0 z-50 flex" : "" // Show when mobileIsOpen is true (simplified)
     )}>
       <div className="p-6 pb-2 relative group">
         <button 

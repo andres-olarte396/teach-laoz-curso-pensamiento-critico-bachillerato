@@ -1,5 +1,5 @@
-import { BlogPost } from '../../domain/blog/BlogPost.js';
-import { BlogPostRepository } from '../../domain/blog/BlogPostRepository.js';
+import { BlogPost } from '../../../domain/blog/BlogPost.js';
+import { BlogPostRepository } from '../../../domain/blog/BlogPostRepository.js';
 
 export class ListPosts {
   constructor(private readonly blogRepository: BlogPostRepository) {}

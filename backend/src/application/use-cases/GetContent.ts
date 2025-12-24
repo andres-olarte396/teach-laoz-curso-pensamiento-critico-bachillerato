@@ -1,8 +1,8 @@
-import { IContentRepository } from '@domain/repositories/IContentRepository.js';
-import { ContentDto } from '@application/dtos/ContentDto.js';
-import { ContentPath } from '@domain/value-objects/ContentPath.js';
-import { ContentNotFoundError } from '@application/errors/DomainError.js';
-import { ContentType } from '@domain/value-objects/ContentType.js';
+import { IContentRepository } from '../../domain/repositories/IContentRepository.js';
+import { ContentDto } from '../dtos/ContentDto.js';
+import { ContentPath } from '../../domain/value-objects/ContentPath.js';
+import { ContentNotFoundError } from '../errors/DomainError.js';
+import { ContentType } from '../../domain/value-objects/ContentType.js';
 
 export class GetContent {
   constructor(private readonly contentRepository: IContentRepository) {}

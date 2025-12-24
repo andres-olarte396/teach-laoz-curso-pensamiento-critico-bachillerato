@@ -1,8 +1,8 @@
 import { GetContent } from './GetContent.js';
-import { IMarkdownRenderer } from '@domain/services/IMarkdownRenderer.js';
-import { RenderedContentDto } from '@application/dtos/ContentDto.js';
-import { ContentType } from '@domain/value-objects/ContentType.js';
-import { RenderError } from '@application/errors/DomainError.js';
+import { IMarkdownRenderer } from '../../domain/services/IMarkdownRenderer.js';
+import { RenderedContentDto } from '../dtos/ContentDto.js';
+import { ContentType } from '../../domain/value-objects/ContentType.js';
+import { RenderError } from '../errors/DomainError.js';
 
 export class RenderMarkdown {
   constructor(

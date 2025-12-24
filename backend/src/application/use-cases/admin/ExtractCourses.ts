@@ -24,7 +24,14 @@ export class ExtractCourses {
 
   constructor() {
     // Assuming backend root is where the process runs
-    this.coursesListPath = path.resolve(process.cwd(), '../COURSE_REPOSITORIES.md');
+    // Check multiple possible locations for the course list
+    const possiblePaths = [
+      path.resolve(process.cwd(), 'COURSE_REPOSITORIES.md'),
+      path.resolve(process.cwd(), '../COURSE_REPOSITORIES.md'),
+      '/COURSE_REPOSITORIES.md' // Root fallback for docker if mounted there
+    ];
+    
+    this.coursesListPath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
     this.contentDir = path.resolve(env.CONTENT_BASE_PATH);
   }
 

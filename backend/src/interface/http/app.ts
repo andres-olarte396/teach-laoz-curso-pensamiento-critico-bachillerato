@@ -95,7 +95,7 @@ export async function createServer(): Promise<FastifyInstance> {
   // Static files for course assets (images, etc)
   await app.register(staticFiles, {
     root: path.resolve(env.CONTENT_BASE_PATH),
-    prefix: '/assets/', // Assets prefix
+    prefix: '/api/content-assets/', // Changed to avoid collision with frontend /assets/
     decorateReply: false,
   });
 

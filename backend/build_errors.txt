@@ -1,0 +1,7 @@
+
+> teach-laoz-lms@0.1.0 build
+> tsc
+
+src/application/use-cases/blog/ListPosts.ts(1,26): error TS2307: Cannot find module '../../domain/blog/BlogPost.js' or its corresponding type declarations.
+src/application/use-cases/blog/ListPosts.ts(2,36): error TS2307: Cannot find module '../../domain/blog/BlogPostRepository.js' or its corresponding type declarations.
+src/infrastructure/database/sqlite.ts(10,14): error TS4023: Exported variable 'db' has or is using name 'BetterSqlite3.Database' from external module "E:/MyRepos/education/teach-laoz-learning-management-system/backend/node_modules/@types/better-sqlite3/index" but cannot be named.
