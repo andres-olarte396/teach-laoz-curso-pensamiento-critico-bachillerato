@@ -60,4 +60,32 @@ export async function adminRoutes(fastify: FastifyInstance) {
       },
     },
   }, controller.addRepository.bind(controller));
+
+  fastify.get('/config', {
+    schema: {
+      tags: ['System'],
+      summary: 'Get public system configuration',
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                social: {
+                  type: 'object',
+                  properties: {
+                    github: { type: 'string' },
+                    twitter: { type: 'string' },
+                    linkedin: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, controller.getConfig.bind(controller));
 }

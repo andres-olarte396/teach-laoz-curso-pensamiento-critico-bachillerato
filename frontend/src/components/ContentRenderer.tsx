@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { Video, Music, FileText as FileTextIcon, Download, HardDrive } from 'lucide-react';
+import { Video, Music, FileText as FileTextIcon, Download, HardDrive, AlertCircle } from 'lucide-react';
 
 interface ContentRendererProps {
   html: string;
@@ -12,6 +12,11 @@ interface ContentRendererProps {
     lastModified: string;
     name: string;
     poster?: string;
+    relatedAssets?: {
+      type: 'audio' | 'video' | 'exercise' | 'evaluation';
+      path: string;
+      name: string;
+    }[];
   };
 }
 
@@ -269,10 +274,79 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
       ${className || ''}
     `}>
       {html ? (
-        <div 
-          className="content-area"
-          dangerouslySetInnerHTML={{ __html: processHtml(html) }} 
-        />
+        <>
+          {/* Related Audio Assets - Top Player */}
+          {metadata && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'audio').map((asset: any) => (
+             <div key={asset.path} className="mb-8 p-6 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-md shadow-lg flex items-center gap-6 animate-in slide-in-from-top-4 duration-700">
+               <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                 <Music size={24} />
+               </div>
+               <div className="flex-1">
+                 <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Audio de la lección</h4>
+                 <audio controls className="w-full h-10 accent-secondary">
+                   <source src={`http://localhost:3000/assets/${asset.path}`} />
+                   Tu navegador no soporta el elemento de audio.
+                 </audio>
+               </div>
+             </div>
+          ))}
+
+          {/* Related Video Assets - Embedded Player */}
+          {metadata && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'video').map((asset: any) => (
+             <div key={asset.path} className="mb-10 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-black">
+               <div className="bg-slate-900/50 p-4 border-b border-slate-800 flex items-center gap-2 text-primary">
+                 <Video size={18} />
+                 <span className="text-sm font-bold text-white">Video Complementario: {asset.name}</span>
+               </div>
+               <video controls className="w-full aspect-video">
+                 <source src={`http://localhost:3000/assets/${asset.path}`} />
+                 Tu navegador no soporta el elemento de video.
+               </video>
+             </div>
+          ))}
+
+          <div 
+            className="content-area"
+            dangerouslySetInnerHTML={{ __html: processHtml(html) }} 
+          />
+
+          {/* Exercises and Evaluations - Bottom Value Props */}
+          {metadata && (metadata as any).relatedAssets?.some((a: any) => ['exercise', 'evaluation'].includes(a.type)) && (
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
+              {(metadata as any).relatedAssets.filter((a: any) => a.type === 'exercise').map((asset: any) => (
+                <a 
+                  key={asset.path}
+                  href={`/course/${asset.path}`} // Assuming internal routing for MD files
+                  className="flex items-center gap-4 p-6 rounded-2xl bg-slate-900 border border-teal-800/30 hover:border-teal-500/50 hover:bg-teal-950/20 transition-all group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+                    <FileTextIcon size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white group-hover:text-teal-300 transition-colors">Ejercicio Práctico</h4>
+                    <p className="text-sm text-slate-400">Pon a prueba tu conocimiento</p>
+                  </div>
+                </a>
+              ))}
+
+              {(metadata as any).relatedAssets.filter((a: any) => a.type === 'evaluation').map((asset: any) => (
+                <a 
+                  key={asset.path}
+                  href={`/course/${asset.path}`}
+                  className="flex items-center gap-4 p-6 rounded-2xl bg-slate-900 border border-purple-800/30 hover:border-purple-500/50 hover:bg-purple-950/20 transition-all group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <AlertCircle size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white group-hover:text-purple-300 transition-colors">Evaluación del Tema</h4>
+                    <p className="text-sm text-slate-400">Certifica lo aprendido</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </>
       ) : renderMedia()}
     </div>
   );

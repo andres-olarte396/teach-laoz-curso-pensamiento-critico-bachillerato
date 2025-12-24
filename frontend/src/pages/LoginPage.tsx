@@ -34,37 +34,42 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="w-full max-w-md bg-zinc-900 p-8 rounded-xl shadow-2xl border border-zinc-800">
+        <div className="flex justify-center mb-8">
+          <img src="/logo.svg" alt="Teach LAOZ" className="h-12 w-auto" />
+        </div>
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">Login</h2>
+        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded mb-4 text-sm">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Email</label>
+            <label className="block text-zinc-400 mb-2 text-sm">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              placeholder="Enter your email"
               required
             />
           </div>
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Password</label>
+            <label className="block text-zinc-400 mb-2 text-sm">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              placeholder="Enter your password"
               required
             />
           </div>
-          <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+          <button type="submit" className="w-full bg-primary text-white p-3 rounded-lg hover:bg-blue-600 font-semibold transition-colors">
             Sign In
           </button>
         </form>
-        <p className="mt-4 text-center">
-          Don't have an account? <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
+        <p className="mt-6 text-center text-zinc-500 text-sm">
+          Don't have an account? <Link to="/register" className="text-primary hover:text-blue-400 hover:underline">Register</Link>
         </p>
       </div>
     </div>

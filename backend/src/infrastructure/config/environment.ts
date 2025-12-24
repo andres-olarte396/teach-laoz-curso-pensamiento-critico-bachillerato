@@ -14,6 +14,9 @@ const envSchema = z.object({
   MARKDOWN_SANITIZE: z.string().transform(v => v === 'true').default('true'),
   MARKDOWN_ALLOW_HTML: z.string().transform(v => v === 'true').default('false'),
   JWT_SECRET: z.string().default('super-secret-key-change-in-prod'),
+  GITHUB_URL: z.string().optional().default('https://github.com'),
+  TWITTER_URL: z.string().optional().default('https://twitter.com'),
+  LINKEDIN_URL: z.string().optional().default('https://linkedin.com'),
 });
 
 const result = envSchema.safeParse(process.env);

@@ -98,14 +98,14 @@ export const CoursePage: React.FC = () => {
       >
         {/* Breadcrumbs & Utilities */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10 print:hidden">
-          <nav className="flex flex-wrap items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-widest">
-            <Link to="/" className="hover:text-primary transition-colors">
+          <nav className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">
+            <Link to="/" className="hover:text-[var(--color-primary)] transition-colors">
               <Home size={14} />
             </Link>
             {breadcrumbs.map((crumb, i) => (
               <React.Fragment key={i}>
-                <ChevronRightIcon size={12} className="text-slate-700 flex-shrink-0" />
-                <span className={i === breadcrumbs.length - 1 ? "text-primary/80" : "hover:text-slate-300 transition-colors cursor-default"}>
+                <ChevronRightIcon size={12} className="text-[var(--text-muted)] flex-shrink-0" />
+                <span className={i === breadcrumbs.length - 1 ? "text-[var(--color-primary)]" : "hover:text-[var(--text-main)] transition-colors cursor-default"}>
                   {crumb.replace(/^teach-laoz-curso-?/i, '').replace(/-/g, ' ').replace('.md', '')}
                 </span>
               </React.Fragment>
@@ -114,7 +114,7 @@ export const CoursePage: React.FC = () => {
           
           <button 
             onClick={() => window.print()}
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all text-xs font-bold uppercase tracking-wider"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
           >
             <Printer size={14} />
             Imprimir
@@ -130,7 +130,8 @@ export const CoursePage: React.FC = () => {
             size: content.metadata.size,
             lastModified: content.metadata.lastModified,
             name: content.name,
-            poster: content.frontmatter?.poster
+            poster: content.frontmatter?.poster,
+            relatedAssets: content.relatedAssets // Inject related assets
           }}
         />
 
@@ -139,13 +140,13 @@ export const CoursePage: React.FC = () => {
           {navContext?.prev ? (
             <Link 
               to={`/course/${navContext.prev.path}`}
-              className="flex flex-col gap-2 p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+              className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] transition-all group shadow-sm"
             >
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                 <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
                 Anterior
               </span>
-              <span className="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">
+              <span className="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
                 {navContext.prev.title}
               </span>
             </Link>
@@ -154,13 +155,13 @@ export const CoursePage: React.FC = () => {
           {navContext?.next ? (
             <Link 
               to={`/course/${navContext.next.path}`}
-              className="flex flex-col gap-2 p-6 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-primary/50 hover:bg-primary/5 transition-all group text-right items-end"
+              className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] transition-all group text-right items-end shadow-sm"
             >
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
                 Siguiente
                 <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
               </span>
-              <span className="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">
+              <span className="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
                 {navContext.next.title}
               </span>
             </Link>

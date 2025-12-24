@@ -2,8 +2,28 @@ import React from 'react';
 import { Github, Twitter, Linkedin, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const [social, setSocial] = React.useState({
+    github: 'https://github.com',
+    twitter: 'https://twitter.com',
+    linkedin: 'https://linkedin.com'
+  });
+
+  React.useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await import('../services/apiService').then(m => m.apiService.getConfig());
+        if (response?.data?.social) {
+          setSocial(response.data.social);
+        }
+      } catch (error) {
+        console.error('Failed to load config', error);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   return (
-    <footer className="mt-20 border-t border-slate-800/50 bg-slate-950/20 backdrop-blur-xl print:hidden">
+    <footer className="mt-20 border-t border-slate-900 bg-[#020617] print:hidden">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand Section */}
@@ -21,13 +41,13 @@ export const Footer: React.FC = () => {
               Contenido denso, visual y directo al grano.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
+              <a href={social.github} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
                 <Github size={20} />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
+              <a href={social.twitter} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
+              <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 transition-all duration-300">
                 <Linkedin size={20} />
               </a>
             </div>

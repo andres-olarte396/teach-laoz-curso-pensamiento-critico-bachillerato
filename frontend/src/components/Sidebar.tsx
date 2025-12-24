@@ -5,6 +5,7 @@ import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ThemeToggle } from './ThemeToggle';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -63,17 +64,17 @@ export const Sidebar: React.FC = () => {
   const { courses, loading, error } = useMenu();
 
   return (
-    <aside className="w-72 h-screen border-r border-slate-800 bg-slate-950/50 backdrop-blur-xl flex flex-col sticky top-0 print:hidden">
+    <aside className="w-72 h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white">
       <div className="p-6 pb-2">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20 bg-primary shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20 bg-primary shadow-[0_0_15px_rgba(5,150,105,0.3)]">
            <span className="text-white font-black italic text-2xl pr-0.5">L</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-black text-white tracking-tighter leading-none">
               Teach <span className="text-primary italic">LAOZ</span>
             </span>
-            <span className="text-[0.65rem] text-slate-400 font-bold tracking-[0.2em] uppercase">
+            <span className="text-[0.65rem] text-slate-500 font-bold tracking-[0.2em] uppercase">
               Learning System
             </span>
           </div>
@@ -85,9 +86,9 @@ export const Sidebar: React.FC = () => {
         <div className="px-3 mb-2">
            <Link 
             to="/blog" 
-            className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-100 transition-all font-medium mb-4 border border-slate-800 bg-slate-950/50"
+            className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-100 transition-all font-medium mb-4 border border-slate-800 bg-slate-900/50"
           >
-            <span className="w-4 h-4 flex items-center justify-center"><FileText size={14} className="text-secondary" /></span>
+            <span className="w-4 h-4 flex items-center justify-center"><FileText size={14} className="text-primary" /></span>
              <span>Blog</span>
           </Link>
 
@@ -113,10 +114,13 @@ export const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-slate-900 flex flex-col gap-4">
+        <div className="flex justify-center">
+            <ThemeToggle />
+        </div>
         <div className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-xl border border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-secondary/20 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-slate-300">LMS v1.0</span>

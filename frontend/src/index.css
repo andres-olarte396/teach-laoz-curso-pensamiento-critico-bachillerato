@@ -1,133 +1,180 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 @theme {
-  --color-primary: #007bff;
+  --color-primary: #3b82f6; /* Soft Royal Blue */
   --color-secondary: oklch(0.7 0.2 150);
   --color-accent: oklch(0.8 0.15 30);
 
-  --background-glass: rgba(255, 255, 255, 0.05);
-  --border-glass: rgba(255, 255, 255, 0.1);
+  --background-glass: rgba(255, 255, 255, 0.03);
+  --border-glass: rgba(255, 255, 255, 0.08);
 }
 
 @layer base {
+  :root {
+    /* Soft Light Palette (High Contrast - Reading Optimized) */
+    --bg-app: #fafafa; /* Neutral White */
+    --bg-surface: #ffffff;
+    --text-main: #09090b; /* Almost Black (Zinc-950) for Max Contrast */
+    --text-muted: #52525b; /* Zinc-600 */
+    --border-color: #e4e4e7; /* Zinc-200 */
+    
+    /* Brand Colors for Light Mode - Green & Gray */
+    --color-primary: #059669; /* Emerald-600 */
+    --color-secondary: #52525b; /* Zinc-600 (Gray accent) */
+    --color-accent: #0d9488; /* Teal-600 */
+  }
+
+  .dark {
+    /* Soft Dark Palette (Deep Zinc - Low Contrast Strain) */
+    --bg-app: #09090b; /* zinc-950 */
+    --bg-surface: #18181b; /* zinc-900 */
+    --text-main: #e4e4e7; /* zinc-200 */
+    --text-muted: #a1a1aa; /* zinc-400 */
+    --border-color: #27272a; /* zinc-800 */
+
+    /* Brand Colors for Dark Mode */
+    --color-primary: #10b981; /* Emerald-500 */
+    --color-secondary: #a1a1aa; /* Zinc-400 (Gray accent) */
+    --color-accent: #14b8a6; /* Teal-500 */
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-50 font-sans antialiased;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Universal scrollbar theming */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-zinc-300 dark:bg-zinc-700 rounded-full hover:bg-zinc-400 dark:hover:bg-zinc-600;
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+.content-area.dark {
+  /* Override specific overrides if needed, but variables should handle most */
+  --tw-prose-body: var(--text-muted);
+  --tw-prose-headings: var(--text-main);
+  --tw-prose-bold: var(--text-main);
+  
+  line-height: 1.8;
+  letter-spacing: 0.015em;
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-slate-900;
+.content-area h1,
+.content-area h2,
+.content-area h3,
+.content-area h4,
+.content-area h5,
+.content-area h6 {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-700 rounded-full hover:bg-slate-600;
-}
-
-/* Content Enhancements & Typography */
-.content-area {
-  --tw-prose-body: theme('colors.slate.300');
-  --tw-prose-headings: theme('colors.white');
-  --tw-prose-links: theme('colors.blue.400');
-  --tw-prose-bold: theme('colors.white');
-  --tw-prose-counters: theme('colors.slate.500');
-  --tw-prose-bullets: theme('colors.slate.600');
-  --tw-prose-hr: theme('colors.slate.800');
-  --tw-prose-quotes: theme('colors.slate.100');
-  --tw-prose-quote-borders: theme('colors.blue.500');
-  --tw-prose-captions: theme('colors.slate.500');
-  --tw-prose-code: theme('colors.blue.300');
-  --tw-prose-pre-code: theme('colors.slate.200');
-  --tw-prose-pre-bg: theme('colors.slate.950');
-  --tw-prose-th-borders: theme('colors.slate.700');
-  --tw-prose-td-borders: theme('colors.slate.800');
-
-  line-height: 1.75;
-  letter-spacing: -0.011em;
+.content-area h1 a,
+.content-area h2 a,
+.content-area h3 a,
+.content-area h4 a,
+.content-area h5 a,
+.content-area h6 a {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .content-area h1 {
-  @apply text-5xl font-black mb-12 tracking-tight leading-[1.1];
+  @apply text-3xl font-bold mb-6 tracking-tight leading-[1.1] text-[var(--text-main)];
 }
 
 .content-area h2 {
-  @apply text-3xl font-bold mt-16 mb-6 tracking-tight border-b border-slate-800/50 pb-4;
+  @apply text-xl font-semibold mt-8 mb-4 tracking-tight text-[var(--text-main)];
 }
 
 .content-area h3 {
-  @apply text-xl font-bold mt-10 mb-4 tracking-tight text-slate-100;
+  @apply text-lg font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)];
 }
 
 .content-area p {
-  @apply mb-6 text-lg;
+  @apply mb-4 text-base text-[var(--text-muted)];
 }
 
-.content-area ul,
+.content-area ul {
+  @apply mb-8 ml-8 list-disc list-outside marker:text-[var(--text-muted)];
+}
+
 .content-area ol {
-  @apply mb-8 ml-4;
+  @apply mb-8 ml-8 list-decimal list-outside marker:text-[var(--text-muted)];
 }
 
 .content-area li {
-  @apply mb-3;
+  @apply mb-2 pl-2 text-[var(--text-muted)];
 }
 
 .mermaid {
-  @apply flex justify-center my-12 bg-slate-900/40 p-10 rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden;
+  @apply flex justify-center my-10 bg-[var(--bg-surface)] p-8 rounded-xl border border-[var(--border-color)] shadow-lg overflow-hidden;
 }
 
 .katex-display {
-  @apply my-12 py-6 bg-blue-500/5 rounded-2xl border border-blue-500/10 overflow-x-auto overflow-y-hidden text-center text-xl;
+  @apply my-10 py-6 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-x-auto overflow-y-hidden text-center text-xl;
 }
 
 .content-area blockquote {
-  @apply my-10 pl-8 pr-6 py-6 bg-gradient-to-r from-blue-500/10 to-transparent border-l-4 border-blue-500 rounded-r-2xl italic text-slate-200;
+  @apply my-8 pl-6 pr-4 py-4 border-l-4 border-[var(--color-primary)] bg-[var(--bg-surface)] rounded-r-xl italic text-[var(--text-muted)];
 }
 
 .content-area table {
-  @apply w-full my-10 border-collapse text-left text-sm;
+  @apply w-full my-8 border-collapse text-left text-sm;
 }
 
 .content-area th {
-  @apply py-4 px-4 font-bold text-white border-b border-slate-700 bg-slate-900/50;
+  @apply py-3 px-4 font-semibold text-[var(--text-main)] border-b border-[var(--border-color)] bg-[var(--bg-surface)];
 }
 
 .content-area td {
-  @apply py-4 px-4 border-b border-slate-800/50 text-slate-400;
+  @apply py-3 px-4 border-b border-[var(--border-color)] text-[var(--text-muted)];
 }
 
 .content-area a {
-  @apply relative text-primary font-semibold no-underline transition-all duration-300;
-  background-image: linear-gradient(to right, theme('colors.primary'), theme('colors.primary'));
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0 2px;
+  @apply relative text-[var(--color-primary)] font-medium no-underline transition-all duration-200;
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+  opacity: 0.9;
+  text-underline-offset: 4px;
+  background-image: none;
 }
 
 .content-area a:hover {
-  @apply text-white;
-  background-size: 100% 2px;
-  text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+  @apply opacity-100;
+  text-shadow: none;
 }
 
 .content-area pre {
-  @apply my-10 rounded-2xl border border-slate-800 shadow-2xl !bg-slate-950 overflow-x-auto whitespace-pre-wrap !p-0;
+  @apply my-8 rounded-xl border border-[var(--border-color)] shadow-xl !bg-[var(--bg-app)] overflow-x-auto whitespace-pre-wrap !p-0;
 }
 
 .content-area pre > code {
-  @apply block !p-8 !bg-transparent;
+  @apply block !p-6 !bg-transparent text-sm leading-relaxed text-[var(--text-main)];
 }
 
 /* Code Headers */
 .code-header {
-  @apply flex items-center justify-between px-6 py-3 bg-slate-900 border-b border-slate-800/50 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500;
+  @apply flex items-center justify-between px-5 py-2.5 bg-[var(--bg-surface)] border-b border-[var(--border-color)] text-[11px] uppercase tracking-wider font-semibold text-[var(--text-muted)];
 }
 
 .code-lang-label {
@@ -135,8 +182,8 @@
 }
 
 .code-lang-label::before {
-  content: '';
-  @apply w-1.5 h-1.5 rounded-full bg-slate-700;
+  content: "";
+  @apply w-1.5 h-1.5 rounded-full bg-zinc-600;
 }
 
 /* Language specific accents */
@@ -247,14 +294,9 @@
   @apply bg-cyan-400 shadow-md;
 }
 
-
 .code-copy-btn {
   @apply p-1.5 rounded-md hover:bg-slate-800 text-slate-600 hover:text-white transition-all duration-200 opacity-0;
 }
-
-
-
-
 
 .code-copy-btn.copied {
   @apply text-emerald-400;
@@ -288,7 +330,7 @@
   .print\:hidden,
   .no-print,
   .code-copy-btn,
-  div[class*='blur'] {
+  div[class*="blur"] {
     display: none !important;
     visibility: hidden !important;
   }

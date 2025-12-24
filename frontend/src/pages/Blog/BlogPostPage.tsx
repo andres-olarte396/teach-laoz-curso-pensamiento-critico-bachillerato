@@ -34,13 +34,13 @@ export const BlogPostPage: React.FC = () => {
       
       <article>
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">{post.title}</h1>
-          <div className="flex items-center gap-4 text-xs text-slate-500 border-b border-slate-800 pb-8">
+          <h1 className="text-4xl font-bold text-[var(--text-main)] mb-2">{post.title}</h1>
+          <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] border-b border-[var(--border-color)] pb-8">
              <span>{new Date(post.date).toLocaleDateString()}</span>
              <span>by {post.author}</span>
              <div className="flex gap-2">
               {post.tags.map(tag => (
-                <span key={tag} className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">#{tag}</span>
+                <span key={tag} className="px-2 py-0.5 rounded-full bg-[var(--bg-app)] text-[var(--text-muted)] border border-[var(--border-color)]">#{tag}</span>
               ))}
              </div>
           </div>
@@ -57,8 +57,8 @@ export const BlogPostPage: React.FC = () => {
         )}
       </article>
       
-      <div className="mt-12 pt-8 border-t border-slate-800">
-         <Link to="/blog" className="text-sm text-slate-400 hover:text-white transition-colors">Browse more articles</Link>
+      <div className="mt-12 pt-8 border-t border-[var(--border-color)]">
+         <Link to="/blog" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Browse more articles</Link>
       </div>
     </div>
   );

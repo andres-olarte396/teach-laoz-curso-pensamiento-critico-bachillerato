@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { ExtractCourses } from '../../../application/use-cases/admin/ExtractCourses.js';
 
 import { AddCourseRepository } from '../../../application/use-cases/admin/AddCourseRepository.js';
+import { env } from '../../../infrastructure/config/environment.js';
 
 export class AdminController {
   private readonly extractCoursesUseCase: ExtractCourses;
@@ -50,5 +51,18 @@ export class AdminController {
         message: error.message || 'Failed to add repository',
       });
     }
+  }
+
+  async getConfig(_request: FastifyRequest, reply: FastifyReply) {
+    return reply.send({
+      success: true,
+      data: {
+        social: {
+          github: env.GITHUB_URL,
+          twitter: env.TWITTER_URL,
+          linkedin: env.LINKEDIN_URL,
+        },
+      },
+    });
   }
 }

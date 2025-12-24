@@ -26,6 +26,12 @@ export interface ContentResponse {
   html?: string;
   frontmatter?: Record<string, any>;
   toc?: any[];
+  relatedAssets?: {
+    type: 'audio' | 'video' | 'exercise' | 'evaluation';
+    path: string;
+    name: string;
+    url?: string;
+  }[];
   metadata: {
     size: number;
     lastModified: string;
@@ -41,6 +47,11 @@ export const apiService = {
   
   getContent: async (path: string) => {
     const response = await apiClient.get<ContentResponse>(`/content/${path}`);
+    return response.data;
+  },
+
+  getConfig: async () => {
+    const response = await apiClient.get<{ data: { social: { github: string, twitter: string, linkedin: string } } }>('/config');
     return response.data;
   },
 };

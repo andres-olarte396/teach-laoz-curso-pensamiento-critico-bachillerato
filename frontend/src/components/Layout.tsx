@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom';
 
 export const Layout: React.FC = () => {
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-50">
+    <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] transition-colors duration-300">
       <Sidebar />
       <main className="flex-1 flex flex-col relative overflow-hidden">
         {/* Background Gradients */}
