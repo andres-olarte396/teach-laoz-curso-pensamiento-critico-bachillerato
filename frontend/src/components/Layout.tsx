@@ -3,17 +3,38 @@ import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { Outlet } from 'react-router-dom';
 
+import { Menu } from 'lucide-react';
+
 export const Layout: React.FC = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   return (
     <div className="flex min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] transition-colors duration-300">
-      <Sidebar />
+      <Sidebar mobileIsOpen={mobileMenuOpen} setMobileIsOpen={setMobileMenuOpen} />
+      
       <main className="flex-1 flex flex-col relative overflow-hidden">
+        {/* Mobile Header */}
+        <div className="lg:hidden p-4 flex items-center justify-between bg-[var(--bg-surface)] border-b border-[var(--border-color)] sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+               <span className="text-white font-black italic text-lg pr-0.5">L</span>
+             </div>
+             <span className="text-sm font-bold tracking-tight">Teach LAOZ</span>
+          </div>
+          <button 
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 text-slate-400 hover:text-white"
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 print:hidden" />
         <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-secondary/5 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2 print:hidden" />
         
         <div className="flex-1 overflow-y-auto mt-0 custom-scrollbar print:overflow-visible">
-          <div className="px-8 py-10 lg:px-12 xl:px-20 min-h-[calc(100vh-80px)] print:p-0 print:m-0">
+          <div className="px-4 py-8 lg:px-12 xl:px-20 min-h-[calc(100vh-80px)] print:p-0 print:m-0">
             <Outlet />
           </div>
           <Footer />

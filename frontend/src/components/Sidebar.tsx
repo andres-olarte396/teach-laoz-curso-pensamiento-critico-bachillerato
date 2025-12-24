@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, File, FileAudio } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -34,27 +34,36 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
   return (
     <div className="flex flex-col">
       <Link
-        to={item.type === 'markdown' ? `/course/${item.path}` : '#'}
+        to={(item.type === 'markdown' || item.type === 'binary' || item.type === 'html') ? `/course/${item.path}` : '#'}
         onClick={toggleOpen}
         className={cn(
           "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
           isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-slate-900 text-slate-400 hover:text-slate-100",
           isCollapsed && "justify-center"
         )}
-        title={isCollapsed ? item.title : undefined}
+        title={item.title}
       >
-        <span className="w-4 h-4 flex items-center justify-center">
+        <span className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
           {hasChildren ? (
             isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
           ) : (
-            item.type === 'directory' ? <Folder size={14} /> : <FileText size={14} />
+            item.type === 'directory' ? <Folder size={14} /> : 
+            item.path.toLowerCase().endsWith('.mp4') ? <FileVideo size={14} className="text-blue-500" /> :
+            (item.path.toLowerCase().endsWith('.mp3') || item.path.toLowerCase().endsWith('.wav') || item.path.toLowerCase().endsWith('.ogg')) ? <FileAudio size={14} className="text-purple-500" /> :
+            item.path.toLowerCase().endsWith('.html') ? <FileCode size={14} className="text-orange-500" /> :
+            item.path.toLowerCase().endsWith('.pdf') ? <FileText size={14} className="text-red-500" /> :
+            <FileText size={14} />
           )}
         </span>
-        {!isCollapsed && <span className="text-sm truncate font-medium">{item.title}</span>}
+        {!isCollapsed && (
+          <span className="text-sm font-medium leading-tight break-words line-clamp-2">
+            {item.title}
+          </span>
+        )}
       </Link>
       
       {!isCollapsed && hasChildren && isOpen && (
-        <div className="mt-1 flex flex-col gap-1 ml-5 pl-2 border-l border-slate-800">
+        <div className="mt-1 flex flex-col gap-1 ml-3 pl-2 border-l border-slate-800">
           {item.children?.map((child) => (
             <NavItem key={child.id} item={child} depth={depth + 1} isCollapsed={isCollapsed} />
           ))}
@@ -118,7 +127,10 @@ export const Sidebar: React.FC = () => {
              >
                 {!isCollapsed ? (
                   <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold tracking-wider uppercase">Cursos</span>
+                    <div className="flex items-center gap-2">
+                      <Folder size={14} />
+                      <span className="text-xs font-bold tracking-wider uppercase">Cursos</span>
+                    </div>
                     {isCoursesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                   </div>
                 ) : (
@@ -243,7 +255,7 @@ export const Sidebar: React.FC = () => {
         </button>
 
         <div className="flex justify-center">
-            <ThemeToggle />
+            <ThemeToggle isCollapsed={isCollapsed} />
         </div>
         <div className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-xl border border-slate-800">
           <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">

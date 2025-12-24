@@ -33,8 +33,88 @@ mermaid.initialize({
   fontFamily: 'Inter, system-ui, sans-serif',
 });
 
-export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, className, metadata, onCloseAudio, onCloseScript }) => {
+export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path, className, metadata, onCloseAudio, onCloseScript }) => {
   const [scriptHtml, setScriptHtml] = React.useState<string | null>(null);
+
+  // Helper function defined early to avoid reference errors
+  const formatQuizQuestions = (html: string) => {
+    // Regex to find numbered questions followed by inline options (a) ... b) ...)
+    // Pattern: 1. Question? a) ... b) ... 
+    // We look for patterns where options start with a lowercase letter and a parenthesis.
+    
+    // First, let's look for paragraphs that seem to contain multiple options
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const paragraphs = doc.querySelectorAll('p, li');
+    let hasChanges = false;
+    
+    paragraphs.forEach(p => {
+      // If it's an li, we might need to handle it carefully to not break nested lists, 
+      // but replacing innerHTML should be fine if it matches the pattern.
+      const text = p.innerHTML;
+      
+      // Check if paragraph contains "a) " and "b) " (minimal multiple choice)
+      if (text.includes('a) ') && text.includes('b) ')) {
+         // Attempt to split by options. 
+         // Assuming format: "1. Question text? a) Option A b) Option B (Correcta) c) Option C"
+         
+         // Capturing the question part first (everything before "a) ")
+         const parts = text.split(/(\s[a-z]\)\s)/); // Split keeping delimiters
+         
+         if (parts.length > 1) {
+             const questionText = parts[0];
+             const options = [];
+             
+             for (let i = 1; i < parts.length; i += 2) {
+                 const label = parts[i].trim(); // "a) "
+                 const content = parts[i+1] || ''; // "Option content..."
+                 options.push({ label, content });
+             }
+             
+             // Build new HTML
+             const newContainer = document.createElement('div');
+             newContainer.className = 'quiz-question mb-6 p-6 rounded-2xl bg-slate-800/50 border border-slate-700';
+             
+             const qTitle = document.createElement('p');
+             qTitle.className = 'font-bold text-lg mb-4 text-white';
+             qTitle.innerHTML = questionText;
+             newContainer.appendChild(qTitle);
+             
+             const optionsList = document.createElement('ul');
+             optionsList.className = 'space-y-3';
+             
+             options.forEach(opt => {
+                 const li = document.createElement('li');
+                 li.className = 'flex items-start gap-3 p-3 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer group';
+                 
+                 // Check for "(Correcta)" indicator
+                 const isCorrect = opt.content.includes('(Correcta)');
+                 const cleanContent = opt.content.replace('(Correcta)', '').trim();
+                 
+                 // Checkbox mockup
+                 const checkbox = document.createElement('div');
+                 checkbox.className = `w-6 h-6 rounded border flex items-center justify-center mt-0.5 shrink-0 ${isCorrect ? 'border-emerald-500 bg-emerald-500/20 text-emerald-500' : 'border-slate-500 group-hover:border-blue-400'}`;
+                 if (isCorrect) {
+                     checkbox.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                 }
+                 
+                 const textDiv = document.createElement('div');
+                 textDiv.className = 'flex-1 text-slate-300 group-hover:text-slate-200';
+                 textDiv.innerHTML = `<span class="font-bold text-blue-400 mr-2 uppercase">${opt.label.replace(')', '')}.</span> ${cleanContent}`;
+                 
+                 li.appendChild(checkbox);
+                 li.appendChild(textDiv);
+                 optionsList.appendChild(li);
+             });
+             newContainer.appendChild(optionsList);
+             p.replaceWith(newContainer);
+             hasChanges = true;
+         }
+      }
+    });
+    return hasChanges ? doc.body.innerHTML : html;
+  };
 
   useEffect(() => {
     if (metadata?.showScript && metadata.relatedAssets) {
@@ -50,7 +130,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
   useEffect(() => {
     const renderAdvancedElements = async () => {
       if (!html) return;
-
+      
       // 1. Process Mermaid Diagrams
       const mermaidCandidates = Array.from(document.querySelectorAll('pre > code'));
       
@@ -174,17 +254,18 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
     return () => clearTimeout(timeout);
   }, [html]);
 
-  const processHtml = (html: string) => {
-    if (!html) return '';
-    
+  const getProcessedHtml = React.useCallback((rawHtml: string) => {
+    if (!rawHtml) return '';
     // If no path is provided, we can't resolve relative paths reliably/or assume different base
-    if (!path) return html;
+    // Use path from props closure
+    if (!path && !rawHtml.includes('<img')) return rawHtml; // Optimization 
 
-    const currentDir = path.substring(0, path.lastIndexOf('/')) || '';
+    const currentDir = path ? (path.substring(0, path.lastIndexOf('/')) || '') : '';
     const assetsBaseUrl = 'http://localhost:3000/assets';
     
-    let processed = html.replace(/<img([^>]*)src="([^"]+)"([^>]*)\/?>/g, (match, p1, src, p3) => {
+    let processed = rawHtml.replace(/<img([^>]*)src="([^"]+)"([^>]*)\/?>/g, (match, p1, src, p3) => {
       if (src.startsWith('http') || src.startsWith('data:')) return match;
+      if (!path) return match; // Can't resolve relative without path
       
       let cleanSrc = src;
       let targetDir = currentDir;
@@ -210,88 +291,10 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
     processed = formatQuizQuestions(processed);
 
     return processed;
-  };
+  }, [path]);
 
-  const formatQuizQuestions = (html: string) => {
-    // Regex to find numbered questions followed by inline options (a) ... b) ...)
-    // Pattern: 1. Question? a) ... b) ... 
-    // We look for patterns where options start with a lowercase letter and a parenthesis.
-    
-    // First, let's look for paragraphs that seem to contain multiple options
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    
-    const paragraphs = doc.querySelectorAll('p, li');
-    let hasChanges = false;
-    
-    paragraphs.forEach(p => {
-      // If it's an li, we might need to handle it carefully to not break nested lists, 
-      // but replacing innerHTML should be fine if it matches the pattern.
-      const text = p.innerHTML;
-      
-      // Check if paragraph contains "a) " and "b) " (minimal multiple choice)
-      if (text.includes('a) ') && text.includes('b) ')) {
-         // Attempt to split by options. 
-         // Assuming format: "1. Question text? a) Option A b) Option B (Correcta) c) Option C"
-         
-         // Capturing the question part first (everything before "a) ")
-         const parts = text.split(/(\s[a-z]\)\s)/); // Split keeping delimiters
-         
-         if (parts.length > 1) {
-             const questionText = parts[0];
-             const options = [];
-             
-             for (let i = 1; i < parts.length; i += 2) {
-                 const label = parts[i].trim(); // "a) "
-                 const content = parts[i+1] || ''; // "Option content..."
-                 options.push({ label, content });
-             }
-             
-             // Build new HTML
-             const newContainer = document.createElement('div');
-             newContainer.className = 'quiz-question mb-6 p-6 rounded-2xl bg-slate-800/50 border border-slate-700';
-             
-             const qTitle = document.createElement('p');
-             qTitle.className = 'font-bold text-lg mb-4 text-white';
-             qTitle.innerHTML = questionText;
-             newContainer.appendChild(qTitle);
-             
-             const optionsList = document.createElement('ul');
-             optionsList.className = 'space-y-3';
-             
-             options.forEach(opt => {
-                 const li = document.createElement('li');
-                 li.className = 'flex items-start gap-3 p-3 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer group';
-                 
-                 // Check for "(Correcta)" indicator
-                 const isCorrect = opt.content.includes('(Correcta)');
-                 const cleanContent = opt.content.replace('(Correcta)', '').trim();
-                 
-                 // Checkbox mockup
-                 const checkbox = document.createElement('div');
-                 checkbox.className = `w-6 h-6 rounded border flex items-center justify-center mt-0.5 shrink-0 ${isCorrect ? 'border-emerald-500 bg-emerald-500/20 text-emerald-500' : 'border-slate-500 group-hover:border-blue-400'}`;
-                 if (isCorrect) {
-                     checkbox.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                 }
-                 
-                 const textDiv = document.createElement('div');
-                 textDiv.className = 'flex-1 text-slate-300 group-hover:text-slate-200';
-                 textDiv.innerHTML = `<span class="font-bold text-blue-400 mr-2 uppercase">${opt.label.replace(')', '')}.</span> ${cleanContent}`;
-                 
-                 li.appendChild(checkbox);
-                 li.appendChild(textDiv);
-                 optionsList.appendChild(li);
-             });
-             
-             newContainer.appendChild(optionsList);
-             p.replaceWith(newContainer);
-             hasChanges = true;
-         }
-      }
-    });
-
-    return hasChanges ? doc.body.innerHTML : html;
-  };
+  // Memoize the processed HTML to prevent DOM thrashing
+  const processedHtml = React.useMemo(() => getProcessedHtml(html), [html, getProcessedHtml]);
 
   const renderMedia = () => {
     if (!metadata || !path) return null;
@@ -401,29 +404,28 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
       {html ? (
         <>
           {/* Related Audio Assets - Fixed Bottom Right Player */}
-          {metadata && metadata.showAudio && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'audio').map((asset: any) => (
-             <div key={asset.path} className="fixed bottom-8 right-8 z-[100] w-96 p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
+          {metadata && (metadata as any).showAudio && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'audio').map((asset: any) => (
+             <div key={asset.path} className="fixed bottom-8 right-8 z-[100] w-96 p-4 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
                <div className="flex items-start justify-between">
                  <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                   <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
                      <Music size={20} />
                    </div>
                    <div>
-                      <h4 className="text-sm font-bold text-[var(--text-main)]">Reproduciendo</h4>
-                      <p className="text-xs text-[var(--text-muted)] line-clamp-1">{asset.name}</p>
+                      <h4 className="text-sm font-bold text-white">Reproduciendo</h4>
+                      <p className="text-xs text-slate-400 line-clamp-1">{asset.name}</p>
                    </div>
                  </div>
                  <button 
                     onClick={onCloseAudio}
-                    className="p-1.5 rounded-full hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-red-500 transition-colors"
+                    className="p-1.5 rounded-full hover:bg-slate-800 text-slate-500 hover:text-white transition-colors"
                     title="Cerrar reproductor"
                  >
                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                  </button>
                </div>
                
-               <audio controls autoPlay className="w-full h-8 accent-emerald-500">
-                 <source src={`http://localhost:3000/assets/${asset.path}`} />
+               <audio controls autoPlay className="w-full h-8 accent-emerald-500" src={`http://localhost:3000/assets/${asset.path}`}>
                  Tu navegador no soporta el elemento de audio.
                </audio>
              </div>
@@ -447,7 +449,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
 
           <div 
             className="content-area"
-            dangerouslySetInnerHTML={{ __html: processHtml(html) }} 
+            dangerouslySetInnerHTML={{ __html: processedHtml }} 
           />
 
           {/* Script Content Area */}
@@ -466,67 +468,31 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ html, path, cl
                    <span className="text-xs font-bold">Cerrar</span>
                  </button>
                </div>
-               <div 
+                <div 
                  className="prose prose-invert prose-blue max-w-none script-content"
-                 dangerouslySetInnerHTML={{ __html: processHtml(scriptHtml) }} 
+                 dangerouslySetInnerHTML={{ __html: getProcessedHtml(scriptHtml) }} 
                />
             </div>
           )}
 
-          {/* Exercises, Evaluations, and Scripts - Grid */}
-          {metadata && (metadata as any).relatedAssets?.some((a: any) => ['exercise', 'evaluation', 'script'].includes(a.type)) && (
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 not-prose">
-              {(metadata as any).relatedAssets.filter((a: any) => a.type === 'script').map((asset: any) => (
-                <a 
-                  key={asset.path}
-                  href={`/course/${asset.path}`}
-                  className="flex items-center gap-4 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group shadow-sm"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                    <FileTextIcon size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[var(--text-main)] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Ver Guion</h4>
-                    <p className="text-sm text-[var(--text-muted)]">Leer texto del audio</p>
-                  </div>
-                </a>
-              ))}
-
-              {(metadata as any).relatedAssets.filter((a: any) => a.type === 'exercise').map((asset: any) => (
-                <a 
-                  key={asset.path}
-                  href={`/course/${asset.path}`} 
-                  className="flex items-center gap-4 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group shadow-sm"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
-                    <FileTextIcon size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[var(--text-main)] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Ejercicio Práctico</h4>
-                    <p className="text-sm text-[var(--text-muted)]">Pon a prueba tu conocimiento</p>
-                  </div>
-                </a>
-              ))}
-
-              {(metadata as any).relatedAssets.filter((a: any) => a.type === 'evaluation').map((asset: any) => (
-                <a 
-                  key={asset.path}
-                  href={`/course/${asset.path}`}
-                  className="flex items-center gap-4 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group shadow-sm"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                    <AlertCircle size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[var(--text-main)] group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Evaluación del Tema</h4>
-                    <p className="text-sm text-[var(--text-muted)]">Certifica lo aprendido</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
+          {/* Exercises, Evaluations, and Scripts - Grid REMOVED */}
         </>
       ) : renderMedia()}
     </div>
   );
 };
+
+export const ContentRenderer = React.memo(ContentRendererBase, (prev, next) => {
+  if (prev.html !== next.html || prev.path !== next.path) return false;
+  
+  const pMeta = (prev.metadata || {}) as any;
+  const nMeta = (next.metadata || {}) as any;
+  
+  if (pMeta.showAudio !== nMeta.showAudio) return false;
+  if (pMeta.showScript !== nMeta.showScript) return false;
+  if (pMeta.poster !== nMeta.poster) return false;
+  
+  if (JSON.stringify(pMeta.relatedAssets) !== JSON.stringify(nMeta.relatedAssets)) return false;
+
+  return true; 
+});

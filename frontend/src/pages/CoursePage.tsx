@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
@@ -107,6 +107,15 @@ export const CoursePage: React.FC = () => {
 
   const breadcrumbs = path?.split('/').filter(Boolean) || [];
 
+  /* Helper to format file size */
+  const formatSize = (bytes: number) => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -115,9 +124,10 @@ export const CoursePage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="max-w-4xl mx-auto pb-20"
+        className="max-w-4xl mx-auto pb-0"
       >
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10 print:hidden">
+            {/* ... navigation remains ... */}
           <nav className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">
             <Link to="/" className="hover:text-[var(--color-primary)] transition-colors">
               <Home size={14} />
@@ -132,57 +142,90 @@ export const CoursePage: React.FC = () => {
             ))}
           </nav>
           
-          <div className="flex items-center gap-2">
-            {!isReading ? (
-              <button 
-                onClick={startReading}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]"
-              >
-                <Volume2 size={14} />
-                Leer Contenido
-              </button>
-            ) : (
-                <div className="flex items-center gap-2">
-                  {isPaused ? (
-                    <button 
-                        onClick={resumeReading}
-                        className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20"
-                        title="Reanudar"
-                    >
-                        <Volume2 size={14} />
-                        Reanudar
-                    </button>
-                  ) : (
-                    <button 
-                        onClick={pauseReading}
-                        className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500 text-orange-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-orange-500/20"
-                        title="Pausar"
-                    >
-                         {/* We can use Pause icon if we import it, or just use text/Volume2 for now. User asked for controls. */}
-                         {/* I will stick to Volume2 or I can import Pause icon. I'll import Pause. */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        Pausar
-                    </button>
-                  )}
-                  
-                  <button 
-                    onClick={stopReading}
-                    className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500 text-red-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-red-500/20"
-                    title="Detener"
-                  >
-                    <Square size={14} fill="currentColor" />
-                    Detener
-                  </button>
-                </div>
-            )}
+          <div className="flex items-center justify-between gap-4 w-full">
+            {/* Prev Button (Top) */}
+            <div className="flex-1 flex justify-start">
+              {navContext?.prev && (
+                <Link 
+                  to={`/course/${navContext.prev.path}`}
+                  className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+                  title={navContext.prev.title}
+                >
+                  <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                  <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline-block truncate max-w-[150px]">
+                    {navContext.prev.title}
+                  </span>
+                </Link>
+              )}
+            </div>
 
-            <button 
-              onClick={() => window.print()}
-              className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
-            >
-              <Printer size={14} />
-              Imprimir
-            </button>
+            {/* Center Actions */}
+            <div className="flex items-center gap-2">
+              {!isReading ? (
+                <button 
+                  onClick={startReading}
+                  className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]"
+                >
+                  <Volume2 size={14} />
+                  Leer Contenido
+                </button>
+              ) : (
+                  <div className="flex items-center gap-2">
+                    {isPaused ? (
+                      <button 
+                          onClick={resumeReading}
+                          className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500 text-emerald-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20"
+                          title="Reanudar"
+                      >
+                          <Volume2 size={14} />
+                          Reanudar
+                      </button>
+                    ) : (
+                      <button 
+                          onClick={pauseReading}
+                          className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-500/10 border border-orange-500 text-orange-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-orange-500/20"
+                          title="Pausar"
+                      >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                          Pausar
+                      </button>
+                    )}
+                    
+                    <button 
+                      onClick={stopReading}
+                      className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500 text-red-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-red-500/20"
+                      title="Detener"
+                    >
+                      <Square size={14} fill="currentColor" />
+                      Detener
+                    </button>
+                  </div>
+              )}
+  
+              <button 
+                onClick={() => window.print()}
+                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
+              >
+                <Printer size={14} />
+                Imprimir
+              </button>
+            </div>
+
+            {/* Next Button (Top) */}
+            <div className="flex-1 flex justify-end">
+              {navContext?.next && (
+                <Link 
+                  to={`/course/${navContext.next.path}`}
+                  className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+                  title={navContext.next.title}
+                >
+                  <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline-block truncate max-w-[150px]">
+                    {navContext.next.title}
+                  </span>
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
@@ -254,40 +297,48 @@ export const CoursePage: React.FC = () => {
         </div>
 
         {/* Sequential Navigation */}
-        <div className="mt-16 grid grid-cols-2 gap-6 print:hidden">
+        <div className="mt-8 flex flex-col sm:flex-row items-stretch justify-between gap-4 print:hidden text-sm">
           {navContext?.prev ? (
             <Link 
               to={`/course/${navContext.prev.path}`}
-              className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] transition-all group shadow-sm"
+              className="flex-1 min-w-0 flex items-center justify-start gap-3 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
+              title={navContext.prev.title}
             >
-              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
-                <ChevronLeft size={12} className="group-hover:-translate-x-1 transition-transform" />
-                Anterior
-              </span>
-              <span className="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
-                {navContext.prev.title}
-              </span>
+              <ChevronLeft size={16} className="shrink-0 group-hover:-translate-x-1 transition-transform" />
+              <div className="flex flex-col items-start overflow-hidden">
+                 <span className="text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Anterior</span>
+                 <span className="font-bold uppercase tracking-wide truncate w-full">{navContext.prev.title}</span>
+              </div>
             </Link>
-          ) : <div />}
+          ) : <div className="flex-1" />}
+
+          {/* Back to Top */}
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="shrink-0 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
+            title="Volver arriba"
+          >
+            <ChevronLeft size={16} className="rotate-90 group-hover:-translate-y-1 transition-transform" />
+            <span className="font-bold uppercase tracking-widest text-[10px]">Subir</span>
+          </button>
 
           {navContext?.next ? (
             <Link 
               to={`/course/${navContext.next.path}`}
-              className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] transition-all group text-right items-end shadow-sm"
+              className="flex-1 min-w-0 flex items-center justify-end gap-3 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm text-right"
+              title={navContext.next.title}
             >
-              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
-                Siguiente
-                <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
-              </span>
-              <span className="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">
-                {navContext.next.title}
-              </span>
+              <div className="flex flex-col items-end overflow-hidden">
+                 <span className="text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Siguiente</span>
+                 <span className="font-bold uppercase tracking-wide truncate w-full">{navContext.next.title}</span>
+              </div>
+              <ChevronRight size={16} className="shrink-0 group-hover:translate-x-1 transition-transform" />
             </Link>
-          ) : <div />}
+          ) : <div className="flex-1" />}
         </div>
 
         {/* Footer Metadata Section */}
-        <footer className="mt-20 pt-10 border-t border-slate-800/50 print:hidden">
+        <footer className="mt-8 pt-10 border-t border-slate-800/50 print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-6 text-slate-500 text-xs font-medium uppercase tracking-[0.1em]">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
@@ -296,7 +347,7 @@ export const CoursePage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <HardDrive size={14} className="text-slate-600" />
-                <span>Tamaño: {(content.metadata.size / 1024).toFixed(1)} KB</span>
+                <span>Tamaño: {formatSize(content.metadata.size)}</span>
               </div>
             </div>
             
