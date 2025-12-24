@@ -67,12 +67,12 @@ export const Sidebar: React.FC = () => {
     <aside className="w-72 h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white">
       <div className="p-6 pb-2">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center border border-primary/20 bg-primary shadow-[0_0_15px_rgba(5,150,105,0.3)]">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]">
            <span className="text-white font-black italic text-2xl pr-0.5">L</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-black text-white tracking-tighter leading-none">
-              Teach <span className="text-primary italic">LAOZ</span>
+              Teach <span className="text-emerald-500 italic">LAOZ</span>
             </span>
             <span className="text-[0.65rem] text-slate-500 font-bold tracking-[0.2em] uppercase">
               Learning System

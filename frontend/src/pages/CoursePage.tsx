@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
-import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentRenderer } from '../components/ContentRenderer';
 
@@ -12,6 +12,8 @@ export const CoursePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [navContext, setNavContext] = useState<{ prev: MenuItem | null, next: MenuItem | null } | null>(null);
+  const [showAudio, setShowAudio] = useState(false);
+  const [showScript, setShowScript] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -119,6 +121,49 @@ export const CoursePage: React.FC = () => {
             <Printer size={14} />
             Imprimir
           </button>
+
+          {/* Related Assets Buttons */}
+          <div className="flex flex-wrap gap-2">
+            {content.relatedAssets?.find(a => a.type === 'audio') && (
+              <button 
+                onClick={() => setShowAudio(!showAudio)}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${showAudio ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-emerald-500 hover:border-emerald-500'}`}
+              >
+                <Music size={14} />
+                Escuchar
+              </button>
+            )}
+
+            {content.relatedAssets?.find(a => a.type === 'script') && (
+              <button 
+                onClick={() => setShowScript(!showScript)}
+                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${showScript ? 'bg-blue-500/10 border-blue-500 text-blue-500' : 'bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-blue-500 hover:border-blue-500'}`}
+              >
+                <FileText size={14} />
+                Ver Guión
+              </button>
+            )}
+
+            {content.relatedAssets?.find(a => a.type === 'exercise') && (
+              <Link 
+                to={`/course/${content.relatedAssets.find(a => a.type === 'exercise')?.path}`}
+                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-orange-500 hover:border-orange-500 transition-all text-xs font-bold uppercase tracking-wider"
+              >
+                <CheckSquare size={14} />
+                Ejercicios
+              </Link>
+            )}
+
+            {content.relatedAssets?.find(a => a.type === 'evaluation') && (
+              <Link 
+                to={`/course/${content.relatedAssets.find(a => a.type === 'evaluation')?.path}`}
+                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-purple-500 hover:border-purple-500 transition-all text-xs font-bold uppercase tracking-wider"
+              >
+                <Brain size={14} />
+                Presentar Test
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Content Section */}
@@ -131,8 +176,12 @@ export const CoursePage: React.FC = () => {
             lastModified: content.metadata.lastModified,
             name: content.name,
             poster: content.frontmatter?.poster,
-            relatedAssets: content.relatedAssets // Inject related assets
+            relatedAssets: content.relatedAssets,
+            showAudio,
+            showScript
           }}
+          onCloseAudio={() => setShowAudio(false)}
+          onCloseScript={() => setShowScript(false)}
         />
 
         {/* Sequential Navigation */}
@@ -174,7 +223,7 @@ export const CoursePage: React.FC = () => {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
                 <Calendar size={14} className="text-slate-600" />
-                <span>Actualizado: {new Date(content.metadata.lastModified).toLocaleDateString()}</span>
+                <span>Actualizado: {content.metadata.lastModified ? new Date(content.metadata.lastModified).toLocaleDateString() : 'Pendiente'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <HardDrive size={14} className="text-slate-600" />
