@@ -13,7 +13,7 @@ export interface MenuItem {
   id: string;
   title: string;
   path: string;
-  type: 'directory' | 'markdown';
+  type: 'directory' | 'markdown' | 'binary' | 'html';
   children?: MenuItem[];
 }
 

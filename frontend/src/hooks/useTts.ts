@@ -21,8 +21,10 @@ export const useTts = (options: UseTtsOptions = {}) => {
 
   // Cleanup helper to remove highlights
   const clearHighlights = useCallback(() => {
-    document.querySelectorAll('.reading-highlight, .bg-yellow-500\\/20').forEach(el => {
-      el.classList.remove('reading-highlight', 'bg-yellow-500/20', 'rounded', 'px-1', '-mx-1', 'transition-colors', 'duration-300');
+    document.querySelectorAll('.reading-highlight').forEach(el => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.cssText = '';
+      htmlEl.classList.remove('reading-highlight');
     });
   }, []);
 
@@ -59,6 +61,9 @@ export const useTts = (options: UseTtsOptions = {}) => {
 
     if (textBlocks.length === 0) return;
 
+    // Debug: Log found blocks
+    console.log(`[TTS] Found ${textBlocks.length} readable blocks.`);
+
     // Stop unique previous instances just in case
     window.speechSynthesis.cancel();
     clearHighlights();
@@ -83,14 +88,27 @@ export const useTts = (options: UseTtsOptions = {}) => {
       }
 
       const el = textBlocks[currentIndex];
+
+      // Highlight: Use subtler styles for better UX
+      const isDark = document.documentElement.classList.contains('dark');
       
-      // Highlight: Add Tailwind classes for nice yellow background
-      el.classList.add('bg-yellow-500/20', 'rounded', 'px-1', '-mx-1', 'transition-colors', 'duration-300');
+      // Use cssText but with softer values
+      el.style.cssText = `
+        background-color: ${isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)'} !important;
+        border-radius: 8px !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        margin-left: -12px !important; /* Compensate padding */
+        border-left: 4px solid #10b981 !important;
+        transition: all 0.5s ease !important;
+      `;
+      
+      el.classList.add('reading-highlight'); 
       
       // Smooth scroll only if element is out of viewport (roughly)
       const rect = el.getBoundingClientRect();
       const inViewport = (
-          rect.top >= 0 &&
+          rect.top >= 150 && 
           rect.left >= 0 &&
           rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
           rect.right <= (window.innerWidth || document.documentElement.clientWidth)
@@ -105,8 +123,10 @@ export const useTts = (options: UseTtsOptions = {}) => {
       utterance.rate = rate;
 
       utterance.onend = () => {
-        // Remove highlight
-        el.classList.remove('bg-yellow-500/20', 'rounded', 'px-1', '-mx-1', 'transition-colors', 'duration-300');
+        // Remove highlight styles by clearing cssText
+        el.style.cssText = '';
+        el.classList.remove('reading-highlight');
+        
         currentIndex++;
         // Use timeout to allow UI update / breath
         if (readingActive.current) {
