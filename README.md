@@ -64,22 +64,28 @@ npm run format        # Formateo de código
 El proyecto incluye scripts en la carpeta `scripts/` para facilitar tareas comunes:
 
 ### 1. Iniciar Entorno de Desarrollo
+
 ```powershell
 .\scripts\start-dev.ps1
 ```
+
 Abre automáticamente terminales para Backend y Frontend.
 
 ### 2. Cargar Datos Iniciales (Seed)
+
 ```bash
 # Desde la raíz backend
 npm run seed --prefix backend
 ```
+
 Crea un usuario administrador por defecto (`admin@teachlaoz.com` / `admin`).
 
 ### 3. Descargar Cursos
+
 ```bash
 npx tsx scripts/download-courses.ts
 ```
+
 Descarga los cursos listados en `courses-list.md` a la carpeta `content/courses`.
 
 ## 🐳 Docker Deployment
@@ -91,6 +97,7 @@ docker-compose up --build
 ```
 
 El sistema estará disponible en:
+
 - **Frontend**: http://localhost:80
 - **Backend API**: http://localhost:3000
 
@@ -129,20 +136,25 @@ Ver [docs/README.md](./docs/README.md) para el índice completo de documentació
 ## 📝 Roadmap
 
 ### Fase 1 - Motor de contenido (actual)
+
 - [ ] ContentRepository
 - [ ] MarkdownRenderingService
 - [ ] Navegación y menú dinámico
+- [ ] Soporte para simulaciones HTML interactivas e incrustación
 
 ### Fase 2 - Modelo educativo
+
 - [ ] Frontmatter estandarizado
 - [ ] Identidad estable de cursos
 
 ### Fase 3 - LMS básico
+
 - [ ] Usuarios y autenticación
 - [ ] Progreso por curso
 - [ ] Evaluaciones
 
 ### Fase 4 - Analítica
+
 - [ ] Eventos de aprendizaje
 - [ ] Estadísticas
 - [ ] Multi-tenant

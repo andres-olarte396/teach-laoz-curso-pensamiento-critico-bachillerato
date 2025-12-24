@@ -95,4 +95,5 @@ Fase 3: Advanced LMS Features (Auth, Progress)
 - [x] UI/UX Polish (Navegación, Temas)
 - [ ] Autenticación de usuarios
 - [ ] Base de datos persistente (Progress)
+- [ ] Soporte para simulaciones HTML interactivas
 - [ ] Docker Deployment Finalizado (Pending verification)
