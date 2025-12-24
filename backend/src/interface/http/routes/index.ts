@@ -1,8 +1,36 @@
 import { FastifyInstance } from 'fastify';
 import { ContentController } from '../controllers/ContentController.js';
 
+import { ContactController } from '../controllers/ContactController.js';
+
 export async function contentRoutes(app: FastifyInstance) {
   const controller = new ContentController();
+  
+  // Contact Route
+  app.post('/contact', {
+    schema: {
+      tags: ['Contact'],
+      summary: 'Submit a contact message',
+      body: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 2 },
+          email: { type: 'string', format: 'email' },
+          subject: { type: 'string', minLength: 3 },
+          message: { type: 'string', minLength: 10 },
+        },
+        required: ['name', 'email', 'subject', 'message']
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, ContactController.submit);
 
   // Menu Schema
   app.get('/menu', {
@@ -50,10 +78,31 @@ export async function contentRoutes(app: FastifyInstance) {
             path: { type: 'string' },
             name: { type: 'string' },
             type: { type: 'string' },
+            extension: { type: 'string' },
             content: { type: 'string' },
             html: { type: 'string' },
-            metadata: { type: 'object' },
-            frontmatter: { type: 'object' },
+            metadata: { 
+              type: 'object',
+              properties: {
+                size: { type: 'number' },
+                lastModified: { type: 'string' },
+                mimeType: { type: 'string' }
+              },
+              additionalProperties: true
+            },
+            frontmatter: { type: 'object', additionalProperties: true },
+            relatedAssets: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  path: { type: 'string' },
+                  name: { type: 'string' },
+                  url: { type: 'string' }
+                }
+              }
+            }
           },
         },
       },
