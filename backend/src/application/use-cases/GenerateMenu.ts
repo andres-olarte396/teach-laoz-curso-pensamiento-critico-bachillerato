@@ -9,17 +9,17 @@ export class GenerateMenu {
     const rootNodes = await this.contentRepository.list('');
     
     // We filter only directories at root as "courses"
-    const courses: MenuItemDto[] = await Promise.all(
+    const courses = (await Promise.all(
       rootNodes
         .filter(node => node.isDirectory())
         .map(async courseNode => this.buildMenuItem(courseNode.path.toString()))
-    );
+    )).filter((item): item is MenuItemDto => item !== null);
 
     // logger.info({ courses }, 'Generated courses menu');
     return { courses };
   }
 
-  private async buildMenuItem(path: string): Promise<MenuItemDto> {
+  private async buildMenuItem(path: string): Promise<MenuItemDto | null> {
     const name = path.split('/').pop() || '';
     const isDirectory = await this.contentRepository.isDirectory(path);
     
@@ -32,13 +32,28 @@ export class GenerateMenu {
 
     if (isDirectory) {
       const childrenNodes = await this.contentRepository.list(path);
-      item.children = await Promise.all(
-        childrenNodes
-          .filter(node => node.isDirectory() || node.isMarkdown())
-          .map(node => this.buildMenuItem(node.path.toString()))
-      );
       
-      // Sort children if needed (e.g., by order in frontmatter/filename)
+      const childrenPromises = childrenNodes
+        .filter(node => {
+          if (node.isDirectory()) return true;
+          if (node.isMarkdown()) return true;
+          if (node.isHtml()) return true;
+          // Allow specific binary assets
+          const allowedExtensions = ['pdf', 'mp4', 'mp3', 'wav', 'ogg'];
+          return node.isBinary() && allowedExtensions.includes(node.extension?.toLowerCase() || '');
+        })
+        .map(node => this.buildMenuItem(node.path.toString()));
+
+      const children = (await Promise.all(childrenPromises))
+        .filter((child): child is MenuItemDto => child !== null);
+      
+      // If directory is empty after filtering, don't show it (unless it's a root node which we check differently, but here we enforce cleaner tree)
+      // Actually, for a directory to be useful in a menu, it should have content.
+      if (children.length === 0) {
+        return null;
+      }
+
+      item.children = children;
     }
 
     if (name === '') {
