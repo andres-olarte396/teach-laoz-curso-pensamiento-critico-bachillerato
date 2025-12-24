@@ -120,6 +120,7 @@ export class GetContent {
        console.warn(`Failed to scan for related assets in ${parentDir}`, error);
     }
 
+
     return {
       path: pathStr,
       name,
