@@ -21,7 +21,7 @@
     --text-main: #09090b; /* Almost Black (Zinc-950) for Max Contrast */
     --text-muted: #52525b; /* Zinc-600 */
     --border-color: #e4e4e7; /* Zinc-200 */
-    
+
     /* Brand Colors for Light Mode - Green & Gray */
     --color-primary: #059669; /* Emerald-600 */
     --color-secondary: #52525b; /* Zinc-600 (Gray accent) */
@@ -43,7 +43,7 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     scroll-behavior: smooth;
   }
 
@@ -73,7 +73,7 @@
   --tw-prose-body: var(--text-muted);
   --tw-prose-headings: var(--text-main);
   --tw-prose-bold: var(--text-main);
-  
+
   line-height: 1.8;
   letter-spacing: 0.015em;
 }
@@ -111,7 +111,7 @@
 }
 
 .content-area p {
-  @apply mb-4 text-base text-[var(--text-muted)];
+  @apply mb-4 text-base text-[var(--text-muted)] text-justify;
 }
 
 .content-area ul {
@@ -392,4 +392,78 @@
     max-width: 100% !important;
     page-break-inside: avoid;
   }
+}
+
+/* Code Block Headers - Force Override */
+.code-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0.5rem 1rem !important;
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1) !important;
+  font-family: monospace;
+  font-size: 0.75rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  min-height: 2.5rem; /* Ensure height */
+}
+
+/* TARGET THE DOT AND KILL IT */
+.code-lang-label, 
+.code-lang-label::before, 
+.code-lang-label::after,
+span[class*="code-lang-"]::before {
+  content: none !important;
+  display: inline-block !important; /* Reset any flex that might hide it */
+  background: none !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  color: #94a3b8 !important; /* Force nice color */
+}
+
+.code-lang-label {
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Adjust pre border since we have a header now */
+.prose pre {
+  padding-top: 0 !important; 
+  border-top-left-radius: 0.5rem !important;
+  border-top-right-radius: 0.5rem !important;
+  margin-top: 0 !important;
+}
+
+.code-copy-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.7;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  opacity: 1;
+}
+
+.code-copy-btn.copied {
+  color: #10b981 !important;
+}
+
+.code-copy-btn svg {
+  width: 16px;
+  height: 16px;
 }
