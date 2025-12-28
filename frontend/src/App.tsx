@@ -43,7 +43,8 @@ function App() {
             <Route element={<Layout />}>
               {/* Public Blog Routes */}
               <Route path="/blog" element={<BlogListPage />} />
-              <Route path="/blog/:slug" element={<BlogPostPage />} />
+              <Route path="/blog/category/:category" element={<BlogListPage />} />
+              <Route path="/blog/article/*" element={<BlogPostPage />} />
               
               {/* Contact Route */}
               <Route path="/contact" element={<ContactPage />} />

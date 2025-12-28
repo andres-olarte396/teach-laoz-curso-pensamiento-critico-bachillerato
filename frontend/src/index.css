@@ -16,11 +16,11 @@
 @layer base {
   :root {
     /* Soft Light Palette (High Contrast - Reading Optimized) */
-    --bg-app: #fafafa; /* Neutral White */
+    --bg-app: #f8fafc; /* Slate-50 */
     --bg-surface: #ffffff;
-    --text-main: #09090b; /* Almost Black (Zinc-950) for Max Contrast */
-    --text-muted: #52525b; /* Zinc-600 */
-    --border-color: #e4e4e7; /* Zinc-200 */
+    --text-main: #0f172a; /* Slate-900 */
+    --text-muted: #475569; /* Slate-600 */
+    --border-color: #e2e8f0; /* Slate-200 */
 
     /* Brand Colors for Light Mode - Green & Gray */
     --color-primary: #059669; /* Emerald-600 */
@@ -394,3 +394,21 @@
   }
 }
 
+/* TTS Word Highlighting */
+.reading-word-highlight {
+  background-color: #fef08a !important; /* Yellow-200 (brighter) */
+  color: #000000 !important;
+  border-radius: 4px;
+  padding: 1px 3px;
+  box-shadow: 0 0 0 2px #facc15, 0 4px 12px rgba(234, 179, 8, 0.4); /* Neon yellow ring + shadow */
+  transition: all 0.05s ease-in-out;
+  position: relative;
+  z-index: 50;
+  font-weight: 700;
+}
+
+.dark .reading-word-highlight {
+  background-color: #facc15 !important; /* Yellow-400 */
+  color: #000000 !important;
+  box-shadow: 0 0 0 2px #fef08a, 0 4px 15px rgba(250, 204, 21, 0.6);
+}

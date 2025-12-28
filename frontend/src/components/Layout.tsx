@@ -14,7 +14,7 @@ export const Layout: React.FC = () => {
       
       <main className="flex-1 flex flex-col relative overflow-hidden">
         {/* Mobile Header */}
-        <div className="lg:hidden p-4 flex items-center justify-between bg-[var(--bg-surface)] border-b border-[var(--border-color)] sticky top-0 z-30">
+        <div className="lg:hidden p-4 flex items-center justify-between bg-[#020617] border-b border-zinc-800 text-white sticky top-0 z-30">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
                <span className="text-white font-black italic text-lg pr-0.5">L</span>
@@ -28,6 +28,14 @@ export const Layout: React.FC = () => {
             <Menu size={24} />
           </button>
         </div>
+
+        {/* Backdrop for Mobile Menu */}
+        {mobileMenuOpen && (
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
 
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2 print:hidden" />

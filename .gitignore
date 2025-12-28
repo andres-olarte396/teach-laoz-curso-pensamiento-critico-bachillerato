@@ -43,3 +43,4 @@ Thumbs.db
 .husky/_
 
 content/*
+!content/blog/

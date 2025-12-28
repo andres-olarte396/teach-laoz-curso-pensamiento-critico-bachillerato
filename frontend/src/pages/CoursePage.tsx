@@ -21,12 +21,17 @@ export const CoursePage: React.FC = () => {
   const { 
     isReading,
     isPaused, 
+    availableVoices,
+    selectedVoiceURI,
     startReading, 
     pauseReading, 
     resumeReading, 
     stopReading,
     seekForward,
-    seekBackward
+    seekBackward,
+    setVoice,
+    rate,
+    setRate
   } = useTts({
     contentSelector: '.content-area'
   });
@@ -34,6 +39,14 @@ export const CoursePage: React.FC = () => {
   useEffect(() => {
     return () => stopReading();
   }, [path, stopReading]);
+
+  useEffect(() => {
+    // Scroll to top of the main container when the path changes
+    const mainContainer = document.querySelector('main > div.flex-1');
+    if (mainContainer) {
+      mainContainer.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [path]);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -120,25 +133,32 @@ export const CoursePage: React.FC = () => {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={path}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="max-w-4xl mx-auto pb-0"
-      >
-        {/* Floating TTS Controls */}
-        <TtsFloatingControls 
-          isReading={isReading}
-          isPaused={isPaused}
-          onPause={pauseReading}
-          onResume={resumeReading}
-          onStop={stopReading}
-          onSeekForward={seekForward}
-          onSeekBackward={seekBackward}
-        />
+    <>
+      {/* Floating TTS Controls - Outside AnimatePresence to avoid transform bugs */}
+      <TtsFloatingControls 
+        isReading={isReading}
+        isPaused={isPaused}
+        onPause={pauseReading}
+        onResume={resumeReading}
+        onStop={stopReading}
+        onSeekForward={seekForward}
+        onSeekBackward={seekBackward}
+        availableVoices={availableVoices}
+        selectedVoiceURI={selectedVoiceURI}
+        onVoiceChange={setVoice}
+        rate={rate}
+        onRateChange={setRate}
+      />
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={path}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-4xl mx-auto pb-0"
+        >
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10 print:hidden">
             {/* ... navigation remains ... */}
           <nav className="flex flex-wrap items-center gap-2 text-[var(--text-muted)] text-xs font-medium uppercase tracking-widest">
@@ -149,7 +169,11 @@ export const CoursePage: React.FC = () => {
               <React.Fragment key={i}>
                 <ChevronRightIcon size={12} className="text-[var(--text-muted)] flex-shrink-0" />
                 <span className={i === breadcrumbs.length - 1 ? "text-[var(--color-primary)]" : "hover:text-[var(--text-main)] transition-colors cursor-default"}>
-                  {crumb.replace(/^teach-laoz-curso-?/i, '').replace(/-/g, ' ').replace('.md', '')}
+                  {(() => {
+                    const cleanRegex = /^((teach|laoz|curso|learning|system|courses?|educacion|[ ._-]+)+)/i;
+                    const cleaned = crumb.replace(cleanRegex, '').replace(/\.(md|html|pdf)$/i, '').replace(/[._-]/g, ' ').trim();
+                    return cleaned || crumb.replace(/\.(md|html|pdf)$/i, '').replace(/[._-]/g, ' ');
+                  })()}
                 </span>
               </React.Fragment>
             ))}
@@ -357,5 +381,6 @@ export const CoursePage: React.FC = () => {
         </footer>
       </motion.div>
     </AnimatePresence>
+  </>
   );
 };

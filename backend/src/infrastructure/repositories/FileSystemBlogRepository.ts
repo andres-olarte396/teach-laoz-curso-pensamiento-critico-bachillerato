@@ -27,19 +27,8 @@ export class FileSystemBlogRepository implements BlogPostRepository {
         return [];
       }
 
-      const files = await fs.readdir(this.basePath);
       const posts: BlogPost[] = [];
-
-      for (const file of files) {
-        if (!file.endsWith('.md')) continue;
-        
-        const slug = file.replace('.md', '');
-        const post = await this.getBySlug(slug);
-        
-        if (post && post.published) {
-          posts.push(post);
-        }
-      }
+      await this.scanDirectory(this.basePath, posts);
 
       // Sort by date descending
       return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -49,8 +38,30 @@ export class FileSystemBlogRepository implements BlogPostRepository {
     }
   }
 
+  private async scanDirectory(directory: string, posts: BlogPost[]): Promise<void> {
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(directory, entry.name);
+      
+      if (entry.isDirectory()) {
+        await this.scanDirectory(fullPath, posts);
+      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        // Calculate relative path for slug (handle multi-level categories)
+        const relativePath = path.relative(this.basePath, fullPath);
+        const slug = relativePath.replace(/\\/g, '/').replace('.md', '');
+        
+        const post = await this.getBySlug(slug);
+        if (post && post.published) {
+          posts.push(post);
+        }
+      }
+    }
+  }
+
   async getBySlug(slug: string): Promise<BlogPost | null> {
     try {
+      // slug matches the relative path without extension (e.g., "tecnologia-software/la-doctrina-americana-chomsky")
       const filePath = path.join(this.basePath, `${slug}.md`);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       
@@ -90,14 +101,15 @@ export class FileSystemBlogRepository implements BlogPostRepository {
   }
 
   private parseFrontmatter(fileContent: string): { frontmatter: any, content: string } {
-    const match = fileContent.match(/^---\s+([\s\S]*?)\s+---\s+([\s\S]*)$/);
+    // Robust regex to capture frontmatter even with trailing spaces or different line endings
+    const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---\s*?\r?\n([\s\S]*)$/);
     if (match) {
       try {
         const frontmatter = yaml.parse(match[1]);
         const content = match[2];
         return { frontmatter, content };
       } catch (e) {
-        console.error('Error parsing YAML frontmatter', e);
+        console.error('Error parsing YAML frontmatter:', e);
       }
     }
     // Fallback if no frontmatter

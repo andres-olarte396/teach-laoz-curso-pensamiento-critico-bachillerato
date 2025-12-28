@@ -345,27 +345,23 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
 
     if (mime === 'application/pdf') {
       return (
-        <div className="media-container mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700 h-[80vh] flex flex-col">
-          <div className="flex items-center justify-between gap-3 mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/20">
-            <div className="flex items-center gap-3">
-              <FileTextIcon className="text-accent" size={24} />
-              <h3 className="text-xl font-bold m-0! text-white">Documento: {metadata.name}</h3>
-            </div>
-            <a 
-              href={fileUrl} 
-              download 
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all text-xs font-bold"
-            >
-              <Download size={14} />
-              Descargar
-            </a>
-          </div>
-          <div className="flex-1 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900">
+        <div className="media-container mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 h-[calc(100vh-200px)] flex flex-col">
+          <div className="flex-1 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900">
             <iframe 
               src={`${fileUrl}#view=FitH`} 
               className="w-full h-full border-none"
               title={metadata.name}
             />
+          </div>
+          <div className="mt-4 flex justify-center">
+            <a 
+              href={fileUrl} 
+              download 
+              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-all text-sm font-bold shadow-lg"
+            >
+              <Download size={16} />
+              Descargar PDF Completo
+            </a>
           </div>
         </div>
       );
@@ -401,7 +397,7 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
       print:prose-slate print:prose-headings:text-black print:text-black
       ${className || ''}
     `}>
-      {html ? (
+      {(html || (metadata && metadata.mimeType === 'text/html')) ? (
         <>
           {/* Related Audio Assets - Fixed Bottom Right Player */}
           {metadata && (metadata as any).showAudio && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'audio').map((asset: any) => (
@@ -447,35 +443,51 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
              </div>
           ))}
 
-          <div 
-            className="content-area"
-            dangerouslySetInnerHTML={{ __html: processedHtml }} 
-          />
+          {metadata && metadata.mimeType === 'text/html' ? (
+             <div className="simulation-container animate-in fade-in duration-700 h-[calc(100vh-250px)] min-h-[500px] w-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
+                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                   <div className="px-3 py-1 bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-500/30 backdrop-blur-md">
+                      Simulación Interactiva
+                   </div>
+                </div>
+                <iframe 
+                  src={`/api/content-assets/${path}`} 
+                  className="w-full h-full border-none bg-white" 
+                  title="Simulación"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                />
+             </div>
+          ) : (
+            <>
+              <div 
+                className="content-area"
+                dangerouslySetInnerHTML={{ __html: processedHtml }} 
+              />
 
-          {/* Script Content Area */}
-          {metadata?.showScript && scriptHtml && (
-            <div className="mt-12 p-8 rounded-3xl bg-blue-500/5 border border-blue-500/20 animate-in fade-in slide-in-from-bottom-4 duration-700 relative group">
-               <div className="flex items-center justify-between mb-6">
-                 <div className="flex items-center gap-2 text-blue-500">
-                    <FileTextIcon size={20} />
-                    <span className="text-sm font-bold uppercase tracking-wider">Guion de la lección</span>
-                 </div>
-                 <button 
-                    onClick={onCloseScript}
-                    className="p-2 rounded-xl bg-blue-500/10 hover:bg-red-500/10 text-blue-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                    title="Cerrar guion"
-                 >
-                   <span className="text-xs font-bold">Cerrar</span>
-                 </button>
-               </div>
-                <div 
-                 className="prose prose-invert prose-blue max-w-none script-content"
-                 dangerouslySetInnerHTML={{ __html: getProcessedHtml(scriptHtml) }} 
-               />
-            </div>
+              {/* Script Content Area */}
+              {metadata?.showScript && scriptHtml && (
+                <div className="mt-12 p-8 rounded-3xl bg-blue-500/5 border border-blue-500/20 animate-in fade-in slide-in-from-bottom-4 duration-700 relative group">
+                   <div className="flex items-center justify-between mb-6">
+                     <div className="flex items-center gap-2 text-blue-500">
+                        <FileTextIcon size={20} />
+                        <span className="text-sm font-bold uppercase tracking-wider">Guion de la lección</span>
+                     </div>
+                     <button 
+                        onClick={onCloseScript}
+                        className="p-2 rounded-xl bg-blue-500/10 hover:bg-red-500/10 text-blue-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Cerrar guion"
+                     >
+                       <span className="text-xs font-bold">Cerrar</span>
+                     </button>
+                   </div>
+                    <div 
+                     className="prose prose-invert prose-blue max-w-none script-content"
+                     dangerouslySetInnerHTML={{ __html: getProcessedHtml(scriptHtml) }} 
+                   />
+                </div>
+              )}
+            </>
           )}
-
-          {/* Exercises, Evaluations, and Scripts - Grid REMOVED */}
         </>
       ) : renderMedia()}
     </div>

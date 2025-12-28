@@ -144,6 +144,38 @@ Agregar:
 
 ---
 
+## 🗂️ Gestión de Contenido y Cursos
+
+El sistema está diseñado para ser independiente del contenido. Los cursos se gestionan como repositorios Git independientes que se descargan en la carpeta `content/courses/`.
+
+### Descarga e Instalación de Cursos
+
+1. **Configurar Repositorios**:
+   Asegúrate de que tus cursos estén listados en el archivo [COURSE_REPOSITORIES.md](../COURSE_REPOSITORIES.md) en la raíz del proyecto. El formato debe ser:
+   `- [Nombre del Curso](URL_DEL_REPOSITORIO_GIT)`
+
+2. **Ejecutar Descarga**:
+   Desde la raíz del proyecto, ejecuta el script de descarga:
+
+   ```bash
+   npx tsx scripts/download-courses.ts
+   ```
+
+3. **Uso Interactivo**:
+   - Usa las **flechas** para navegar por la lista.
+   - Presiona **Espacio** para seleccionar/deseleccionar cursos.
+   - Presiona **Enter** para iniciar el proceso de clonación o actualización (`git pull`).
+
+### Estructura de un Curso
+
+Cada curso debe seguir la estructura estándar de Teach LAOZ:
+
+- `INDICE.md`: El punto de entrada y estructura del menú.
+- `media/`: Carpeta para imágenes y recursos.
+- `Archivos .md`: Lecciones y contenido.
+
+---
+
 ## 🧪 Comandos disponibles
 
 ```bash

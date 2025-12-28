@@ -29,7 +29,7 @@ export async function blogRoutes(fastify: FastifyInstance) {
   }, controller.list.bind(controller));
 
   // Get Post Schema
-  fastify.get('/blog/posts/:slug', {
+  fastify.get('/blog/posts/*', {
     schema: {
       tags: ['Blog'],
       summary: 'Get a single blog post by slug',

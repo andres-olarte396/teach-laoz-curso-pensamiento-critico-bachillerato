@@ -124,7 +124,9 @@ export class GetContent {
     return {
       path: pathStr,
       name,
-      type: ContentType.BINARY, 
+      type: metadata.mimeType === 'text/markdown' ? ContentType.MARKDOWN : 
+            metadata.mimeType === 'text/html' ? ContentType.HTML : 
+            ContentType.BINARY, 
       extension,
       content,
       relatedAssets,

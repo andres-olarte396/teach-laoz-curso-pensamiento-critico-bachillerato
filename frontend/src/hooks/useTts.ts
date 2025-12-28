@@ -11,23 +11,75 @@ export const useTts = (options: UseTtsOptions = {}) => {
   const {
     contentSelector = '.content-area',
     lang = 'es-ES',
-    rate = 1.0,
-    onEnd
+    onEnd,
+    rate: rateOption = 1.0
   } = options;
 
   const [isReading, setIsReading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(localStorage.getItem('tts-preferred-voice'));
+  const [rate, setRateState] = useState(parseFloat(localStorage.getItem('tts-rate') || rateOption.toString()));
+  
+  const setRate = useCallback((newRate: number) => {
+    setRateState(newRate);
+    localStorage.setItem('tts-rate', newRate.toString());
+    
+    if (readingActive.current) {
+        window.speechSynthesis.cancel();
+    }
+  }, []);
+  
   const readingActive = useRef(false);
   const currentIndexRef = useRef(0);
   const textBlocksRef = useRef<HTMLElement[]>([]);
+  const boundaryFiredRef = useRef(false);
+  const timerRef = useRef<number | null>(null);
 
-  // Cleanup helper to remove highlights
+  // Load voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices();
+      // Filter for Spanish or specific lang
+      const esVoices = allVoices.filter(v => v.lang.startsWith('es'));
+      setAvailableVoices(esVoices);
+      
+      // If no preferred voice is set, try to find a "natural" or "google" one by default
+      if (!localStorage.getItem('tts-preferred-voice')) {
+        const preferred = esVoices.find(v => v.name.includes('Google') || v.name.includes('Natural')) || esVoices[0];
+        if (preferred) {
+          setSelectedVoiceURI(preferred.voiceURI);
+        }
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  const setVoice = useCallback((voiceURI: string) => {
+    setSelectedVoiceURI(voiceURI);
+    localStorage.setItem('tts-preferred-voice', voiceURI);
+  }, []);
+
   const clearHighlights = useCallback(() => {
-    document.querySelectorAll('.reading-highlight').forEach(el => {
+    document.querySelectorAll('.reading-highlight, .reading-word-highlight, .tts-word').forEach(el => {
       const htmlEl = el as HTMLElement;
-      htmlEl.style.cssText = '';
-      htmlEl.classList.remove('reading-highlight');
+      if (htmlEl.classList.contains('reading-word-highlight')) {
+        htmlEl.classList.remove('reading-word-highlight');
+      }
+      if (htmlEl.classList.contains('reading-highlight')) {
+        htmlEl.style.cssText = '';
+        htmlEl.classList.remove('reading-highlight');
+      }
     });
+    if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+    }
   }, []);
 
   const stopReading = useCallback(() => {
@@ -43,6 +95,7 @@ export const useTts = (options: UseTtsOptions = {}) => {
   const pauseReading = useCallback(() => {
     window.speechSynthesis.pause();
     setIsPaused(true);
+    if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
   const resumeReading = useCallback(() => {
@@ -60,73 +113,159 @@ export const useTts = (options: UseTtsOptions = {}) => {
     }
 
     const el = textBlocks[currentIndexRef.current];
+    const originalContent = el.innerHTML;
+    const originalText = el.innerText || el.textContent || '';
+    boundaryFiredRef.current = false;
 
-    // Highlight: Use subtler styles for better UX
+    // Advanced Word Segmentation (only if not already segmented)
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    const textNodes: Node[] = [];
+    let currentNode = walker.nextNode();
+    while (currentNode) {
+      textNodes.push(currentNode);
+      currentNode = walker.nextNode();
+    }
+
+    let globalCharOffset = 0;
+    textNodes.forEach(node => {
+      const text = node.textContent || '';
+      const fragment = document.createDocumentFragment();
+      const tokens = text.split(/(\s+)/);
+      
+      tokens.forEach(token => {
+        if (token.trim().length > 0) {
+          const span = document.createElement('span');
+          span.className = 'tts-word transition-all duration-75';
+          span.dataset.charIndex = globalCharOffset.toString();
+          span.textContent = token;
+          fragment.appendChild(span);
+        } else {
+          fragment.appendChild(document.createTextNode(token));
+        }
+        globalCharOffset += token.length;
+      });
+      
+      if (node.parentNode) {
+        node.parentNode.replaceChild(fragment, node);
+      }
+    });
+
+    // Block level Highlight
     const isDark = document.documentElement.classList.contains('dark');
-    
-    // Use cssText but with softer values
     el.style.cssText = `
-      background-color: ${isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)'} !important;
-      border-radius: 8px !important;
-      padding-left: 12px !important;
-      padding-right: 12px !important;
-      margin-left: -12px !important; /* Compensate padding */
-      border-left: 4px solid #10b981 !important;
-      transition: all 0.5s ease !important;
+      background-color: ${isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.05)'} !important;
+      border-radius: 12px !important;
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      margin-left: -16px !important;
+      border-left: 5px solid #10b981 !important;
+      transition: all 0.4s ease !important;
     `;
-    
     el.classList.add('reading-highlight'); 
     
-    // Smooth scroll only if element is out of viewport (roughly)
+    // Smooth scroll
     const rect = el.getBoundingClientRect();
-    const inViewport = (
-        rect.top >= 150 && 
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
-    if (!inViewport) {
+    if (rect.top < 100 || rect.bottom > window.innerHeight) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    const text = el.innerText;
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(originalText);
     utterance.lang = lang;
     utterance.rate = rate;
 
+    // Selected Voice Integration
+    const voices = window.speechSynthesis.getVoices();
+    const userVoice = voices.find(v => v.voiceURI === selectedVoiceURI);
+    
+    if (userVoice) {
+        utterance.voice = userVoice;
+    } else {
+        // Fallback if the selected voice is not found
+        const preferredVoice = voices.find(v => v.lang.startsWith(lang) && (v.name.includes('Google') || v.name.includes('Natural'))) || 
+                               voices.find(v => v.lang.startsWith(lang));
+        if (preferredVoice) utterance.voice = preferredVoice;
+    }
+
+    const wordsSpans = Array.from(el.querySelectorAll('.tts-word')) as HTMLElement[];
+
+    utterance.onboundary = (event) => {
+      if (event.name === 'word') {
+        boundaryFiredRef.current = true;
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        
+        const charIndex = event.charIndex;
+        let activeSpan: HTMLElement | null = null;
+        for (let i = 0; i < wordsSpans.length; i++) {
+          const spanIndex = parseInt(wordsSpans[i].dataset.charIndex || '0');
+          if (spanIndex <= charIndex) {
+            activeSpan = wordsSpans[i];
+          } else {
+            break; 
+          }
+        }
+
+        if (activeSpan) {
+          wordsSpans.forEach(w => w.classList.remove('reading-word-highlight'));
+          activeSpan.classList.add('reading-word-highlight');
+        }
+      }
+    };
+
     utterance.onend = () => {
-      // Remove highlight styles by clearing cssText
+      if (timerRef.current) clearInterval(timerRef.current);
+      el.innerHTML = originalContent; 
       el.style.cssText = '';
       el.classList.remove('reading-highlight');
       
       currentIndexRef.current++;
-      // Use timeout to allow UI update / breath
       if (readingActive.current) {
-        setTimeout(speakNext, 50);
+        setTimeout(speakNext, 60);
       }
     };
 
     utterance.onerror = (e) => {
-       console.warn('Speech error or cancel', e);
-       el.classList.remove('bg-yellow-500/20', 'rounded', 'px-1', '-mx-1', 'transition-colors', 'duration-300');
-       if (readingActive.current) { 
-           // If error wasn't a manual cancel, move next
-           if (e.error !== 'interrupted') {
-               currentIndexRef.current++;
-               setTimeout(speakNext, 50);
-           }
+       if (timerRef.current) clearInterval(timerRef.current);
+       console.warn('[TTS] Playback Error:', e);
+       el.innerHTML = originalContent;
+       el.style.cssText = '';
+       if (readingActive.current && e.error !== 'interrupted') {
+          currentIndexRef.current++;
+          setTimeout(speakNext, 60);
        }
     };
 
     window.speechSynthesis.speak(utterance);
-  }, [lang, rate, stopReading]);
+
+    // Hybrid Sync Fallback
+    setTimeout(() => {
+      if (readingActive.current && !boundaryFiredRef.current && wordsSpans.length > 0) {
+        let wordIndex = 0;
+        const baseDelay = 220; 
+        const adjustedDelay = baseDelay / rate;
+
+        timerRef.current = window.setInterval(() => {
+          if (!readingActive.current || isPaused) return;
+          
+          if (wordIndex < wordsSpans.length) {
+            wordsSpans.forEach(w => w.classList.remove('reading-word-highlight'));
+            wordsSpans[wordIndex].classList.add('reading-word-highlight');
+            wordIndex++;
+          } else {
+            if (timerRef.current) clearInterval(timerRef.current);
+          }
+        }, adjustedDelay);
+      }
+    }, 1500);
+
+  }, [lang, rate, stopReading, isPaused, selectedVoiceURI]);
 
   const startReading = useCallback(() => {
-    // Safety check for content area
     const container = document.querySelector(contentSelector);
     if (!container) return;
 
-    // Enhanced selector for readable blocks
     const blocks = Array.from(container.querySelectorAll<HTMLElement>('h1, h2, h3, h4, p, li, blockquote, .mermaid, table'));
     const textBlocks = blocks.filter(el => {
       const text = el.innerText?.trim();
@@ -136,10 +275,6 @@ export const useTts = (options: UseTtsOptions = {}) => {
     if (textBlocks.length === 0) return;
     textBlocksRef.current = textBlocks;
 
-    // Debug: Log found blocks
-    console.log(`[TTS] Found ${textBlocks.length} readable blocks.`);
-
-    // Stop unique previous instances just in case
     window.speechSynthesis.cancel();
     clearHighlights();
 
@@ -155,7 +290,6 @@ export const useTts = (options: UseTtsOptions = {}) => {
     if (!isReading) return;
     window.speechSynthesis.cancel();
     clearHighlights();
-    // Move 1 block forward (approximation for 10s in simple content)
     currentIndexRef.current = Math.min(currentIndexRef.current + 1, textBlocksRef.current.length);
     speakNext();
   }, [isReading, clearHighlights, speakNext]);
@@ -164,12 +298,10 @@ export const useTts = (options: UseTtsOptions = {}) => {
     if (!isReading) return;
     window.speechSynthesis.cancel();
     clearHighlights();
-    // Move 1 block backward
     currentIndexRef.current = Math.max(currentIndexRef.current - 1, 0);
     speakNext();
   }, [isReading, clearHighlights, speakNext]);
 
-  // Use effect to cleanup on unmount
   useEffect(() => {
     return () => {
       if (readingActive.current) {
@@ -181,11 +313,16 @@ export const useTts = (options: UseTtsOptions = {}) => {
   return {
     isReading,
     isPaused,
+    availableVoices,
+    selectedVoiceURI,
     startReading,
     pauseReading,
     resumeReading,
     stopReading,
     seekForward,
-    seekBackward
+    seekBackward,
+    setVoice,
+    rate,
+    setRate
   };
 };

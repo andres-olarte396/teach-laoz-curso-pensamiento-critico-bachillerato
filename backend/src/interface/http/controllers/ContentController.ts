@@ -36,9 +36,19 @@ export class ContentController {
     // For now, let's try reading as content, if it fails because it's a directory, list it.
     
     try {
-      if (path.endsWith('.md')) {
+      const lowerPath = path.toLowerCase();
+      
+      if (lowerPath.endsWith('.md')) {
         const result = await this.renderMarkdown.execute(path);
         return reply.send(result);
+      }
+      
+      if (lowerPath.endsWith('.html')) {
+        const result = await this.getContent.execute(path);
+        return reply.send({
+          ...result,
+          html: result.content
+        });
       }
       
       const result = await this.getContent.execute(path);

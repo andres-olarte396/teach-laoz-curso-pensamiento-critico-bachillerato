@@ -7,7 +7,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./content:/app/content/courses
+      - ./content:/app/content
       - ./backend/lms.db:/app/lms.db
       - ./COURSE_REPOSITORIES.md:/app/COURSE_REPOSITORIES.md
     environment:

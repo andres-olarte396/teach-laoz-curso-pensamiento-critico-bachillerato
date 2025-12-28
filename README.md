@@ -80,13 +80,16 @@ npm run seed --prefix backend
 
 Crea un usuario administrador por defecto (`admin@teachlaoz.com` / `admin`).
 
-### 3. Descargar Cursos
+### 3. Descargar Cursos (Interactivo)
+
+El sistema permite descargar y actualizar cursos de forma masiva desde repositorios Git externos.
 
 ```bash
+# Ejecutar el script interactivo
 npx tsx scripts/download-courses.ts
 ```
 
-Descarga los cursos listados en `courses-list.md` a la carpeta `content/courses`.
+Este script lee la lista de repositorios desde `COURSE_REPOSITORIES.md` y permite seleccionar qué cursos descargar o actualizar mediante un menú interactivo.
 
 ## 🐳 Docker Deployment
 

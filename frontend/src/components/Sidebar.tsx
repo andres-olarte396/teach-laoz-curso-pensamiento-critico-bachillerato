@@ -90,11 +90,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
     if (mobileIsOpen && setMobileIsOpen) {
       setMobileIsOpen(false);
     }
-  }, [location.pathname, mobileIsOpen, setMobileIsOpen]);
+  }, [location.pathname]); // Only close on path change
 
   return (
     <aside className={cn(
-      "h-screen border-r border-slate-900 bg-[#020617] flex flex-col sticky top-0 print:hidden text-white transition-all duration-300",
+      "dark h-screen border-r border-zinc-800 bg-[#020617] flex flex-col sticky top-0 print:hidden text-zinc-200 transition-all duration-300",
       isCollapsed ? "w-20" : "w-72",
       // Simple mobile visibility toggle (if not hidden by default, we might need more complex CSS, but this fixes the build signature)
       "hidden lg:flex", // Hide on mobile by default unless we implement the drawer logic strictly
@@ -103,11 +103,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
       <div className="p-6 pb-2 relative group">
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 bg-slate-800 text-slate-400 p-1 rounded-full border border-slate-700 hover:text-white hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute -right-3 top-8 bg-slate-800 text-slate-400 p-1 rounded-full border border-slate-700 hover:text-white hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100 lg:flex hidden"
           title={isCollapsed ? "Expandir menú" : "Contraer menú"}
         >
           {isCollapsed ? <ChevronRight size={14} /> : <PanelLeftClose size={14} />}
         </button>
+
+        {/* Mobile Close Button */}
+        {mobileIsOpen && (
+          <button 
+            onClick={() => setMobileIsOpen?.(false)}
+            className="lg:hidden absolute right-4 top-6 p-2 text-slate-400 hover:text-white"
+          >
+            <ChevronRight className="rotate-180" size={24} />
+          </button>
+        )}
 
         <div className={cn("flex items-center gap-3 mb-6", isCollapsed && "justify-center")}>
           <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center border border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] shrink-0">
@@ -221,14 +231,77 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
               {!isCollapsed && <span>Documentación</span>}
             </Link>
 
-             <Link 
-              to="/blog" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
-               title="Blog"
-            >
-              <span className="w-4 h-4 flex items-center justify-center"><FileText size={14} /></span>
-               {!isCollapsed && <span>Blog</span>}
-            </Link>
+             <div className="flex flex-col gap-1">
+              <Link 
+                to="/blog" 
+                className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium group"
+                title="Blog"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 flex items-center justify-center"><Book size={14} /></span>
+                  {!isCollapsed && <span>Blog & Updates</span>}
+                </div>
+              </Link>
+              
+              {!isCollapsed && (
+                <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mt-1">
+                  <Link 
+                    to="/blog" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Todo
+                  </Link>
+                  <Link 
+                    to="/blog/category/tecnologia-software" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog/category/tecnologia-software" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Tecnología Software
+                  </Link>
+                  <Link 
+                    to="/blog/category/medio-ambiente-sostenibilidad" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog/category/medio-ambiente-sostenibilidad" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Medio Ambiente
+                  </Link>
+                  <Link 
+                    to="/blog/category/fitness-salud" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog/category/fitness-salud" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Fitness & Salud
+                  </Link>
+                  <Link 
+                    to="/blog/category/desarrollo-personal-psicologia" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog/category/desarrollo-personal-psicologia" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Desarrollo Personal
+                  </Link>
+                  <Link 
+                    to="/blog/category/finanzas-productividad" 
+                    className={clsx(
+                      "text-xs py-1.5 px-2 rounded-md transition-colors",
+                      location.pathname === "/blog/category/finanzas-productividad" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                    )}
+                  >
+                    Finanzas & Productividad
+                  </Link>
+                </div>
+              )}
+            </div>
 
             <Link 
               to="/support" 

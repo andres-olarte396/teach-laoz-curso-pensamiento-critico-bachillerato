@@ -43,7 +43,7 @@ export class LocalFileSystemRepository implements IContentRepository {
     const fullPath = this.resolvePath(relativePath);
     const type = this.detectType(relativePath);
 
-    if (type === ContentType.MARKDOWN) {
+    if (type === ContentType.MARKDOWN || type === ContentType.HTML) {
       return await fs.readFile(fullPath, 'utf8');
     }
 

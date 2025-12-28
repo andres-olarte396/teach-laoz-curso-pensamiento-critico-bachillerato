@@ -18,16 +18,16 @@ export const WelcomePage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tighter"
+        className="text-5xl md:text-6xl font-black text-[var(--text-main)] mb-6 tracking-tighter"
       >
-        Bienvenido a <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">Teach LAOZ</span>
+        Bienvenido a <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent italic">Teach LAOZ</span>
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="text-xl text-slate-400 mb-12 max-w-2xl leading-relaxed"
+        className="text-xl text-[var(--text-muted)] mb-12 max-w-2xl leading-relaxed"
       >
         Tu centro de aprendizaje técnico de alto rendimiento. Explora nuestros cursos interactivos 
         diseñados para dominar las tecnologías más demandadas.
@@ -62,12 +62,12 @@ const FeatureCard: React.FC<{ icon: React.ReactNode, title: string, desc: string
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
-    className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-colors text-left group"
+    className="p-6 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-primary/50 transition-colors text-left group shadow-sm hover:shadow-xl"
   >
-    <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+    <div className="w-12 h-12 rounded-2xl bg-[var(--bg-app)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform border border-[var(--border-color)]">
       {icon}
     </div>
-    <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-    <p className="text-sm text-slate-500 leading-snug">{desc}</p>
+    <h3 className="text-lg font-bold text-[var(--text-main)] mb-2">{title}</h3>
+    <p className="text-sm text-[var(--text-muted)] leading-snug">{desc}</p>
   </motion.div>
 );

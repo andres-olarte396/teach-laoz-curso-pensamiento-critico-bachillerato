@@ -2,23 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { blogService, type BlogPost } from '../../services/blogService';
 import { ContentRenderer } from '../../components/ContentRenderer';
-import { Volume2, Square } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 import { useTts } from '../../hooks/useTts';
 
+import { TtsFloatingControls } from '../../components/TtsFloatingControls';
+
 export const BlogPostPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { '*': slug } = useParams<{ '*': string }>();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
 
   const { 
     isReading, 
     isPaused, 
+    availableVoices,
+    selectedVoiceURI,
     startReading, 
     pauseReading, 
     resumeReading, 
-    stopReading 
+    stopReading,
+    seekForward,
+    seekBackward,
+    setVoice,
+    rate,
+    setRate
   } = useTts({
-    contentSelector: '.blog-content-area' // Specific selector for blog to avoid side navs etc.
+    contentSelector: '.blog-content-area'
   });
 
   // Stop reading when navigating away
@@ -33,6 +42,13 @@ export const BlogPostPage: React.FC = () => {
       try {
         const data = await blogService.getPost(slug);
         setPost(data);
+        
+        // Mark as read in localStorage
+        const readPosts = JSON.parse(localStorage.getItem('laoz_read_posts') || '[]');
+        if (!readPosts.includes(slug)) {
+          readPosts.push(slug);
+          localStorage.setItem('laoz_read_posts', JSON.stringify(readPosts));
+        }
       } catch (error) {
         console.error('Error loading blog post:', error);
       } finally {
@@ -48,10 +64,26 @@ export const BlogPostPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-8">
+      {/* Floating TTS Controls */}
+      <TtsFloatingControls 
+        isReading={isReading}
+        isPaused={isPaused}
+        onPause={pauseReading}
+        onResume={resumeReading}
+        onStop={stopReading}
+        onSeekForward={seekForward}
+        onSeekBackward={seekBackward}
+        availableVoices={availableVoices}
+        selectedVoiceURI={selectedVoiceURI}
+        onVoiceChange={setVoice}
+        rate={rate}
+        onRateChange={setRate}
+      />
+
       <div className="flex justify-between items-center mb-8">
-        <Link to="/blog" className="text-sm text-primary hover:underline">&larr; Back to Blog</Link>
+        <Link to="/blog" className="text-sm text-primary hover:underline">&larr; Volver al Blog</Link>
         
-        {/* TTS Controls */}
+        {/* TTS Toggle Button */}
         <div className="flex items-center gap-2">
             {!isReading ? (
               <button 
@@ -62,35 +94,8 @@ export const BlogPostPage: React.FC = () => {
                 Leer Artículo
               </button>
             ) : (
-                <div className="flex items-center gap-2">
-                  {isPaused ? (
-                    <button 
-                        onClick={resumeReading}
-                        className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500 text-emerald-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20"
-                        title="Reanudar"
-                    >
-                        <Volume2 size={14} />
-                        Reanudar
-                    </button>
-                  ) : (
-                    <button 
-                        onClick={pauseReading}
-                        className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500 text-orange-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-orange-500/20"
-                        title="Pausar"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                        Pausar
-                    </button>
-                  )}
-                  
-                  <button 
-                    onClick={stopReading}
-                    className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500 text-red-500 transition-all text-xs font-bold uppercase tracking-wider hover:bg-red-500/20"
-                    title="Detener"
-                  >
-                    <Square size={14} fill="currentColor" />
-                    Detener
-                  </button>
+                <div className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-emerald-500 animate-pulse bg-emerald-500/5 rounded-xl border border-emerald-500/20">
+                  Escuchando...
                 </div>
             )}
         </div>

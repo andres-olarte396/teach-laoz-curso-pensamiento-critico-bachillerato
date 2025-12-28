@@ -34,42 +34,42 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-      <div className="w-full max-w-md bg-zinc-900 p-8 rounded-xl shadow-2xl border border-zinc-800">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-app)]">
+      <div className="w-full max-w-md bg-[var(--bg-surface)] p-8 rounded-2xl shadow-2xl border border-[var(--border-color)]">
         <div className="flex justify-center mb-8">
           <img src="/logo.svg" alt="Teach LAOZ" className="h-12 w-auto" />
         </div>
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">Login</h2>
-        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded mb-4 text-sm">{error}</div>}
+        <h2 className="text-2xl font-black mb-6 text-center text-[var(--text-main)]">Iniciar Sesión</h2>
+        {error && <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-zinc-400 mb-2 text-sm">Email</label>
+            <label className="block text-[var(--text-muted)] mb-2 text-sm font-bold uppercase tracking-wider">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              placeholder="Enter your email"
+              className="w-full p-4 bg-[var(--bg-app)] border border-[var(--border-color)] rounded-xl text-[var(--text-main)] placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+              placeholder="tu@email.com"
               required
             />
           </div>
           <div className="mb-6">
-            <label className="block text-zinc-400 mb-2 text-sm">Password</label>
+            <label className="block text-[var(--text-muted)] mb-2 text-sm font-bold uppercase tracking-wider">Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-              placeholder="Enter your password"
+              className="w-full p-4 bg-[var(--bg-app)] border border-[var(--border-color)] rounded-xl text-[var(--text-main)] placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+              placeholder="••••••••"
               required
             />
           </div>
-          <button type="submit" className="w-full bg-primary text-white p-3 rounded-lg hover:bg-blue-600 font-semibold transition-colors">
-            Sign In
+          <button type="submit" className="w-full bg-primary text-white p-4 rounded-xl hover:bg-primary/90 font-bold transition-all shadow-lg hover:shadow-primary/30">
+            Entrar
           </button>
         </form>
-        <p className="mt-6 text-center text-zinc-500 text-sm">
-          Don't have an account? <Link to="/register" className="text-primary hover:text-blue-400 hover:underline">Register</Link>
+        <p className="mt-8 text-center text-[var(--text-muted)] text-sm">
+          ¿No tienes cuenta? <Link to="/register" className="text-primary font-bold hover:underline underline-offset-4">Regístrate</Link>
         </p>
       </div>
     </div>

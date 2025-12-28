@@ -4,15 +4,21 @@ import { GetPost } from '../../../application/use-cases/blog/GetPost.js';
 import { FileSystemBlogRepository } from '../../../infrastructure/repositories/FileSystemBlogRepository.js';
 import { UnifiedMarkdownRenderer } from '../../../infrastructure/services/UnifiedMarkdownRenderer.js';
 import path from 'path';
+import fs from 'fs';
 
 export class BlogController {
   private readonly listPosts: ListPosts;
   private readonly getPost: GetPost;
 
   constructor() {
-    // Assuming backend is running from 'backend/' directory
-    // content is at '../content/blog'
-    const blogPath = path.join(process.cwd(), '../content/blog');
+    // Robust path resolution for development: try root and sibling content folders
+    let blogPath = path.resolve('content/blog');
+    
+    // Fallback if running from within backend/ directory
+    if (!fs.existsSync(blogPath)) {
+      blogPath = path.resolve('../content/blog');
+    }
+    
     const repository = new FileSystemBlogRepository(blogPath);
     const renderer = new UnifiedMarkdownRenderer();
     
@@ -25,8 +31,8 @@ export class BlogController {
     return reply.send(posts);
   }
 
-  async get(request: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) {
-    const { slug } = request.params;
+  async get(request: FastifyRequest<{ Params: { '*': string } }>, reply: FastifyReply) {
+    const slug = request.params['*'];
     const post = await this.getPost.execute(slug);
     
     if (!post) {
