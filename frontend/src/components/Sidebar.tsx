@@ -197,37 +197,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                 </Link>
 
                 {/* Course Categories (if not collapsed) */}
-                {!isCollapsed && location.pathname.startsWith("/courses") && (
-                   <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mb-2">
-                      <Link 
-                        to="/courses/category/tecnologia-software" 
-                        className={clsx(
-                          "text-xs py-1.5 px-2 rounded-md transition-colors",
-                          location.pathname === "/courses/category/tecnologia-software" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
-                        )}
-                      >
-                        Tecnología & Software
-                      </Link>
-                      <Link 
-                        to="/courses/category/finanzas-economia" 
-                        className={clsx(
-                          "text-xs py-1.5 px-2 rounded-md transition-colors",
-                          location.pathname === "/courses/category/finanzas-economia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
-                        )}
-                      >
-                        Finanzas & Economía
-                      </Link>
-                      <Link 
-                        to="/courses/category/educacion-pedagogia" 
-                        className={clsx(
-                          "text-xs py-1.5 px-2 rounded-md transition-colors",
-                          location.pathname === "/courses/category/educacion-pedagogia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
-                        )}
-                      >
-                        Educación & Pedagogía
-                      </Link>
-                   </div>
-                )}
+                    <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mb-2">
+                       <Link 
+                         to="/courses/category/tecnologia-software" 
+                         className={clsx(
+                           "text-xs py-1.5 px-2 rounded-md transition-colors",
+                           location.pathname === "/courses/category/tecnologia-software" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                         )}
+                       >
+                         Tecnología & Software
+                       </Link>
+                       <Link 
+                         to="/courses/category/finanzas-economia" 
+                         className={clsx(
+                           "text-xs py-1.5 px-2 rounded-md transition-colors",
+                           location.pathname === "/courses/category/finanzas-economia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                         )}
+                       >
+                         Finanzas & Economía
+                       </Link>
+                       <Link 
+                         to="/courses/category/educacion-soft-skills" 
+                         className={clsx(
+                           "text-xs py-1.5 px-2 rounded-md transition-colors",
+                           location.pathname === "/courses/category/educacion-soft-skills" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                         )}
+                       >
+                         Educación & Soft Skills
+                       </Link>
+                       <Link 
+                         to="/courses/category/datos-analitica" 
+                         className={clsx(
+                           "text-xs py-1.5 px-2 rounded-md transition-colors",
+                           location.pathname === "/courses/category/datos-analitica" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                         )}
+                       >
+                         Datos & Analítica
+                       </Link>
+                    </div>
 
                 {courses.map((course) => (
                   <NavItem key={course.id} item={course} isCollapsed={isCollapsed} />
