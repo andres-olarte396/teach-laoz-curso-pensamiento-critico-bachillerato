@@ -8,37 +8,71 @@ export const DocumentationPage: React.FC = () => {
       title: 'Primeros Pasos',
       icon: <Rocket className="text-emerald-500" />,
       desc: 'Configura tu cuenta y empieza a aprender en minutos.',
-      links: ['Crear una cuenta', 'Navegación básica', 'Tu primer curso']
+      links: [
+        { name: 'Crear una cuenta', id: 'crear-cuenta', cat: 'primeros-pasos' },
+        { name: 'Navegación básica', id: 'navegacion-basica', cat: 'primeros-pasos' },
+        { name: 'Tu primer curso', id: 'tu-primer-curso', cat: 'primeros-pasos' }
+      ]
     },
     {
       title: 'Uso de la Plataforma',
       icon: <Book className="text-blue-500" />,
       desc: 'Domina todas las herramientas de aprendizaje interactivo.',
-      links: ['Controles de video/audio', 'Realizar ejercicios', 'Sistema de notas']
+      links: [
+        { name: 'Controles de video/audio', id: 'controles-multimedia', cat: 'uso-plataforma' },
+        { name: 'Realizar ejercicios', id: 'realizar-ejercicios', cat: 'uso-plataforma' },
+        { name: 'Sistema de notas', id: 'sistema-notas', cat: 'uso-plataforma' }
+      ]
     },
     {
       title: 'Preguntas Frecuentes',
       icon: <HelpCircle className="text-amber-500" />,
       desc: 'Respuestas rápidas a las dudas más comunes.',
-      links: ['Pagos y suscripciones', 'Certificaciones', 'Acceso offline']
+      links: [
+        { name: 'Pagos y suscripciones', id: 'pagos-suscripciones', cat: 'faq' },
+        { name: 'Certificaciones', id: 'certificaciones', cat: 'faq' },
+        { name: 'Acceso offline', id: 'acceso-offline', cat: 'faq' }
+      ]
     },
     {
       title: 'Guías Avanzadas',
       icon: <Code className="text-purple-500" />,
       desc: 'Para aquellos que quieren profundizar en la tecnología.',
-      links: ['API para desarrolladores', 'Integraciones', 'Contribuir al contenido']
+      links: [
+        { name: 'API para desarrolladores', id: 'api-desarrolladores', cat: 'guias-avanzadas' },
+        { name: 'Integraciones', id: 'integraciones', cat: 'guias-avanzadas' },
+        { name: 'Contribuir al contenido', id: 'contribuir', cat: 'guias-avanzadas' }
+      ]
     },
     {
       title: 'Privacidad y Seguridad',
       icon: <Shield className="text-rose-500" />,
       desc: 'Cómo protegemos tus datos y tu privacidad.',
-      links: ['Política de datos', 'Seguridad de cuenta', 'GDPR']
+      links: [
+        { name: 'Política de datos', id: 'politica-datos', cat: 'privacidad' },
+        { name: 'Seguridad de cuenta', id: 'seguridad-cuenta', cat: 'privacidad' },
+        { name: 'GDPR', id: 'gdpr', cat: 'privacidad' }
+      ]
     },
     {
       title: 'Comunidad',
       icon: <MessageSquare className="text-cyan-500" />,
       desc: 'Conéctate con otros estudiantes y profesores.',
-      links: ['Foros de discusión', 'Grupos de estudio', 'Eventos en vivo']
+      links: [
+        { name: 'Foros de discusión', id: 'foros', cat: 'comunidad' },
+        { name: 'Grupos de estudio', id: 'grupos-estudio', cat: 'comunidad' },
+        { name: 'Eventos en vivo', id: 'eventos-vivo', cat: 'comunidad' }
+      ]
+    },
+    {
+      title: 'Administración de Cursos',
+      icon: <Book className="text-primary" />,
+      desc: 'Guías para profesores y administradores sobre gestión de contenido.',
+      links: [
+        { name: 'Carga de Cursos', id: 'carga-de-cursos', cat: 'administracion' },
+        { name: 'Categorización', id: 'categorizacion', cat: 'administracion' },
+        { name: 'Actualización de Cursos', id: 'actualizacion-de-cursos', cat: 'administracion' }
+      ]
     }
   ];
 
@@ -76,10 +110,10 @@ export const DocumentationPage: React.FC = () => {
             
             <ul className="space-y-3">
               {cat.links.map(link => (
-                <li key={link}>
-                  <a href="#" className="text-sm text-primary hover:underline flex items-center gap-2 font-medium">
+                <li key={link.id}>
+                  <a href={`/documentation/${link.cat}/${link.id}`} className="text-sm text-primary hover:underline flex items-center gap-2 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
-                    {link}
+                    {link.name}
                   </a>
                 </li>
               ))}

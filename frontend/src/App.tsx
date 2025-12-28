@@ -28,6 +28,7 @@ import { CertificationsPage } from './pages/CertificationsPage';
 import { DocumentationPage } from './pages/DocumentationPage';
 import { SupportPage } from './pages/SupportPage';
 import { TermsPage } from './pages/TermsPage';
+import { DocViewerPage } from './pages/DocViewerPage';
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
 
               {/* New Resource Routes */}
               <Route path="/documentation" element={<DocumentationPage />} />
+              <Route path="/documentation/:category/:docId" element={<DocViewerPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/terms" element={<TermsPage />} />
 
