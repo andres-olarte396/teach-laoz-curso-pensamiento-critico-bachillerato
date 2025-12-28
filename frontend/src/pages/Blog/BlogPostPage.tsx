@@ -127,7 +127,7 @@ export const BlogPostPage: React.FC = () => {
       </article>
       
       <div className="mt-12 pt-8 border-t border-[var(--border-color)]">
-         <Link to="/blog" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Browse more articles</Link>
+         <Link to="/blog" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Buscar más artículos</Link>
       </div>
     </div>
   );

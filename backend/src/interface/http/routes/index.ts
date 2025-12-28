@@ -7,6 +7,9 @@ export async function contentRoutes(app: FastifyInstance) {
   const controller = new ContentController();
   const docController = new DocController();
 
+  // Test Route
+  app.get('/ping', async () => ({ status: 'ok', message: 'pong', timestamp: new Date().toISOString() }));
+
   // Documentation Route
   console.log('[Routes] Registering /docs/:category/:docId');
   app.get('/docs/:category/:docId', {
