@@ -60,6 +60,39 @@ export async function contentRoutes(app: FastifyInstance) {
     },
   }, controller.getMenu.bind(controller));
 
+  // Courses List with Metadata
+  app.get('/courses', {
+    schema: {
+      tags: ['Content'],
+      summary: 'Get course list with full metadata',
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            courses: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  title: { type: 'string' },
+                  summary: { type: 'string' },
+                  author: { type: 'string' },
+                  date: { type: 'string' },
+                  tags: { type: 'array', items: { type: 'string' } },
+                  category: { type: 'string' },
+                  level: { type: 'string' },
+                  imageUrl: { type: 'string' },
+                  published: { type: 'boolean' }
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, controller.listCourses.bind(controller));
+
   // Content Schema
   app.get('/content/*', {
     schema: {

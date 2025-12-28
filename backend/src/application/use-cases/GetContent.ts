@@ -18,9 +18,16 @@ export class GetContent {
 
     const isDirectory = await this.contentRepository.isDirectory(pathStr);
     if (isDirectory) {
-      // In Clean Architecture, GetContent usually refers to a file. 
-      // For directories, ListContent should be used.
-      // However, we can return some metadata if needed.
+      // Auto-resolve directory to index file
+      const indexFiles = ['INDICE.md', 'index.md', 'README.md'];
+      for (const indexFile of indexFiles) {
+        const indexPath = `${pathStr}/${indexFile}`.replace(/\/+/g, '/');
+        if (await this.contentRepository.exists(indexPath)) {
+          return this.execute(indexPath);
+        }
+      }
+      
+      // If no index file, fallback to ListContent behavior (throwing for ContentController to catch)
       throw new Error('Use ListContent for directories');
     }
 

@@ -5,12 +5,16 @@ import { RenderMarkdown } from '../../../application/use-cases/RenderMarkdown.js
 import { GenerateMenu } from '../../../application/use-cases/GenerateMenu.js';
 import { LocalFileSystemRepository } from '../../../infrastructure/repositories/LocalFileSystemRepository.js';
 import { UnifiedMarkdownRenderer } from '../../../infrastructure/services/UnifiedMarkdownRenderer.js';
+import { FileSystemCourseRepository } from '../../../infrastructure/repositories/FileSystemCourseRepository.js';
+import { env } from '../../../infrastructure/config/environment.js';
+import path from 'path';
 
 export class ContentController {
   private readonly listContent: ListContent;
   private readonly getContent: GetContent;
   private readonly renderMarkdown: RenderMarkdown;
   private readonly generateMenu: GenerateMenu;
+  private readonly courseRepository: FileSystemCourseRepository;
 
   constructor() {
     // Dependency Injection (Manually for now, could use a container later)
@@ -21,11 +25,19 @@ export class ContentController {
     this.getContent = new GetContent(repository);
     this.renderMarkdown = new RenderMarkdown(this.getContent, markdownRenderer);
     this.generateMenu = new GenerateMenu(repository);
+    
+    // The CONTENT_BASE_PATH is usually ./content/courses
+    this.courseRepository = new FileSystemCourseRepository(path.resolve(env.CONTENT_BASE_PATH));
   }
 
   async getMenu(_request: FastifyRequest, reply: FastifyReply) {
     const menu = await this.generateMenu.execute();
     return reply.send(menu);
+  }
+
+  async listCourses(_request: FastifyRequest, reply: FastifyReply) {
+    const courses = await this.courseRepository.listAll();
+    return reply.send({ courses });
   }
 
   async getContentByPath(request: FastifyRequest<{ Params: { '*': string } }>, reply: FastifyReply) {
