@@ -1,5 +1,3 @@
-
-
 # Listado de Repositorios de Cursos
 
 Agrega los cursos en el formato: `- [Nombre del Curso](URL_DEL_GIT_REPO)`
@@ -34,3 +32,5 @@ Agrega los cursos en el formato: `- [Nombre del Curso](URL_DEL_GIT_REPO)`
 - [Curso de Modelo Organizacional](https://github.com/andres-olarte396/lab-laoz-devops-team.git)
 - [DevOps Learning Path](https://github.com/andres-olarte396/devops-laoz-learning-path.git)
 - [Curso de Arquitectura de Software Moderna](https://github.com/andres-olarte396/teach-laoz-curso_modelos_organizacionales.git)
+- [Power BI para Talento Humano, SST, HSCQ y Contabilidad](https://github.com/andres-olarte396/teach-laoz-curso-power-bi-integral.git)
+- [Trading e Inversiones para Ingenieros](https://github.com/andres-olarte396/teach-laoz-curso-trading-ingenieros.git)
