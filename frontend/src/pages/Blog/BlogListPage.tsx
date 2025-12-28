@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { blogService, type BlogPost } from '../../services/blogService';
 import { Link, useParams } from 'react-router-dom';
-<<<<<<< HEAD
 import { CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-=======
-import { CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
->>>>>>> 7f4e011 (feat(frontend): mejoras en componentes, estilos y nuevas páginas para cursos)
 
 export const BlogListPage: React.FC = () => {
   const { category } = useParams<{ category?: string }>();
@@ -39,14 +35,6 @@ export const BlogListPage: React.FC = () => {
     fetchPosts();
   }, []);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    let result = posts;
-    
-    // Filter by category
-    if (category) {
-      result = posts.filter(post => 
-=======
   // Reset page when category or search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -90,37 +78,11 @@ export const BlogListPage: React.FC = () => {
       }
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
-
-    setFilteredPosts(result);
-  }, [category, posts, readPosts, searchQuery]);
-    // 3. Sort: Unread first, then Read. Within each group, most recent first.
-    result.sort((a, b) => {
->>>>>>> 7f4e011 (feat(frontend): mejoras en componentes, estilos y nuevas páginas para cursos)
-      const isARead = readPosts.includes(a.slug);
-      const isBRead = readPosts.includes(b.slug);
-
-      if (isARead !== isBRead) {
-<<<<<<< HEAD
-        return isARead ? 1 : -1; // Read goes to the end
-      }
-
-      // If both same status, use date (backend already returns them mostly sorted by date, but good to be sure)
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
-    setFilteredPosts(sorted);
-  }, [category, posts, readPosts]);
-=======
-        return isARead ? 1 : -1;
-      }
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-
     setFilteredPosts(result);
   }, [category, posts, readPosts, searchQuery]);
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPosts.length / (itemsPerPage || 1));
   const currentItems = filteredPosts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -128,9 +90,12 @@ export const BlogListPage: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (listTopRef.current) {
+        listTopRef.current.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
->>>>>>> 7f4e011 (feat(frontend): mejoras en componentes, estilos y nuevas páginas para cursos)
 
   const getPageTitle = () => {
     if (!category) return "Blog & Updates";
@@ -138,62 +103,10 @@ export const BlogListPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-400">Loading blog...</div>;
+    return <div className="p-8 text-center text-slate-400">Cargando blog...</div>;
   }
 
   return (
-<<<<<<< HEAD
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-3xl font-bold text-[var(--text-main)] mb-8">
-        {getPageTitle()}
-      </h1>
-      
-      <div className="grid gap-6">
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => {
-            const isRead = readPosts.includes(post.slug);
-            return (
-              <Link 
-                key={post.slug} 
-                to={`/blog/article/${post.slug}`}
-                className={`block p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-[var(--color-primary)] transition-all group shadow-sm hover:shadow-md ${isRead ? 'opacity-70' : ''}`}
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-semibold text-[var(--text-main)] group-hover:text-[var(--color-primary)] transition-colors">
-                      {post.title}
-                    </h2>
-                    {isRead && (
-                      <div className="flex items-center gap-1 text-emerald-500 font-bold text-[10px] uppercase tracking-wider bg-emerald-500/10 px-2 py-1 rounded-md">
-                        <CheckCircle size={12} />
-                        Leído
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-2">
-                    <span>{new Date(post.date).toLocaleDateString()}</span>
-                    <span>by {post.author}</span>
-                  </div>
-                  <p className="text-[var(--text-muted)] line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  {post.tags.length > 0 && (
-                    <div className="flex gap-2 mt-2">
-                      {post.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] text-[10px] uppercase tracking-wide">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            );
-          })
-        ) : (
-          <div className="p-8 text-center text-slate-500 border border-dashed border-[var(--border-color)] rounded-xl">
-            No se encontraron artículos en esta categoría.
-=======
     <div className="max-w-4xl mx-auto py-8 px-4" ref={listTopRef}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <h1 className="text-3xl font-bold text-[var(--text-main)]">
@@ -303,7 +216,6 @@ export const BlogListPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-semibold text-[var(--text-main)] mb-1">No se encontraron artículos</h3>
             <p className="text-sm">Prueba con otros términos o cambia de categoría.</p>
->>>>>>> 7f4e011 (feat(frontend): mejoras en componentes, estilos y nuevas páginas para cursos)
           </div>
         )}
       </div>
