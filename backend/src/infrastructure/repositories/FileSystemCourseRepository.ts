@@ -46,7 +46,7 @@ export class FileSystemCourseRepository {
   }
 
   private async getCourseMetadata(coursePath: string, courseId: string): Promise<Course | null> {
-    const commonNames = ['INDICE.md', 'index.md'];
+    const commonNames = ['INDICE.md', 'index.md', 'README.md'];
     
     for (const name of commonNames) {
       const filePath = path.join(coursePath, name);
