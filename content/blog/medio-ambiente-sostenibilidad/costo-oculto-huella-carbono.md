@@ -1,8 +1,8 @@
 ---
-title: "El Costo Oculto de tu Rutina: Tu Huella de Carbono"
-date: '2025-12-27'
+title: "El Impacto Invisible de tu día: Qué es la Huella de Carbono"
+date: "2025-12-27"
 author: Andres Olarte
-excerpt: "Tres hábitos cotidianos y una verdad esencial para entender y reducir tu huella de carbono personal."
+excerpt: "Incluso enviar un correo o cargar el celular deja un rastro en el planeta. Aprende cómo pequeños cambios reducen tu impacto."
 tags:
   - Medio Ambiente
   - Sostenibilidad
@@ -10,47 +10,47 @@ tags:
 published: true
 ---
 
-Cargar el celular o revisar un correo electrónico parece inofensivo, pero cada una de estas acciones tiene un impacto medible en el planeta. La **huella de carbono** no es solo cosa de grandes industrias; es el resultado acumulado de nuestras decisiones diarias.
+Acciones que parecen inofensivas, como revisar el celular o enviar un mensaje, tienen un impacto que podemos medir. A ese rastro de contaminación que dejamos lo llamamos **huella de carbono**. Y aunque parezca que solo las grandes fábricas contaminan, lo cierto es que nuestras decisiones diarias también importan.
 
-Aquí te revelamos tres hábitos que quizás estés pasando por alto.
-
----
-
-## 1. El Cargador "Fantasma"
-
-Dejar el cargador conectado sin el teléfono saca energía de la red constantemente. Este descuido genera aproximadamente **0.5 kg de CO2 al mes**. Multiplicado por millones, se convierte en una fuga energética masiva a nivel global.
+Aquí te mostramos tres hábitos que quizás no sabías que afectan al planeta.
 
 ---
 
-## 2. La Contaminación Digital
+## 1. El cargador "fantasma" que gasta energía
 
-Cada correo electrónico se almacena en servidores masivos que requieren energía constante para refrigeración.
-
-- Al borrar **50 correos diarios**, puedes reducir tu huella digital en **200 gramos**.
-- La "higiene digital" es la nueva frontera de la sostenibilidad.
+¿Alguna vez has dejado el cargador conectado a la pared sin el celular? Aunque no esté cargando nada, sigue consumiendo un poquito de luz. Este pequeño descuido multiplicado por millones de personas genera una cantidad enorme de contaminación al año. Desconectarlo cuando no lo usas es un gesto simple pero poderoso.
 
 ---
 
-## 3. El Dilema del Desplazamiento
+## 2. La contaminación invisible de tus correos
 
-Tu viaje diario al trabajo es el factor más determinante. Compara las emisiones anuales para un trayecto de 19 km:
+Cada vez que guardas un correo o una foto en "la nube", esa información está en grandes edificios llenos de computadoras (**servidores**) que necesitan mucha electricidad para funcionar y mantenerse fríos.
 
-| Medio de Transporte    | CO2 Anual (aprox.) | Árbitros necesarios para absorberlo |
-| ---------------------- | ------------------ | ----------------------------------- |
-| **Automóvil**          | 2,635 kg           | 121 árboles                         |
-| **Motocicleta**        | 1,664 kg           | 76 árboles                          |
-| **Transporte Público** | 860 kg             | 39 árboles                          |
+- Si borras **50 correos viejos al día**, estás ayudando a que esas computadoras trabajen menos.
+- Mantener tu correo y archivos limpios es una forma moderna y efectiva de cuidar el ambiente.
 
 ---
 
-## 4. La Verdad: Más allá del CO2
+## 3. ¿Cómo te mueves por la ciudad?
 
-No todos los gases son iguales. Existen contaminantes como el **Hexafluoruro de Azufre (SF6)** que tienen un potencial de calentamiento **23,500 veces mayor** que el CO2. Una pequeña fuga industrial puede ser más dañina que cientos de vehículos.
+El transporte es lo que más marca tu huella de carbono. Mira cuántos árboles se necesitan para limpiar el aire por cada tipo de transporte en un año:
+
+- **En carro propio**: Se necesitan 121 árboles.
+- **En moto**: Se necesitan 76 árboles.
+- **En bus o metro**: Se necesitan 39 árboles.
+
+Compartir el transporte o usar el bus ayuda muchísimo a que el aire sea más puro.
 
 ---
 
-## Conclusión: Decisiones para hoy
+## 4. No todos los gases contaminan igual
 
-Aunque el desafío parece inmenso, la conciencia es el motor del cambio. Cada decisión cuenta para transformar un modelo que hemos construido durante siglos en apenas tres décadas.
+Aunque hablamos mucho del CO2 (el gas que sale de los carros), hay otros gases mucho más potentes. Por ejemplo, hay gases usados en la industria que calientan la tierra **miles de veces más** que el CO2. Por eso, además de nuestros hábitos, debemos exigir que las empresas controlen sus fugas de gases peligrosos.
 
-**¿Cuál de estos datos te sorprendió más hoy?**
+---
+
+## Conclusión: Tu decisión cuenta
+
+Aunque el problema del cambio climático parece muy grande, empieza en la suma de lo que todos hacemos. Cada vez que apagas una luz o borras un archivo innecesario, estás ayudando a construir un futuro más limpio.
+
+**¿Qué cambio pequeño vas a intentar hoy?**

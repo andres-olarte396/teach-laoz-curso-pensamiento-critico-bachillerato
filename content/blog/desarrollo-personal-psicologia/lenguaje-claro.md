@@ -1,8 +1,8 @@
 ---
-title: "Manual de Lenguaje Claro: Escribe para ser Entendido"
-date: '2025-12-27'
+title: "Escribe para ser Entendido: El Poder del Lenguaje Claro"
+date: "2025-12-27"
 author: Andres Olarte
-excerpt: "Una guía práctica sobre por qué la claridad no es solo una opción, sino una responsabilidad institucional y personal."
+excerpt: "Descubre por qué escribir de forma sencilla es una de las habilidades más valiosas para conectar con los demás."
 tags:
   - Comunicación
   - Habilidades Blandas
@@ -10,40 +10,40 @@ tags:
 published: true
 ---
 
-¿Alguna vez has sentido que un contrato u oficio es un misterio indescifrable? La opacidad del lenguaje es la primera barrera que impide a las personas navegar el sistema.
+¿Alguna vez has leído un contrato o un documento oficial y has sentido que estaba escrito en otro idioma? A menudo, las palabras complicadas actúan como muros que nos impiden entender la información importante.
 
-El **lenguaje claro** es una técnica sofisticada para simplificar la interacción humana y garantizar derechos.
-
----
-
-## 1. Un Derecho, No una Cortesía
-
-Hablar claro es fundamental para fortalecer la confianza entre el Estado y los ciudadanos. No es un gesto amable, es una **responsabilidad democrática**.
+El **Lenguaje Claro** es una técnica que busca derribar esos muros, haciendo que la comunicación sea sencilla de entender para todos a la primera lectura.
 
 ---
 
-## 2. Empatía en la Escritura
+## 1. Un Derecho, No un Favor
 
-Antes de redactar, debemos considerar los sentimientos del lector. ¿Siente ansiedad o frustración? Escribir con claridad es un **acto de empatía** que busca reducir la fricción emocional.
-
----
-
-## 3. El Objetivo: Comprensión e Inclusión
-
-La comunicación moderna busca tres dimensiones:
-
-- **Clara**: Gramática sencilla y directa.
-- **Comprensible**: Contextualizada a la realidad del lector.
-- **Incluyente**: Respetuosa con la diversidad cultural y de género.
+Hablar y escribir de forma clara es fundamental para generar confianza. Cuando un ciudadano entiende un mensaje, se siente respetado. No es un gesto de cortesía; es una **responsabilidad** de cualquier persona o institución que quiera ser transparente y confiable.
 
 ---
 
-## 4. Probando la Efectividad
+## 2. Empatía al Escribir
 
-No necesitas grandes estudios. Validar tu texto con **7 personas reales** te dará el 80% de los aprendizajes necesarios para mejorar la comprensión.
+Antes de empezar a escribir, piensa en quién va a leer tu texto. ¿Esa persona tiene prisa? ¿Está preocupada? Escribir con claridad es un **acto de empatía**: te pones en los zapatos del otro para evitarle confusiones y ahorrarle tiempo.
+
+---
+
+## 3. Las Tres Dimensiones de la Claridad
+
+Para que un mensaje realmente llegue a su destino, debe ser:
+
+- **Claro**: Con un orden lógico y palabras que todos conocemos.
+- **Comprensible**: Que use ejemplos que tengan sentido en la vida real del lector.
+- **Incluyente**: Que respete a todas las personas, sin importar su origen o género.
+
+---
+
+## 4. La Prueba de los Siete
+
+No necesitas ser un experto para saber si tu texto funciona. Haz una prueba sencilla: pídele a **7 personas** comunes que lean tu escrito. Sus comentarios te darán la clave para descubrir qué partes son confusas y cómo puedes mejorarlas.
 
 ---
 
 ## Conclusión
 
-Adoptar el lenguaje claro transforma tu relación con tu audiencia, pasando de ser un transmisor de datos a un **constructor de puentes**.
+Adoptar el Lenguaje Claro te ayuda a dejar de ser alguien que simplemente "suelta información" para convertirte en un **constructor de puentes**. Cuando comunicas con sencillez, permites que los demás se acerquen a tus ideas.
