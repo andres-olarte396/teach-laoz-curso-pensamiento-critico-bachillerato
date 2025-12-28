@@ -355,11 +355,11 @@ export const CoursePage: React.FC = () => {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
                 <Calendar size={14} className="text-slate-600" />
-                <span>Actualizado: {content.metadata.lastModified ? new Date(content.metadata.lastModified).toLocaleDateString() : 'Pendiente'}</span>
+                <span>Actualizado: {content.metadata?.lastModified ? new Date(content.metadata.lastModified).toLocaleDateString() : 'Pendiente'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <HardDrive size={14} className="text-slate-600" />
-                <span>Tamaño: {formatSize(content.metadata.size)}</span>
+                <span>Tamaño: {formatSize(content.metadata?.size || 0)}</span>
               </div>
             </div>
             

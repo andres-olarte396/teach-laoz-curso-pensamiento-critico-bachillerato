@@ -1,21 +1,110 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Book } from 'lucide-react';
+import { Book, Rocket, HelpCircle, Code, Shield, MessageSquare, Newspaper } from 'lucide-react';
 
 export const DocumentationPage: React.FC = () => {
+  const categories = [
+    {
+      title: 'Primeros Pasos',
+      icon: <Rocket className="text-emerald-500" />,
+      desc: 'Configura tu cuenta y empieza a aprender en minutos.',
+      links: ['Crear una cuenta', 'Navegación básica', 'Tu primer curso']
+    },
+    {
+      title: 'Uso de la Plataforma',
+      icon: <Book className="text-blue-500" />,
+      desc: 'Domina todas las herramientas de aprendizaje interactivo.',
+      links: ['Controles de video/audio', 'Realizar ejercicios', 'Sistema de notas']
+    },
+    {
+      title: 'Preguntas Frecuentes',
+      icon: <HelpCircle className="text-amber-500" />,
+      desc: 'Respuestas rápidas a las dudas más comunes.',
+      links: ['Pagos y suscripciones', 'Certificaciones', 'Acceso offline']
+    },
+    {
+      title: 'Guías Avanzadas',
+      icon: <Code className="text-purple-500" />,
+      desc: 'Para aquellos que quieren profundizar en la tecnología.',
+      links: ['API para desarrolladores', 'Integraciones', 'Contribuir al contenido']
+    },
+    {
+      title: 'Privacidad y Seguridad',
+      icon: <Shield className="text-rose-500" />,
+      desc: 'Cómo protegemos tus datos y tu privacidad.',
+      links: ['Política de datos', 'Seguridad de cuenta', 'GDPR']
+    },
+    {
+      title: 'Comunidad',
+      icon: <MessageSquare className="text-cyan-500" />,
+      desc: 'Conéctate con otros estudiantes y profesores.',
+      links: ['Foros de discusión', 'Grupos de estudio', 'Eventos en vivo']
+    }
+  ];
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto pb-20 text-center"
-    >
-      <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 text-primary">
-        <Book size={40} />
+    <div className="max-w-6xl mx-auto py-12 px-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-16"
+      >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-4">
+          < Newspaper size={14} />
+          <span>Knowledge Base</span>
+        </div>
+        <h1 className="text-5xl font-black text-[var(--text-main)] mb-6 tracking-tight">Centro de Documentación</h1>
+        <p className="text-[var(--text-muted)] text-xl max-w-2xl mx-auto leading-relaxed">
+          Todo lo que necesitas saber para aprovechar al máximo tu experiencia en Teach LAOZ.
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {categories.map((cat, idx) => (
+          <motion.div
+            key={cat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className="p-8 rounded-3xl bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-primary/50 transition-all group shadow-sm hover:shadow-xl"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[var(--bg-app)] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-[var(--border-color)] shadow-inner">
+              {cat.icon}
+            </div>
+            <h3 className="text-xl font-bold text-[var(--text-main)] mb-3">{cat.title}</h3>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-6">{cat.desc}</p>
+            
+            <ul className="space-y-3">
+              {cat.links.map(link => (
+                <li key={link}>
+                  <a href="#" className="text-sm text-primary hover:underline flex items-center gap-2 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/30" />
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ))}
       </div>
-      <h1 className="text-4xl font-black text-white mb-4 tracking-tight">Documentación</h1>
-      <p className="text-slate-400 text-lg">
-        Manuales y guías de referencia estarán disponibles aquí.
-      </p>
-    </motion.div>
+
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="mt-20 p-10 rounded-[3rem] bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/10 text-center"
+      >
+        <h3 className="text-2xl font-bold text-[var(--text-main)] mb-4">¿No encuentras lo que buscas?</h3>
+        <p className="text-[var(--text-muted)] mb-8">Nuestro equipo de soporte está disponible las 24 horas para ayudarte.</p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a href="/support" className="px-8 py-3 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+            Ir a Soporte
+          </a>
+          <a href="/contact" className="px-8 py-3 bg-[var(--bg-surface)] border border-[var(--border-color)] text-[var(--text-main)] rounded-2xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+            Contactar ahora
+          </a>
+        </div>
+      </motion.div>
+    </div>
   );
 };

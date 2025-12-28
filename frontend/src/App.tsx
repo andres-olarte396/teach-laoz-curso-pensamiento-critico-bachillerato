@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { BlogListPage } from './pages/Blog/BlogListPage';
 import { BlogPostPage } from './pages/Blog/BlogPostPage';
+import { CourseListPage } from './pages/CourseListPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ProtectedRoute = () => {
@@ -45,7 +46,10 @@ function App() {
               <Route path="/blog" element={<BlogListPage />} />
               <Route path="/blog/category/:category" element={<BlogListPage />} />
               <Route path="/blog/article/*" element={<BlogPostPage />} />
-              
+
+              {/* Courses Explorer */}
+              <Route path="/courses" element={<CourseListPage />} />
+              <Route path="/courses/category/:category" element={<CourseListPage />} />
               {/* Contact Route */}
               <Route path="/contact" element={<ContactPage />} />
 

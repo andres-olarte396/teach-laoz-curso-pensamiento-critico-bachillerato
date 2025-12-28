@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -181,6 +181,52 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                   <div className="px-3 py-2 text-xs text-red-400 bg-red-400/10 rounded-lg">
                     Error al cargar cursos.
                   </div>
+                )}
+
+                {/* Explorar Cursos Link */}
+                <Link 
+                  to="/courses" 
+                  className={clsx(
+                    "flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 transition-all font-medium mb-1",
+                    location.pathname.startsWith("/courses") ? "text-primary bg-slate-900" : "text-slate-400 hover:text-white"
+                  )}
+                  title="Explorar todos los cursos"
+                >
+                  <span className="w-4 h-4 flex items-center justify-center"><Search size={14} /></span>
+                  {!isCollapsed && <span>Explorar Cursos</span>}
+                </Link>
+
+                {/* Course Categories (if not collapsed) */}
+                {!isCollapsed && location.pathname.startsWith("/courses") && (
+                   <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mb-2">
+                      <Link 
+                        to="/courses/category/tecnologia-software" 
+                        className={clsx(
+                          "text-xs py-1.5 px-2 rounded-md transition-colors",
+                          location.pathname === "/courses/category/tecnologia-software" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                        )}
+                      >
+                        Tecnología & Software
+                      </Link>
+                      <Link 
+                        to="/courses/category/finanzas-economia" 
+                        className={clsx(
+                          "text-xs py-1.5 px-2 rounded-md transition-colors",
+                          location.pathname === "/courses/category/finanzas-economia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                        )}
+                      >
+                        Finanzas & Economía
+                      </Link>
+                      <Link 
+                        to="/courses/category/educacion-pedagogia" 
+                        className={clsx(
+                          "text-xs py-1.5 px-2 rounded-md transition-colors",
+                          location.pathname === "/courses/category/educacion-pedagogia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                        )}
+                      >
+                        Educación & Pedagogía
+                      </Link>
+                   </div>
                 )}
 
                 {courses.map((course) => (
