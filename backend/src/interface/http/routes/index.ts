@@ -1,11 +1,28 @@
 import { FastifyInstance } from 'fastify';
 import { ContentController } from '../controllers/ContentController.js';
-
 import { ContactController } from '../controllers/ContactController.js';
+import { DocController } from '../controllers/DocController.js';
 
 export async function contentRoutes(app: FastifyInstance) {
   const controller = new ContentController();
-  
+  const docController = new DocController();
+
+  // Documentation Route
+  console.log('[Routes] Registering /docs/:category/:docId');
+  app.get('/docs/:category/:docId', {
+    schema: {
+      tags: ['Documentation'],
+      summary: 'Get documentation article',
+      params: {
+        type: 'object',
+        properties: {
+          category: { type: 'string' },
+          docId: { type: 'string' }
+        }
+      }
+    }
+  }, docController.getDoc.bind(docController));
+
   // Contact Route
   app.post('/contact', {
     schema: {
