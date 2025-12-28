@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { courseService, type Course } from '../services/courseService';
 import { Link, useParams } from 'react-router-dom';
-import { Search, ChevronLeft, ChevronRight, GraduationCap, Clock, BookOpen } from 'lucide-react';
+import { Search, GraduationCap, Clock } from 'lucide-react';
+import { getCategoryIcon } from '../components/CategoryIcons';
 
 export const CourseListPage: React.FC = () => {
   const { category } = useParams<{ category?: string }>();
@@ -9,10 +10,8 @@ export const CourseListPage: React.FC = () => {
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Search and Pagination states
+  // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -29,10 +28,18 @@ export const CourseListPage: React.FC = () => {
     fetchCourses();
   }, []);
 
-  // Reset page when category or search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [category, searchQuery]);
+  // Helper function to normalize strings for comparison (remove accents, symbols, etc)
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD') // Split accents from letters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[&]/g, '') // Remove &
+      .replace(/[^a-z0-9\s-]/g, '') // Remove other special chars
+      .trim()
+      .replace(/\s+/g, '-') // Replace spaces with -
+      .replace(/-+/g, '-'); // Collapse multiple hyphens
+  };
 
   // Combined logic for Filtering and Sorting
   useEffect(() => {
@@ -41,7 +48,7 @@ export const CourseListPage: React.FC = () => {
     // 1. Filter by category
     if (category) {
       result = result.filter(course => 
-        course.category.toLowerCase().replace(/\s+/g, '-') === category.toLowerCase()
+        slugify(course.category) === category.toLowerCase()
       );
     }
 
@@ -61,17 +68,16 @@ export const CourseListPage: React.FC = () => {
     setFilteredCourses(result);
   }, [category, courses, searchQuery]);
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
-  const currentItems = filteredCourses.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Grouping logic
+  const groupedCourses = useMemo(() => {
+    const groups: Record<string, Course[]> = {};
+    filteredCourses.forEach(course => {
+      const cat = course.category || 'General';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(course);
+    });
+    return groups;
+  }, [filteredCourses]);
 
   const getPageTitle = () => {
     if (!category) return "Explorar Cursos";
@@ -97,8 +103,8 @@ export const CourseListPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-6">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+    <div className="max-w-6xl mx-auto py-12 px-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-[0.2em]">
             <GraduationCap size={16} />
@@ -122,91 +128,70 @@ export const CourseListPage: React.FC = () => {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {currentItems.length > 0 ? (
-          <>
-            {currentItems.map((course) => (
-              <Link 
-                key={course.id} 
-                to={`/course/${course.id}`}
-                className="flex flex-col h-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl overflow-hidden hover:border-primary/50 transition-all group shadow-sm hover:shadow-2xl hover:-translate-y-1"
-              >
-                {/* Course Thumbnail placeholder/simulated */}
-                <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden flex items-center justify-center">
-                   <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-                   <BookOpen size={48} className="text-white/20 group-hover:scale-110 transition-transform duration-500" />
-                   <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getLevelColor(course.level)} backdrop-blur-md`}>
-                     {course.level}
-                   </div>
+      <div className="space-y-16">
+        {Object.keys(groupedCourses).length > 0 ? (
+          Object.entries(groupedCourses).map(([catName, coursesInCategory]) => {
+            const Icon = getCategoryIcon(catName);
+            return (
+              <section key={catName} className="space-y-8">
+                <div className="flex items-center gap-4 pb-2 border-b border-[var(--border-color)]">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Icon size={20} />
+                  </div>
+                  <h2 className="text-2xl font-black text-[var(--text-main)] tracking-tight">{catName}</h2>
+                  <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase">
+                    {coursesInCategory.length} {coursesInCategory.length === 1 ? 'Curso' : 'Cursos'}
+                  </span>
                 </div>
 
-                <div className="p-6 flex flex-col flex-1 gap-4">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{course.category}</span>
-                    <h2 className="text-xl font-bold text-[var(--text-main)] group-hover:text-primary transition-colors leading-tight line-clamp-2">
-                      {course.title}
-                    </h2>
-                  </div>
-                  
-                  <p className="text-sm text-[var(--text-muted)] line-clamp-3 leading-relaxed flex-1">
-                    {course.summary}
-                  </p>
-
-                  <div className="pt-4 border-t border-[var(--border-color)] flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                       <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                         {course.author.charAt(0)}
-                       </div>
-                       <span className="text-[10px] font-medium">{course.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[var(--text-muted)] text-[10px]">
-                      <Clock size={12} />
-                      <span>{new Date(course.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="col-span-full flex items-center justify-center gap-3 mt-12 py-6">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="p-3 rounded-2xl border border-[var(--border-color)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-90"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                
-                <div className="flex gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`w-12 h-12 rounded-2xl font-bold transition-all active:scale-90 ${
-                        currentPage === page 
-                        ? 'bg-primary text-white shadow-xl shadow-primary/30 scale-110' 
-                        : 'border border-[var(--border-color)] hover:bg-slate-100 dark:hover:bg-slate-800'
-                      }`}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {coursesInCategory.map((course) => (
+                    <Link 
+                      key={course.id} 
+                      to={`/course/${course.id}`}
+                      className="flex flex-col h-full bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl overflow-hidden hover:border-primary/50 transition-all group shadow-sm hover:shadow-2xl hover:-translate-y-1"
                     >
-                      {page}
-                    </button>
+                      <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden flex items-center justify-center">
+                         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+                         <Icon size={48} className="text-white/20 group-hover:scale-110 transition-transform duration-500" />
+                         <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getLevelColor(course.level)} backdrop-blur-md`}>
+                           {course.level}
+                         </div>
+                      </div>
+
+                      <div className="p-6 flex flex-col flex-1 gap-4">
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{course.category}</span>
+                          <h2 className="text-xl font-bold text-[var(--text-main)] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                            {course.title}
+                          </h2>
+                        </div>
+                        
+                        <p className="text-sm text-[var(--text-muted)] line-clamp-3 leading-relaxed flex-1">
+                          {course.summary}
+                        </p>
+
+                        <div className="pt-4 border-t border-[var(--border-color)] flex items-center justify-between mt-auto">
+                          <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                               {course.author.charAt(0)}
+                             </div>
+                             <span className="text-[10px] font-medium">{course.author}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[var(--text-muted)] text-[10px]">
+                            <Clock size={12} />
+                            <span>{new Date(course.date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="p-3 rounded-2xl border border-[var(--border-color)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-90"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            )}
-          </>
+              </section>
+            );
+          })
         ) : (
-          <div className="col-span-full py-20 text-center">
+          <div className="py-20 text-center">
             <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
               <Search size={40} />
             </div>
@@ -215,7 +200,7 @@ export const CourseListPage: React.FC = () => {
               Prueba con otras palabras clave o explora todas nuestras categorías.
             </p>
             <button 
-              onClick={() => {setSearchQuery(''); setCurrentPage(1);}}
+              onClick={() => {setSearchQuery('');}}
               className="mt-8 px-6 py-3 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all"
             >
               Ver todos los cursos

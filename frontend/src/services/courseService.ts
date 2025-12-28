@@ -16,7 +16,7 @@ export interface Course {
   author: string;
   date: string;
   tags: string[];
-  category: string;
+  category: string; // Ensure this is here
   level: string;
   imageUrl?: string;
   published: boolean;
