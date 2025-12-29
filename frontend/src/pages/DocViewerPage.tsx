@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, BookOpen, Share2, Printer } from 'lucide-react';
+import { ChevronLeft, BookOpen, Share2, Printer, Volume2, Check } from 'lucide-react';
+import { useTts } from '../hooks/useTts';
+import { TtsFloatingControls } from '../components/TtsFloatingControls';
 
 // Reusing existing content renderer principles
 export const DocViewerPage: React.FC = () => {
@@ -9,6 +11,28 @@ export const DocViewerPage: React.FC = () => {
   const navigate = useNavigate();
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
+
+  const { 
+    isReading,
+    isPaused, 
+    availableVoices,
+    selectedVoiceURI,
+    startReading, 
+    pauseReading, 
+    resumeReading, 
+    stopReading,
+    seekForward,
+    seekBackward,
+    setVoice,
+    rate,
+    setRate
+  } = useTts({
+    contentSelector: '.content-area'
+  });
+
+  useEffect(() => {
+    return () => stopReading();
+  }, [docId, stopReading]);
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -39,9 +63,49 @@ export const DocViewerPage: React.FC = () => {
     };
 
     if (category && docId) fetchDoc();
-  }, [category, docId]);
+  }, [category, docId, stopReading]);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const [shared, setShared] = useState(false);
+  const handleShare = async () => {
+    const shareData = {
+      title: `Teach LAOZ - ${docId?.replace(/-/g, ' ')}`,
+      text: `Echa un vistazo a esta guía en Teach LAOZ: ${docId?.replace(/-/g, ' ')}`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
 
   return (
+    <>
+      <TtsFloatingControls 
+        isReading={isReading}
+        isPaused={isPaused}
+        onPause={pauseReading}
+        onResume={resumeReading}
+        onStop={stopReading}
+        onSeekForward={seekForward}
+        onSeekBackward={seekBackward}
+        availableVoices={availableVoices}
+        selectedVoiceURI={selectedVoiceURI}
+        onVoiceChange={setVoice}
+        rate={rate}
+        onRateChange={setRate}
+      />
     <div className="max-w-4xl mx-auto py-12 px-6">
       <motion.button
         initial={{ opacity: 0, x: -20 }}
@@ -69,12 +133,34 @@ export const DocViewerPage: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="p-2 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] transition-colors">
+            <button 
+              onClick={handlePrint}
+              className="p-2 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] transition-colors"
+              title="Imprimir documento"
+            >
               <Printer size={18} />
             </button>
-            <button className="p-2 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] transition-colors">
-              <Share2 size={18} />
+            <button 
+              onClick={handleShare}
+              className={`p-2 rounded-lg transition-all ${shared ? 'bg-emerald-500/10 text-emerald-500' : 'hover:bg-[var(--bg-app)] text-[var(--text-muted)]'}`}
+              title={shared ? "¡Copiado!" : "Compartir documento"}
+            >
+              {shared ? <Check size={18} /> : <Share2 size={18} />}
             </button>
+            <div className="h-8 w-[1px] bg-[var(--border-color)] mx-1" />
+            {!isReading ? (
+              <button 
+                onClick={startReading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all text-xs font-bold uppercase tracking-wider"
+              >
+                <Volume2 size={16} />
+                Leer Manual
+              </button>
+            ) : (
+              <div className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-emerald-500 animate-pulse bg-emerald-500/5 rounded-xl border border-emerald-500/20">
+                Leyendo...
+              </div>
+            )}
           </div>
         </div>
 
@@ -85,16 +171,12 @@ export const DocViewerPage: React.FC = () => {
           </div>
         ) : (
           <div 
-            className="prose prose-slate dark:prose-invert max-w-none 
-              prose-headings:font-black prose-headings:tracking-tight
-              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-[var(--text-main)]
-              prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-primary/5 prose-blockquote:py-1 prose-blockquote:px-6 prose-blockquote:rounded-r-xl
-            "
+            className="content-area max-w-none"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}
       </motion.div>
     </div>
+    </>
   );
 };

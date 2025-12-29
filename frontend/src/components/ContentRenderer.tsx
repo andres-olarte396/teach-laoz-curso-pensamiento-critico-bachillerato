@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { Video, Music, FileText as FileTextIcon, Download, HardDrive } from 'lucide-react';
+import { Video, Music, FileText as FileTextIcon, Download, HardDrive, ZoomIn, ZoomOut, Maximize2, RefreshCw, X } from 'lucide-react';
+import { renderToString } from 'react-dom/server';
 import { apiService } from '../services/apiService';
 import type { ContentResponse } from '../services/apiService';
 
 interface ContentRendererProps {
   html: string;
-  path?: string; // For relative resource resolution
+  path?: string;
   className?: string;
   metadata?: {
     mimeType: string;
@@ -33,111 +34,28 @@ mermaid.initialize({
   fontFamily: 'Inter, system-ui, sans-serif',
 });
 
-export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path, className, metadata, onCloseAudio, onCloseScript }) => {
-  const [scriptHtml, setScriptHtml] = React.useState<string | null>(null);
-
-  // Helper function defined early to avoid reference errors
-  const formatQuizQuestions = (html: string) => {
-    // Regex to find numbered questions followed by inline options (a) ... b) ...)
-    // Pattern: 1. Question? a) ... b) ... 
-    // We look for patterns where options start with a lowercase letter and a parenthesis.
-    
-    // First, let's look for paragraphs that seem to contain multiple options
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    
-    const paragraphs = doc.querySelectorAll('p, li');
-    let hasChanges = false;
-    
-    paragraphs.forEach(p => {
-      // If it's an li, we might need to handle it carefully to not break nested lists, 
-      // but replacing innerHTML should be fine if it matches the pattern.
-      const text = p.innerHTML;
-      
-      // Check if paragraph contains "a) " and "b) " (minimal multiple choice)
-      if (text.includes('a) ') && text.includes('b) ')) {
-         // Attempt to split by options. 
-         // Assuming format: "1. Question text? a) Option A b) Option B (Correcta) c) Option C"
-         
-         // Capturing the question part first (everything before "a) ")
-         const parts = text.split(/(\s[a-z]\)\s)/); // Split keeping delimiters
-         
-         if (parts.length > 1) {
-             const questionText = parts[0];
-             const options = [];
-             
-             for (let i = 1; i < parts.length; i += 2) {
-                 const label = parts[i].trim(); // "a) "
-                 const content = parts[i+1] || ''; // "Option content..."
-                 options.push({ label, content });
-             }
-             
-             // Build new HTML
-             const newContainer = document.createElement('div');
-             newContainer.className = 'quiz-question mb-6 p-6 rounded-2xl bg-slate-800/50 border border-slate-700';
-             
-             const qTitle = document.createElement('p');
-             qTitle.className = 'font-bold text-lg mb-4 text-white';
-             qTitle.innerHTML = questionText;
-             newContainer.appendChild(qTitle);
-             
-             const optionsList = document.createElement('ul');
-             optionsList.className = 'space-y-3';
-             
-             options.forEach(opt => {
-                 const li = document.createElement('li');
-                 li.className = 'flex items-start gap-3 p-3 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer group';
-                 
-                 // Check for "(Correcta)" indicator
-                 const isCorrect = opt.content.includes('(Correcta)');
-                 const cleanContent = opt.content.replace('(Correcta)', '').trim();
-                 
-                 // Checkbox mockup
-                 const checkbox = document.createElement('div');
-                 checkbox.className = `w-6 h-6 rounded border flex items-center justify-center mt-0.5 shrink-0 ${isCorrect ? 'border-emerald-500 bg-emerald-500/20 text-emerald-500' : 'border-slate-500 group-hover:border-blue-400'}`;
-                 if (isCorrect) {
-                     checkbox.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                 }
-                 
-                 const textDiv = document.createElement('div');
-                 textDiv.className = 'flex-1 text-slate-300 group-hover:text-slate-200';
-                 textDiv.innerHTML = `<span class="font-bold text-blue-400 mr-2 uppercase">${opt.label.replace(')', '')}.</span> ${cleanContent}`;
-                 
-                 li.appendChild(checkbox);
-                 li.appendChild(textDiv);
-                 optionsList.appendChild(li);
-             });
-             newContainer.appendChild(optionsList);
-             p.replaceWith(newContainer);
-             hasChanges = true;
-         }
-      }
-    });
-    return hasChanges ? doc.body.innerHTML : html;
-  };
-
-  useEffect(() => {
-    if (metadata?.showScript && metadata.relatedAssets) {
-      const scriptAsset = metadata.relatedAssets.find(a => a.type === 'script');
-      if (scriptAsset) {
-        apiService.getContent(scriptAsset.path).then((data: ContentResponse) => {
-            setScriptHtml(data.html || '');
-        });
-      }
-    }
-  }, [metadata?.showScript, metadata?.relatedAssets]);
+// 1. Static Content Component (Memoized to prevent wiping of manual DOM mutations)
+const StaticContent: React.FC<{ 
+  html: string, 
+  getProcessedHtml: (html: string) => string,
+  setModalDiagram: (d: { svg: string } | null) => void 
+}> = React.memo(({ html, getProcessedHtml, setModalDiagram }) => {
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const renderAdvancedElements = async () => {
-      if (!html) return;
+      if (!html || !contentRef.current) return;
       
-      // 1. Process Mermaid Diagrams
-      const mermaidCandidates = Array.from(document.querySelectorAll('pre > code'));
+      const container = contentRef.current;
+      
+      // Mermaid Processing
+      const mermaidCandidates = Array.from(container.querySelectorAll('pre > code'));
       
       for (const el of mermaidCandidates) {
         const isExplicit = el.classList.contains('language-mermaid') || el.parentElement?.classList.contains('mermaid');
         const textContent = el.textContent?.trim() || '';
-        
+        if (!textContent) continue;
+
         const isHeuristic = !el.className.includes('language-') && (
           textContent.startsWith('graph ') || 
           textContent.startsWith('sequenceDiagram') || 
@@ -148,363 +66,265 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path
         );
 
         if (isExplicit || isHeuristic) {
-          const id = `mermaid-svg-${Math.random().toString(36).substr(2, 9)}`;
           const parent = el.parentElement;
-
           if (parent && (parent.tagName === 'PRE' || parent.tagName === 'DIV')) {
             try {
-              const decodeHtml = (html: string) => {
+              const decodeHtml = (h: string) => {
                 const txt = document.createElement("textarea");
-                txt.innerHTML = html;
+                txt.innerHTML = h;
                 return txt.value;
               };
               
-              const cleanCode = decodeHtml(textContent)
-                .replace(/\\n/g, '\n')
-                .replace(/^"|"$/g, '');
-
+              const cleanCode = decodeHtml(textContent).replace(/\\n/g, '\n').replace(/^"|"$/g, '');
+              const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
               const { svg } = await mermaid.render(id, cleanCode);
-              const div = document.createElement('div');
-              div.className = 'mermaid';
-              div.innerHTML = svg;
-              parent.replaceWith(div);
+              
+              const wrapper = document.createElement('div');
+              wrapper.className = 'mermaid-wrapper group';
+
+              const toolbar = document.createElement('div');
+              toolbar.className = 'mermaid-toolbar';
+
+              const zoomDisplay = document.createElement('span');
+              zoomDisplay.className = 'px-2 text-[10px] font-mono font-bold text-primary min-w-[45px] text-center select-none';
+              zoomDisplay.textContent = '100%';
+
+              const createBtn = (Icon: any, title: string, onClick: (e: MouseEvent) => void) => {
+                const btn = document.createElement('button');
+                btn.className = 'p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-all';
+                btn.title = title;
+                btn.innerHTML = renderToString(<Icon size={14} />);
+                btn.onclick = (e) => { e.stopPropagation(); onClick(e); };
+                return btn;
+              };
+
+              let zoom = 1;
+              const updateZoom = (delta: number) => {
+                zoom = Math.max(0.5, Math.min(5, delta === 0 ? 1 : zoom + delta));
+                zoomDisplay.textContent = `${Math.round(zoom * 100)}%`;
+                const svgEl = wrapper.querySelector('.mermaid-viewport svg') as SVGSVGElement | null;
+                if (svgEl) {
+                  svgEl.style.setProperty('width', `${zoom * 100}%`, 'important');
+                  svgEl.style.setProperty('max-width', 'none', 'important');
+                  svgEl.style.setProperty('height', 'auto', 'important');
+                }
+              };
+
+              toolbar.appendChild(createBtn(RefreshCw, 'Resetear Zoom', () => updateZoom(0)));
+              toolbar.appendChild(createBtn(ZoomOut, 'Reducir Zoom', () => updateZoom(-0.2)));
+              toolbar.appendChild(zoomDisplay);
+              toolbar.appendChild(createBtn(ZoomIn, 'Aumentar Zoom', () => updateZoom(0.2)));
+              toolbar.appendChild(createBtn(Maximize2, 'Expandir Diagrama', () => { setModalDiagram({ svg }); }));
+
+              const viewport = document.createElement('div');
+              viewport.className = 'mermaid-viewport custom-scrollbar overflow-auto';
+              viewport.style.maxHeight = '70vh';
+              viewport.innerHTML = `<div class="mermaid-inner-container min-w-full min-h-full flex items-center justify-center p-8">${svg}</div>`;
+
+              wrapper.appendChild(toolbar);
+              wrapper.appendChild(viewport);
+              parent.replaceWith(wrapper);
             } catch (err) {
-              console.error('Mermaid render error:', err);
-              const errorDiv = document.createElement('div');
-              errorDiv.className = 'p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-200 text-xs font-mono overflow-auto';
-              errorDiv.textContent = `Mermaid Syntax Error: ${(err as Error).message}\n\nCode:\n${textContent}`;
-              parent.replaceWith(errorDiv);
+              console.error('Mermaid error:', err);
+              const errDiv = document.createElement('div');
+              errDiv.className = 'p-4 bg-red-900/10 border border-red-500/30 rounded-lg text-red-500 text-xs font-mono';
+              errDiv.textContent = `Mermaid Error: ${(err as Error).message}`;
+              parent.replaceWith(errDiv);
             }
           }
         }
       }
 
-      // 2. Process Code Block Headers
-      const codeBlocks = document.querySelectorAll('pre > code');
-      codeBlocks.forEach((code) => {
+      // Code Headers
+      container.querySelectorAll('pre > code').forEach((code) => {
         const pre = code.parentElement;
-        // Avoid double-processing or processing mermaid diagrams that might have been processed but wrapper left? 
-        // Or if it's already processed (has a header)
-        if (!pre || pre.querySelector('div.flex') || pre.classList.contains('mermaid')) return;
-
+        if (!pre || pre.querySelector('.code-copy-btn') || pre.classList.contains('mermaid') || pre.closest('.mermaid-viewport')) return;
         const langClass = Array.from(code.classList).find(c => c.startsWith('language-'));
         const lang = langClass ? langClass.replace('language-', '') : 'text';
-
-        const displayNames: Record<string, string> = {
-          sh: 'TERMINAL',
-          bash: 'TERMINAL',
-          zsh: 'TERMINAL',
-          javascript: 'JS',
-          typescript: 'TS',
-          dockerfile: 'DOCKER',
-          yaml: 'YAML',
-          yml: 'YAML',
-          python: 'PYTHON',
-          py: 'PYTHON',
-          sql: 'SQL',
-          html: 'HTML',
-          css: 'CSS',
-          go: 'GO',
-          json: 'JSON',
-          text: 'TEXTO',
-          plaintext: 'TEXTO',
-          txt: 'TEXTO'
-        };
+        const displayNames: Record<string, string> = { sh: 'TERM', bash: 'TERM', js: 'JS', ts: 'TS', python: 'PY', sql: 'SQL', dockerfile: 'DOCKER', yaml: 'YAML' };
         
         const header = document.createElement('div');
-        // Use Tailwind utility classes directly to avoid specificity issues and remove "green dot" contamination
-        header.className = 'flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-slate-700/50 rounded-t-lg font-mono text-xs select-none';
-        
-        const langLabel = document.createElement('span');
-        langLabel.className = 'font-bold text-slate-400 uppercase tracking-widest';
-        langLabel.textContent = displayNames[lang.toLowerCase()] || lang.toUpperCase();
+        header.className = 'flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-slate-700/50 rounded-t-lg font-mono text-[10px] select-none uppercase tracking-widest text-slate-400';
+        header.innerHTML = `<span>${displayNames[lang.toLowerCase()] || lang.toUpperCase()}</span>`;
         
         const copyBtn = document.createElement('button');
-        const btnBase = 'flex items-center justify-center p-1 rounded transition-all duration-200 text-slate-400 hover:text-white hover:bg-white/10 opacity-70 hover:opacity-100';
-        copyBtn.className = btnBase;
-        copyBtn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-        `;
+        copyBtn.className = 'code-copy-btn p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-all';
+        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(code.textContent || '');
-          copyBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17 4 12"/></svg>
-          `;
-          // Add success styles
-          copyBtn.classList.add('text-emerald-500', 'opacity-100');
-          copyBtn.classList.remove('text-slate-400', 'opacity-70');
-          
-          setTimeout(() => {
-             // Revert styles
-             copyBtn.classList.remove('text-emerald-500', 'opacity-100');
-             copyBtn.classList.add('text-slate-400', 'opacity-70');
-             copyBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-             `;
-          }, 2000);
+          copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17 4 12"/></svg>`;
+          setTimeout(() => { copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`; }, 2000);
         };
-
-        header.appendChild(langLabel);
         header.appendChild(copyBtn);
         pre.prepend(header);
       });
     };
+    setTimeout(renderAdvancedElements, 150);
+  }, [html, getProcessedHtml, setModalDiagram]);
 
-    const timeout = setTimeout(renderAdvancedElements, 150);
-    return () => clearTimeout(timeout);
-  }, [html]);
+  return <div ref={contentRef} className="content-area" dangerouslySetInnerHTML={{ __html: getProcessedHtml(html) }} />;
+});
+
+// 2. Main Component
+export const ContentRendererBase: React.FC<ContentRendererProps> = ({ html, path, className, metadata, onCloseAudio, onCloseScript }) => {
+  const [scriptHtml, setScriptHtml] = React.useState<string | null>(null);
+  const [modalDiagram, setModalDiagram] = React.useState<{ svg: string } | null>(null);
+  const [modalZoom, setModalZoom] = React.useState(1);
+
+  useEffect(() => {
+    if (metadata?.showScript && metadata.relatedAssets) {
+      const scriptAsset = metadata.relatedAssets.find(a => a.type === 'script');
+      if (scriptAsset) {
+        apiService.getContent(scriptAsset.path).then((data: ContentResponse) => setScriptHtml(data.html || ''));
+      }
+    }
+  }, [metadata?.showScript, metadata?.relatedAssets]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setModalDiagram(null); };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  const formatQuizQuestions = React.useCallback((h: string) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(h, 'text/html');
+    doc.querySelectorAll('p, li').forEach(p => {
+      const text = p.innerHTML;
+      if (text.includes('a) ') && text.includes('b) ')) {
+         const parts = text.split(/(\s[a-z]\)\s)/);
+         if (parts.length > 1) {
+             const newContainer = document.createElement('div');
+             newContainer.className = 'quiz-question mb-6 p-6 rounded-2xl bg-slate-800/50 border border-slate-700';
+             const qTitle = document.createElement('p');
+             qTitle.className = 'font-bold text-lg mb-4 text-white';
+             qTitle.innerHTML = parts[0];
+             newContainer.appendChild(qTitle);
+             const list = document.createElement('ul');
+             list.className = 'space-y-3';
+             for (let i = 1; i < parts.length; i += 2) {
+                 const li = document.createElement('li');
+                 li.className = 'flex items-start gap-3 p-3 rounded-xl hover:bg-slate-700/50 transition-colors';
+                 const isCorrect = parts[i+1]?.includes('(Correcta)');
+                 const clean = (parts[i+1] || '').replace('(Correcta)', '').trim();
+                 li.innerHTML = `<div class="shrink-0 w-6 h-6 rounded border flex items-center justify-center mt-0.5 ${isCorrect ? 'border-emerald-500 bg-emerald-500/20 text-emerald-500' : 'border-slate-500'}">${isCorrect ? '✓' : ''}</div><div class="flex-1 text-slate-300"><span class="font-bold text-blue-400 mr-2 capitalize">${parts[i].trim()}</span> ${clean}</div>`;
+                 list.appendChild(li);
+             }
+             newContainer.appendChild(list);
+             p.replaceWith(newContainer);
+         }
+      }
+    });
+    return doc.body.innerHTML;
+  }, []);
 
   const getProcessedHtml = React.useCallback((rawHtml: string) => {
     if (!rawHtml) return '';
-    // If no path is provided, we can't resolve relative paths reliably/or assume different base
-    // Use path from props closure
-    if (!path && !rawHtml.includes('<img')) return rawHtml; // Optimization 
-
     const currentDir = path ? (path.substring(0, path.lastIndexOf('/')) || '') : '';
     const assetsBaseUrl = '/api/content-assets';
-    
     let processed = rawHtml.replace(/<img([^>]*)src="([^"]+)"([^>]*)\/?>/g, (match, p1, src, p3) => {
-      if (src.startsWith('http') || src.startsWith('data:')) return match;
-      if (!path) return match; // Can't resolve relative without path
-      
-      let cleanSrc = src;
+      if (src.startsWith('http') || src.startsWith('data:') || !path) return match;
+      let cleanSrc = src.startsWith('./') ? src.substring(2) : src;
       let targetDir = currentDir;
-      
-      if (src.startsWith('./')) {
-        cleanSrc = src.substring(2);
-      } else if (src.startsWith('../')) {
-        const parts = currentDir.split('/');
-        while (cleanSrc.startsWith('../')) {
-          parts.pop();
-          cleanSrc = cleanSrc.substring(3);
-        }
-        targetDir = parts.join('/');
-      }
-      
+      while (cleanSrc.startsWith('../')) { targetDir = targetDir.substring(0, targetDir.lastIndexOf('/')); cleanSrc = cleanSrc.substring(3); }
       const fullPath = targetDir ? `${targetDir}/${cleanSrc}` : cleanSrc;
-      const fullAssetUrl = `${assetsBaseUrl}/${fullPath}`.replace(/\/+/g, '/').replace('http:/', 'http://');
-      
-      return `<img${p1}src="${fullAssetUrl}"${p3}>`;
+      return `<img${p1}src="${assetsBaseUrl}/${fullPath.replace(/\/+/g, '/')}"${p3}>`;
     });
-    
-    // Process Quiz Questions
-    processed = formatQuizQuestions(processed);
-
-    return processed;
-  }, [path]);
-
-  // Memoize the processed HTML to prevent DOM thrashing
-  const processedHtml = React.useMemo(() => getProcessedHtml(html), [html, getProcessedHtml]);
+    return formatQuizQuestions(processed);
+  }, [path, formatQuizQuestions]);
 
   const renderMedia = () => {
     if (!metadata || !path) return null;
-    const assetsBaseUrl = '/api/content-assets';
-    const fileUrl = `${assetsBaseUrl}/${path}`.replace(/\/+/g, '/').replace('http:/', 'http://');
+    const url = `/api/content-assets/${path}`.replace(/\/+/g, '/').replace('http:/', 'http://');
     const mime = metadata.mimeType;
 
     if (mime.startsWith('video/')) {
-      return (
-        <div className="media-container mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-primary/10 border border-primary/20">
-            <Video className="text-primary" size={24} />
-            <h3 className="text-xl font-bold m-0! text-white">Video: {metadata.name}</h3>
-          </div>
-          <div className="aspect-video rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-950">
-            <video 
-              controls 
-              className="w-full h-full object-contain"
-              poster={metadata.poster ? `${assetsBaseUrl}/${metadata.poster}` : undefined}
-            >
-              <source src={fileUrl} type={mime} />
-              Tu navegador no soporta el elemento de video.
-            </video>
-          </div>
-        </div>
-      );
-    }
-
-    if (mime.startsWith('audio/')) {
-      return (
-        <div className="media-container mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
-            <Music className="text-secondary" size={24} />
-            <h3 className="text-xl font-bold m-0! text-white">Audio: {metadata.name}</h3>
-          </div>
-          <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-2xl flex flex-col items-center gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-secondary/20 flex items-center justify-center text-secondary">
-              <Music size={40} />
+        return (
+          <div className="media-container mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-primary/10 border border-primary/20">
+              <Video className="text-primary" size={24} /><h3 className="text-xl font-bold m-0! text-white">Video: {metadata.name}</h3>
             </div>
-            <audio controls className="w-full max-w-md h-12">
-              <source src={fileUrl} type={mime} />
-              Tu navegador no soporta el elemento de audio.
-            </audio>
+            <div className="aspect-video rounded-3xl overflow-hidden border border-slate-800 bg-slate-950">
+              <video controls className="w-full h-full object-contain" poster={metadata.poster ? `/api/content-assets/${metadata.poster}` : undefined}>
+                <source src={url} type={mime} />
+              </video>
+            </div>
           </div>
-        </div>
-      );
+        );
     }
-
-    if (mime === 'application/pdf') {
-      return (
-        <div className="media-container mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 h-[calc(100vh-200px)] flex flex-col">
-          <div className="flex-1 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900">
-            <iframe 
-              src={`${fileUrl}#view=FitH`} 
-              className="w-full h-full border-none"
-              title={metadata.name}
-            />
+    if (mime.startsWith('audio/')) {
+        return (
+          <div className="media-container mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl bg-secondary/10 border border-secondary/20">
+              <Music className="text-secondary" size={24} /><h3 className="text-xl font-bold m-0! text-white">Audio: {metadata.name}</h3>
+            </div>
+            <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl flex flex-col items-center gap-6 text-slate-400">
+              <Music size={40} /><audio controls src={url} className="w-full max-w-md h-12" />
+            </div>
           </div>
-          <div className="mt-4 flex justify-center">
-            <a 
-              href={fileUrl} 
-              download 
-              className="flex items-center gap-2 px-6 py-2 rounded-xl bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition-all text-sm font-bold shadow-lg"
-            >
-              <Download size={16} />
-              Descargar PDF Completo
-            </a>
-          </div>
-        </div>
-      );
+        );
     }
-
-    return (
-      <div className="p-12 rounded-3xl bg-slate-900 border border-slate-800 text-center flex flex-col items-center gap-6">
-        <div className="w-20 h-20 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500">
-          <HardDrive size={40} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold text-white mb-2">Archivo No Visualizable</h3>
-          <p className="text-slate-400 mb-6">Este tipo de archivo ({metadata.mimeType}) no puede visualizarse directamente, pero puedes descargarlo.</p>
-          <a 
-            href={fileUrl} 
-            download
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white font-bold hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all"
-          >
-            <Download size={18} />
-            Descargar archivo
-          </a>
-        </div>
-      </div>
-    );
+    return <div className="p-8 text-center text-slate-400">Tipo de archivo no soportado para previsualización. <a href={url} download className="text-primary underline">Descargar</a></div>;
   };
 
   return (
-    <div className={`prose dark:prose-invert prose-slate max-w-none 
-      dark:prose-headings:text-white prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight
-      prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-      dark:prose-code:text-accent prose-code:text-emerald-600 dark:prose-pre:bg-slate-900 prose-pre:bg-slate-100 dark:prose-pre:border dark:prose-pre:border-slate-800 prose-pre:border-slate-200
-      prose-img:rounded-3xl prose-blockquote:border-l-primary prose-blockquote:bg-primary/5 prose-blockquote:py-1
-      print:prose-slate print:prose-headings:text-black print:text-black
-      ${className || ''}
-    `}>
-      {(html || (metadata && metadata.mimeType === 'text/html')) ? (
+    <div className={`prose dark:prose-invert prose-slate max-w-none ${className || ''}`}>
+      {(html || (metadata?.mimeType === 'text/html')) ? (
         <>
-          {/* Related Audio Assets - Fixed Bottom Right Player */}
-          {metadata && (metadata as any).showAudio && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'audio').map((asset: any) => (
-             <div key={asset.path} className="fixed bottom-8 right-8 z-[100] w-96 p-4 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-bottom-4 duration-500">
+          {metadata && metadata.showAudio && metadata.relatedAssets?.filter(a => a.type === 'audio').map(asset => (
+             <div key={asset.path} className="fixed bottom-8 right-8 z-[100] w-96 p-4 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl flex flex-col gap-4">
                <div className="flex items-start justify-between">
-                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
-                     <Music size={20} />
-                   </div>
-                   <div>
-                      <h4 className="text-sm font-bold text-white">Reproduciendo</h4>
-                      <p className="text-xs text-slate-400 line-clamp-1">{asset.name}</p>
-                   </div>
-                 </div>
-                 <button 
-                    onClick={onCloseAudio}
-                    className="p-1.5 rounded-full hover:bg-slate-800 text-slate-500 hover:text-white transition-colors"
-                    title="Cerrar reproductor"
-                 >
-                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                 </button>
+                 <div className="flex items-center gap-3"><Music size={20} className="text-emerald-500" /><div><h4 className="text-sm font-bold text-white">Audio</h4><p className="text-xs text-slate-400">{asset.name}</p></div></div>
+                 <button onClick={onCloseAudio} className="text-slate-500 hover:text-white"><X size={16} /></button>
                </div>
-               
-               <audio controls autoPlay className="w-full h-8 accent-emerald-500" src={`/api/content-assets/${asset.path}`}>
-                 Tu navegador no soporta el elemento de audio.
-               </audio>
+               <audio controls autoPlay className="w-full" src={`/api/content-assets/${asset.path}`} />
              </div>
           ))}
 
-          {/* Related Video Assets - Embedded Player */}
-          {metadata && (metadata as any).relatedAssets?.filter((a: any) => a.type === 'video').map((asset: any) => (
-             <div key={asset.path} className="mb-10 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-xl bg-black">
-               <div className="bg-[var(--bg-surface)] p-3 border-b border-[var(--border-color)] flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                 <Video size={16} />
-                 <span className="text-xs font-bold text-[var(--text-main)]">Video Complementario: {asset.name}</span>
-               </div>
-               <div className="aspect-video bg-black">
-                 <video controls className="w-full h-full">
-                   <source src={`/api/content-assets/${asset.path}`} />
-                   Tu navegador no soporta el elemento de video.
-                 </video>
-               </div>
-             </div>
-          ))}
-
-          {metadata && metadata.mimeType === 'text/html' ? (
-             <div className="simulation-container animate-in fade-in duration-700 h-[calc(100vh-250px)] min-h-[500px] w-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative">
-                <div className="absolute top-4 right-4 z-10 flex gap-2">
-                   <div className="px-3 py-1 bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-500/30 backdrop-blur-md">
-                      Simulación Interactiva
-                   </div>
-                </div>
-                <iframe 
-                  src={`/api/content-assets/${path}`} 
-                  className="w-full h-full border-none bg-white" 
-                  title="Simulación"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-                />
-             </div>
+          {metadata?.mimeType === 'text/html' ? (
+             <iframe src={`/api/content-assets/${path}`} className="w-full h-[600px] border-none bg-white rounded-2xl" title="Simulation" />
           ) : (
             <>
-              <div 
-                className="content-area"
-                dangerouslySetInnerHTML={{ __html: processedHtml }} 
-              />
-
-              {/* Script Content Area */}
+              <StaticContent html={html} getProcessedHtml={getProcessedHtml} setModalDiagram={setModalDiagram} />
               {metadata?.showScript && scriptHtml && (
-                <div className="mt-12 p-8 rounded-3xl bg-blue-500/5 border border-blue-500/20 animate-in fade-in slide-in-from-bottom-4 duration-700 relative group">
-                   <div className="flex items-center justify-between mb-6">
-                     <div className="flex items-center gap-2 text-blue-500">
-                        <FileTextIcon size={20} />
-                        <span className="text-sm font-bold uppercase tracking-wider">Guion de la lección</span>
-                     </div>
-                     <button 
-                        onClick={onCloseScript}
-                        className="p-2 rounded-xl bg-blue-500/10 hover:bg-red-500/10 text-blue-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Cerrar guion"
-                     >
-                       <span className="text-xs font-bold">Cerrar</span>
-                     </button>
-                   </div>
-                    <div 
-                     className="prose prose-invert prose-blue max-w-none script-content"
-                     dangerouslySetInnerHTML={{ __html: getProcessedHtml(scriptHtml) }} 
-                   />
+                <div className="mt-12 p-8 rounded-3xl bg-blue-500/5 border border-blue-500/20 relative group">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2 text-blue-500"><FileTextIcon size={20} /><span className="text-sm font-bold uppercase">Guion</span></div>
+                    <button onClick={onCloseScript} className="text-xs font-bold text-blue-500 hover:text-red-500">Cerrar</button>
+                  </div>
+                  <StaticContent html={scriptHtml} getProcessedHtml={getProcessedHtml} setModalDiagram={setModalDiagram} />
                 </div>
               )}
             </>
           )}
         </>
       ) : renderMedia()}
+
+      {modalDiagram && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl" onClick={() => setModalDiagram(null)}>
+          <div className="relative w-full h-full max-w-6xl max-h-[90vh] bg-slate-900 rounded-3xl border border-white/10 overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900 z-50">
+              <div className="flex items-center gap-3"><Maximize2 size={20} className="text-emerald-500" /><h3 className="text-lg font-bold text-white m-0!">Vista Expandida</h3></div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center bg-slate-800 rounded-xl p-1">
+                  <button onClick={() => setModalZoom(z => Math.max(0.5, z - 0.2))} className="p-2"><ZoomOut size={18} /></button>
+                  <span className="px-3 text-xs font-mono font-bold text-primary min-w-[60px] text-center">{Math.round(modalZoom * 100)}%</span>
+                  <button onClick={() => setModalZoom(z => Math.min(5, z + 0.2))} className="p-2"><ZoomIn size={18} /></button>
+                  <button onClick={() => setModalZoom(1)} className="p-2 border-l border-white/5"><RefreshCw size={16} /></button>
+                </div>
+                <button onClick={() => setModalDiagram(null)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/30 font-bold text-sm"><X size={18} />Cerrar</button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto bg-slate-950 flex items-center justify-center p-12">
+              <div dangerouslySetInnerHTML={{ __html: modalDiagram.svg }} style={{ width: `${modalZoom * 100}%`, maxWidth: 'none', height: 'auto' }} className="transition-all duration-200" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export const ContentRenderer = React.memo(ContentRendererBase, (prev, next) => {
-  if (prev.html !== next.html || prev.path !== next.path) return false;
-  
-  const pMeta = (prev.metadata || {}) as any;
-  const nMeta = (next.metadata || {}) as any;
-  
-  if (pMeta.showAudio !== nMeta.showAudio) return false;
-  if (pMeta.showScript !== nMeta.showScript) return false;
-  if (pMeta.poster !== nMeta.poster) return false;
-  
-  if (JSON.stringify(pMeta.relatedAssets) !== JSON.stringify(nMeta.relatedAssets)) return false;
-
-  return true; 
+  return prev.html === next.html && prev.path === next.path && (prev.metadata as any)?.showAudio === (next.metadata as any)?.showAudio && (prev.metadata as any)?.showScript === (next.metadata as any)?.showScript;
 });
