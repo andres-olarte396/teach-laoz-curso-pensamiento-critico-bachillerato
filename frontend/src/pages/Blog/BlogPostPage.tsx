@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { blogService, type BlogPost } from '../../services/blogService';
 import { ContentRenderer } from '../../components/ContentRenderer';
+import { CommentSection } from '../../components/blog/CommentSection';
+import { Layout } from '../../components/Layout';
 import { Volume2 } from 'lucide-react';
 import { useTts } from '../../hooks/useTts';
 
@@ -125,6 +127,9 @@ export const BlogPostPage: React.FC = () => {
           <div className="text-red-400">Error: Could not render content.</div>
         )}
       </article>
+
+      {/* Blog Comments Section */}
+      {slug && <CommentSection slug={slug} />}
       
       <div className="mt-12 pt-8 border-t border-[var(--border-color)]">
          <Link to="/blog" className="text-sm text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">Buscar más artículos</Link>

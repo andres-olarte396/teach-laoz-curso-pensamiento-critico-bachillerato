@@ -20,7 +20,7 @@
     --bg-surface: #ffffff;
     --text-main: #0f172a; /* Slate-900 */
     --text-muted: #475569; /* Slate-600 */
-    --border-color: #e2e8f0; /* Slate-200 */
+    --border-color: #cbd5e1; /* Slate-300 (Better definition for light mode) */
 
     /* Brand Colors for Light Mode - Green & Gray */
     --color-primary: #059669; /* Emerald-600 */

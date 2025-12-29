@@ -28,6 +28,7 @@ export class AuthController {
     const token = await reply.jwtSign({ 
       id: user.id, 
       email: user.email, 
+      name: user.name,
       role: user.role 
     });
 
@@ -50,6 +51,7 @@ export class AuthController {
        const token = await reply.jwtSign({ 
         id: user.id, 
         email: user.email, 
+        name: user.name,
         role: user.role 
       });
   
@@ -68,7 +70,18 @@ export class AuthController {
     }
   }
 
-  async me(req: FastifyRequest) {
-    return req.user;
+  async me(req: FastifyRequest, reply: FastifyReply) {
+    const user = req.user as any;
+    if (!user) {
+      return reply.code(401).send({ message: 'Not authenticated' });
+    }
+    return { 
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      } 
+    };
   }
 }

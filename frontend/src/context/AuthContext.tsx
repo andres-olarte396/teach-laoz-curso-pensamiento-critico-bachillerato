@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await fetch('/api/auth/me');
       if (response.ok) {
          const data = await response.json();
-         setUser(data);
+         setUser(data.user);
       } else {
         setUser(null);
       }
