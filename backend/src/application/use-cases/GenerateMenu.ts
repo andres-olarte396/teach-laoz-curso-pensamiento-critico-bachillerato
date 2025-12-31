@@ -26,7 +26,7 @@ export class GenerateMenu {
       id: node.name,
       title: this.formatTitle(node.name),
       path,
-      type: isDirectory ? 'directory' : node.type as any,
+      type: isDirectory ? 'directory' : (node.name.toLowerCase().includes('evaluacion') ? 'evaluation' : node.type as any),
     };
 
     if (isDirectory) {

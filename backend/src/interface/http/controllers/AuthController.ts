@@ -37,7 +37,8 @@ export class AuthController {
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: 'lax', // Needed for CORS/Auth to work easily in dev
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' requires 'secure: true'
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     });
 
     return { user, token };

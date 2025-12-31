@@ -8,6 +8,7 @@ import { contentRoutes } from './routes/index.js';
 import { authRoutes } from './routes/authRoutes.js';
 import { blogRoutes } from './routes/blogRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
+import { progressRoutes } from './routes/progressRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import staticFiles from '@fastify/static';
@@ -29,8 +30,23 @@ export async function createServer(): Promise<FastifyInstance> {
 
   // CORS configuration
   await app.register(cors, {
-    origin: env.CORS_ORIGIN,
-    credentials: true, // Needed for cookies
+    origin: (origin, cb) => {
+      // Allow if origin is from CORS_ORIGIN or if it matches localhost/127 for dev
+      if (!origin || origin === 'null') {
+        cb(null, true);
+        return;
+      }
+      
+      const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim());
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'), false);
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
 
@@ -69,6 +85,9 @@ export async function createServer(): Promise<FastifyInstance> {
   // Auth Plugins
   await app.register(jwt, {
     secret: env.JWT_SECRET,
+    sign: {
+      expiresIn: '7d', // Session lasts 7 days
+    },
     cookie: {
       cookieName: 'token',
       signed: false,
@@ -104,6 +123,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(authRoutes, { prefix: '/api' });
   await app.register(blogRoutes, { prefix: '/api' });
   await app.register(adminRoutes, { prefix: '/api' });
+  await app.register(progressRoutes, { prefix: '/api' });
 
   // Health check
   app.get('/health', async () => {

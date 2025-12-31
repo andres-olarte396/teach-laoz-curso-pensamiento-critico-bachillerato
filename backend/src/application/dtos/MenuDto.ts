@@ -2,7 +2,7 @@ export interface MenuItemDto {
   id: string;
   title: string;
   path: string;
-  type: 'directory' | 'markdown' | 'html' | 'binary';
+  type: 'directory' | 'markdown' | 'html' | 'binary' | 'evaluation';
   order?: number;
   children?: MenuItemDto[];
 }

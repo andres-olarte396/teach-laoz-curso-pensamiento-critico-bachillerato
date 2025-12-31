@@ -40,6 +40,16 @@ db.exec(`
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS user_progress (
+    user_id TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    completed BOOLEAN DEFAULT 0,
+    last_accessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, course_id, lesson_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 logger.info('✅ Database schema initialized');
