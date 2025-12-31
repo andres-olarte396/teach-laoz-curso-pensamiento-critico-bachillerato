@@ -1,6 +1,6 @@
 import { ICommentRepository } from '../../../domain/repositories/ICommentRepository.js';
 import { Comment } from '../../../domain/entities/Comment.js';
-import { crypto } from '../../../../shared/utils/crypto.js'; // Assuming a crypto util exists for IDs
+import { randomUUID } from 'crypto';
 
 export interface AddCommentDTO {
   postId: string;
@@ -14,7 +14,7 @@ export class AddComment {
 
   async execute(dto: AddCommentDTO): Promise<Comment> {
     const comment: Comment = {
-      id: Math.random().toString(36).substr(2, 9), // Simple ID generator for now
+      id: randomUUID(),
       postId: dto.postId,
       authorName: dto.authorName,
       authorEmail: dto.authorEmail,
