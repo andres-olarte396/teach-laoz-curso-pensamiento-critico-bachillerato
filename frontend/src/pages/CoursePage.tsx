@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
 import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon, Volume2 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { TtsFloatingControls } from '../components/TtsFloatingControls';
 
 export const CoursePage: React.FC = () => {
   const { '*' : path } = useParams();
+  const navigate = useNavigate();
   const [content, setContent] = useState<ContentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +84,19 @@ export const CoursePage: React.FC = () => {
             prev: currentIndex > 0 ? flatItems[currentIndex - 1] : null,
             next: currentIndex < flatItems.length - 1 ? flatItems[currentIndex + 1] : null
           });
+
+          // Telemetry: Track lesson view
+          apiService.trackEvent({
+            userId: 'anonymous_user', // Placeholder for upcoming Auth Phase
+            organizationId: 'default_org',
+            courseId: courseId,
+            lessonId: path,
+            type: 'lesson_viewed',
+            metadata: {
+              title: data.name,
+              timestamp: new Date().toISOString()
+            }
+          }).catch(err => console.error('Failed to track event:', err));
         }
       } catch (err: any) {
         setError(err.response?.data?.message || 'Error al cargar el contenido');
@@ -185,11 +199,11 @@ export const CoursePage: React.FC = () => {
               {navContext?.prev && (
                 <Link 
                   to={`/course/${navContext.prev.path}`}
-                  className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+                  className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all group text-[10px] font-black uppercase tracking-[0.15em] shadow-sm"
                   title={navContext.prev.title}
                 >
                   <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-                  <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline-block truncate max-w-[150px]">
+                  <span className="hidden sm:inline-block truncate max-w-[150px]">
                     {navContext.prev.title}
                   </span>
                 </Link>
@@ -198,40 +212,48 @@ export const CoursePage: React.FC = () => {
 
             {/* Center Actions */}
             <div className="flex items-center gap-2">
+              {/* Universal Back Button */}
+              <button 
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all text-[10px] font-black uppercase tracking-[0.15em] shadow-sm whitespace-nowrap"
+              >
+                <ChevronLeft size={14} /> REGRESAR
+              </button>
+
               {!isReading ? (
                 <button 
                   onClick={startReading}
-                  className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]"
+                  className="flex-shrink-0 flex items-center gap-2 px-6 py-2.5 rounded-full border transition-all text-[10px] font-black uppercase tracking-[0.15em] bg-[var(--bg-app)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]/30 shadow-sm"
                 >
                   <Volume2 size={14} />
-                  Leer Contenido
+                  LEER CONTENIDO
                 </button>
               ) : (
                   <div className="flex items-center gap-2">
-                    <div className="px-4 py-2 text-[10px] uppercase tracking-widest font-bold text-emerald-500 animate-pulse bg-emerald-500/5 rounded-xl border border-emerald-500/20">
-                      Escuchando...
+                    <div className="px-6 py-2.5 text-[10px] uppercase tracking-[0.15em] font-black text-emerald-500 animate-pulse bg-emerald-500/5 rounded-full border border-emerald-500/20 shadow-sm">
+                      ESCUCHANDO...
                     </div>
                   </div>
               )}
   
               <button 
                 onClick={() => window.print()}
-                className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)] transition-all text-xs font-bold uppercase tracking-wider"
+                className="flex-shrink-0 flex items-center gap-2 px-6 py-2.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--color-primary)]/30 transition-all text-[10px] font-black uppercase tracking-[0.15em] shadow-sm"
               >
                 <Printer size={14} />
-                Imprimir
+                IMPRIMIR
               </button>
             </div>
 
             {/* Next Button (Top) */}
-            <div className="flex-1 flex justify-end">
+            <div className="flex-1 flex justify-end items-center gap-2 sm:gap-4">
               {navContext?.next && (
                 <Link 
                   to={`/course/${navContext.next.path}`}
-                  className="flex items-center gap-3 px-4 py-2 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] transition-all group"
+                  className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all group text-[10px] font-black uppercase tracking-[0.15em] shadow-sm"
                   title={navContext.next.title}
                 >
-                  <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline-block truncate max-w-[150px]">
+                  <span className="hidden sm:inline-block truncate max-w-[150px]">
                     {navContext.next.title}
                   </span>
                   <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -296,7 +318,7 @@ export const CoursePage: React.FC = () => {
 
                 {content.relatedAssets?.find(a => a.type === 'evaluation') && (
                   <Link 
-                    to={`/course/${content.relatedAssets.find(a => a.type === 'evaluation')?.path}`}
+                    to={`/evaluation/${content.relatedAssets.find(a => a.type === 'evaluation')?.path}`}
                     className="flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-2xl bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-purple-500 hover:border-purple-500 hover:bg-purple-500/5 transition-all text-sm font-bold uppercase tracking-wider min-w-[140px] justify-center"
                   >
                     <Brain size={16} />

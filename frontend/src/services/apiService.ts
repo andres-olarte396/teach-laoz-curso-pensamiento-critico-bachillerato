@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -57,6 +56,34 @@ export const apiService = {
 
   submitContact: async (data: { name: string; email: string; subject: string; message: string }) => {
     const response = await apiClient.post<{ message: string }>('/contact', data);
+    return response.data;
+  },
+
+  getEvaluation: async (path: string) => {
+    const response = await apiClient.get<{
+      id: string;
+      title: string;
+      questions: {
+        id: string;
+        text: string;
+        options: { id: string; text: string }[];
+        correctAnswerId: string;
+        feedback?: string;
+      }[];
+      metadata: Record<string, any>;
+    }>(`/evaluation/${path}`);
+    return response.data;
+  },
+
+  trackEvent: async (event: {
+    userId: string;
+    organizationId: string;
+    courseId: string;
+    lessonId?: string;
+    type: 'course_started' | 'lesson_viewed' | 'lesson_completed' | 'evaluation_started' | 'evaluation_submitted';
+    metadata?: Record<string, any>;
+  }) => {
+    const response = await apiClient.post<{ status: string }>('/events', event);
     return response.data;
   },
 };

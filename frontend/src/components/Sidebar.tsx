@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { ThemeToggle } from './ThemeToggle';
+import { AccessibilityMenu } from './AccessibilityMenu';
 import { useAuth } from '../context/AuthContext';
 
 function cn(...inputs: ClassValue[]) {
@@ -21,7 +22,7 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
-  const isActive = location.pathname === `/course/${item.path}`;
+  const isActive = location.pathname === `/course/${item.path}` || location.pathname === `/evaluation/${item.path}`;
   const hasChildren = item.children && item.children.length > 0;
 
   const toggleOpen = (e: React.MouseEvent) => {
@@ -38,7 +39,7 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
         onClick={toggleOpen}
         className={cn(
           "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
-          isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-slate-900 text-slate-400 hover:text-slate-100",
+          isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)]",
           isCollapsed && "justify-center"
         )}
         title={item.title}
@@ -63,7 +64,7 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
       </Link>
       
       {!isCollapsed && hasChildren && isOpen && (
-        <div className="mt-1 flex flex-col gap-1 ml-3 pl-2 border-l border-slate-800">
+        <div className="mt-1 flex flex-col gap-1 ml-3 pl-2 border-l border-[var(--border-color)]">
           {item.children?.map((child) => (
             <NavItem key={child.id} item={child} depth={depth + 1} isCollapsed={isCollapsed} />
           ))}
@@ -80,7 +81,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen }) => {
   const { courses, loading, error } = useMenu();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = React.useState(true);
 
@@ -94,16 +95,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
   return (
     <aside className={cn(
-      "dark h-screen border-r border-zinc-800 bg-[#020617] flex flex-col sticky top-0 print:hidden text-zinc-200 transition-all duration-300",
+      "h-screen border-r border-[var(--border-color)] bg-[var(--bg-surface)] flex flex-col sticky top-0 print:hidden text-[var(--text-main)] transition-all duration-300",
       isCollapsed ? "w-20" : "w-72",
-      // Simple mobile visibility toggle (if not hidden by default, we might need more complex CSS, but this fixes the build signature)
-      "hidden lg:flex", // Hide on mobile by default unless we implement the drawer logic strictly
-      mobileIsOpen ? "fixed inset-y-0 left-0 z-50 flex" : "" // Show when mobileIsOpen is true (simplified)
+      // Simple mobile visibility toggle
+      "hidden lg:flex",
+      mobileIsOpen ? "fixed inset-y-0 left-0 z-50 flex shadow-2xl" : ""
     )}>
       <div className="p-6 pb-2 relative group">
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-8 bg-slate-800 text-slate-400 p-1 rounded-full border border-slate-700 hover:text-white hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100 lg:flex hidden"
+          className="absolute -right-3 top-8 bg-[var(--bg-surface)] text-[var(--text-muted)] p-1 rounded-full border border-[var(--border-color)] hover:text-[var(--text-main)] transition-colors opacity-0 group-hover:opacity-100 lg:flex hidden shadow-sm z-10"
           title={isCollapsed ? "Expandir menú" : "Contraer menú"}
         >
           {isCollapsed ? <ChevronRight size={14} /> : <PanelLeftClose size={14} />}
@@ -125,23 +126,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
           </div>
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xl font-black text-white tracking-tighter leading-none whitespace-nowrap">
+              <span className="text-xl font-black text-[var(--text-main)] tracking-tighter leading-none whitespace-nowrap">
                 Teach <span className="text-emerald-500 italic">LAOZ</span>
               </span>
-              <span className="text-[0.65rem] text-slate-500 font-bold tracking-[0.2em] uppercase whitespace-nowrap">
+              <span className="text-[0.65rem] text-[var(--text-muted)] font-bold tracking-[0.2em] uppercase whitespace-nowrap">
                 Learning System
               </span>
             </div>
           )}
         </div>
-        <div className="h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent mb-2" />
+        <div className="h-px bg-gradient-to-r from-transparent via-[var(--border-color)] to-transparent mb-2" />
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 custom-scrollbar">
         
         {/* PLATAFORMA SECTION */}
         <div>
-          {!isCollapsed && <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Plataforma</h2>}
+          {!isCollapsed && <h2 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-3">Plataforma</h2>}
           <div className="space-y-1">
              <button 
                 onClick={() => !isCollapsed && setIsCoursesOpen(!isCoursesOpen)}
@@ -172,7 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                  {loading && (
                   <div className="px-3 space-y-2">
                     {[1, 2].map(i => (
-                      <div key={i} className="h-6 bg-slate-900/50 animate-pulse rounded-md" />
+                      <div key={i} className="h-6 bg-[var(--bg-app)] animate-pulse rounded-md" />
                     ))}
                   </div>
                 )}
@@ -187,8 +188,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                 <Link 
                   to="/courses" 
                   className={clsx(
-                    "flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 transition-all font-medium mb-1",
-                    location.pathname.startsWith("/courses") ? "text-primary bg-slate-900" : "text-slate-400 hover:text-white"
+                    "flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] transition-all font-medium mb-1",
+                    location.pathname.startsWith("/courses") ? "text-primary bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
                   )}
                   title="Explorar todos los cursos"
                 >
@@ -197,12 +198,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                 </Link>
 
                 {/* Course Categories (if not collapsed) */}
-                    <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mb-2">
+                    <div className="ml-4 pl-3 border-l border-[var(--border-color)] flex flex-col gap-1 mb-2">
                        <Link 
                          to="/courses/category/tecnologia-software" 
                          className={clsx(
                            "text-xs py-1.5 px-2 rounded-md transition-colors",
-                           location.pathname === "/courses/category/tecnologia-software" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                           location.pathname === "/courses/category/tecnologia-software" ? "text-primary font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                          )}
                        >
                          Tecnología & Software
@@ -211,7 +212,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                          to="/courses/category/finanzas-economia" 
                          className={clsx(
                            "text-xs py-1.5 px-2 rounded-md transition-colors",
-                           location.pathname === "/courses/category/finanzas-economia" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                           location.pathname === "/courses/category/finanzas-economia" ? "text-primary font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                          )}
                        >
                          Finanzas & Economía
@@ -220,7 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                          to="/courses/category/educacion-soft-skills" 
                          className={clsx(
                            "text-xs py-1.5 px-2 rounded-md transition-colors",
-                           location.pathname === "/courses/category/educacion-soft-skills" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                           location.pathname === "/courses/category/educacion-soft-skills" ? "text-primary font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                          )}
                        >
                          Educación & Soft Skills
@@ -229,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                          to="/courses/category/datos-analitica" 
                          className={clsx(
                            "text-xs py-1.5 px-2 rounded-md transition-colors",
-                           location.pathname === "/courses/category/datos-analitica" ? "text-primary font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                           location.pathname === "/courses/category/datos-analitica" ? "text-primary font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                          )}
                        >
                          Datos & Analítica
@@ -244,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
             <Link 
               to="/learning-paths" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
               title="Rutas de aprendizaje"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Map size={14} /></span>
@@ -253,7 +254,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
             <Link 
               to="/community" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
                title="Comunidad"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Users size={14} /></span>
@@ -262,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
             <Link 
               to="/certifications" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
                title="Certificaciones"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Award size={14} /></span>
@@ -273,11 +274,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
         {/* RECURSOS SECTION */}
         <div>
-          {!isCollapsed && <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Recursos</h2>}
+          {!isCollapsed && <h2 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-3">Recursos</h2>}
           <div className="space-y-1">
             <Link 
               to="/documentation" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
                title="Documentación"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Book size={14} /></span>
@@ -287,7 +288,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
              <div className="flex flex-col gap-1">
               <Link 
                 to="/blog" 
-                className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium group"
+                className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium group"
                 title="Blog"
               >
                 <div className="flex items-center gap-2">
@@ -297,12 +298,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
               </Link>
               
               {!isCollapsed && (
-                <div className="ml-4 pl-3 border-l border-slate-800 flex flex-col gap-1 mt-1">
+                <div className="ml-4 pl-3 border-l border-[var(--border-color)] flex flex-col gap-1 mt-1">
                   <Link 
                     to="/blog" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Todo
@@ -311,7 +312,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                     to="/blog/category/tecnologia-software" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog/category/tecnologia-software" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog/category/tecnologia-software" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Tecnología Software
@@ -320,7 +321,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                     to="/blog/category/medio-ambiente-sostenibilidad" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog/category/medio-ambiente-sostenibilidad" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog/category/medio-ambiente-sostenibilidad" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Medio Ambiente
@@ -329,7 +330,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                     to="/blog/category/fitness-salud" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog/category/fitness-salud" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog/category/fitness-salud" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Fitness & Salud
@@ -338,7 +339,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                     to="/blog/category/desarrollo-personal-psicologia" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog/category/desarrollo-personal-psicologia" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog/category/desarrollo-personal-psicologia" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)] hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Desarrollo Personal
@@ -347,7 +348,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                     to="/blog/category/finanzas-productividad" 
                     className={clsx(
                       "text-xs py-1.5 px-2 rounded-md transition-colors",
-                      location.pathname === "/blog/category/finanzas-productividad" ? "text-emerald-500 font-semibold bg-slate-900" : "text-slate-500 hover:bg-slate-900 hover:text-slate-300"
+                      location.pathname === "/blog/category/finanzas-productividad" ? "text-emerald-500 font-semibold bg-[var(--bg-app)]" : "text-[var(--text-muted)]/60 hover:bg-[var(--bg-app)] hover:text-[var(--text-main)]"
                     )}
                   >
                     Finanzas & Productividad
@@ -358,7 +359,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
             <Link 
               to="/support" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
                title="Soporte"
             >
               <span className="w-4 h-4 flex items-center justify-center"><LifeBuoy size={14} /></span>
@@ -367,7 +368,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
              <Link 
               to="/terms" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
                title="Términos"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Shield size={14} /></span>
@@ -376,7 +377,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
              
              <Link 
               to="/contact" 
-              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-100 transition-all font-medium mt-2"
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium mt-2"
                title="Contáctanos"
             >
               <span className="w-4 h-4 flex items-center justify-center"><Mail size={14} /></span>
@@ -386,27 +387,60 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
         </div>
       </nav>
 
-      <div className="p-4 border-t border-slate-900 flex flex-col gap-4">
-        <button 
-          onClick={logout}
-          className="flex items-center justify-center gap-2 w-full py-2 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all text-xs font-bold uppercase tracking-wider group"
-           title="Cerrar Sesión"
-        >
-          <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          {!isCollapsed && <span>Cerrar Sesión</span>}
-        </button>
-
-        <div className="flex justify-center">
-            <ThemeToggle isCollapsed={isCollapsed} />
+      <div className="p-4 border-t border-[var(--border-color)] flex flex-col gap-4">
+        {/* Integrated Account Card */}
+        <div className={cn(
+          "rounded-2xl bg-[var(--bg-app)]/50 border border-[var(--border-color)] overflow-hidden transition-all shadow-sm",
+          isCollapsed ? "p-1 space-y-1" : "p-0"
+        )}>
+          {isCollapsed ? (
+            <>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-emerald-500/10">
+                {user?.name?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <button 
+                onClick={logout}
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                title="Cerrar Sesión"
+              >
+                <LogOut size={14} />
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 p-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-base shrink-0 shadow-lg shadow-emerald-500/20">
+                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-bold text-[var(--text-main)] truncate">{user?.name || 'Estudiante'}</span>
+                  <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Plan Premium</span>
+                </div>
+              </div>
+              <button 
+                onClick={logout}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[var(--text-main)] text-[var(--bg-surface)] hover:bg-primary hover:text-white transition-all text-[11px] font-black uppercase tracking-[0.2em] group border-t border-[var(--border-color)]/20"
+              >
+                <LogOut size={14} className="group-hover:-translate-x-1 transition-transform" />
+                <span>Cerrar Sesión</span>
+              </button>
+            </>
+          )}
         </div>
-        <div className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-xl border border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+
+        <div className="flex items-center justify-center gap-4 py-4 px-2">
+            <ThemeToggle isCollapsed={isCollapsed} />
+            <AccessibilityMenu />
+        </div>
+        
+        <div className="flex items-center gap-3 p-2 bg-[var(--bg-app)]/30 rounded-xl border border-[var(--border-color)]/50">
+          <div className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] flex items-center justify-center border border-[var(--border-color)]/30">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-medium text-slate-300 whitespace-nowrap">LMS v1.0</span>
-              <span className="text-[10px] text-slate-500 whitespace-nowrap">Online</span>
+              <span className="text-[10px] font-bold text-[var(--text-main)] whitespace-nowrap opacity-80 uppercase tracking-tighter">LMS Core v1.0</span>
+              <span className="text-[9px] text-[var(--text-muted)] font-medium whitespace-nowrap uppercase tracking-widest">System Online</span>
             </div>
           )}
         </div>
