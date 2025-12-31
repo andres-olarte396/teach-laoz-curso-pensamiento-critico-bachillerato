@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { Layout } from './components/Layout';
 import { WelcomePage } from './pages/WelcomePage';
 import { CoursePage } from './pages/CoursePage';
+import { EvaluationPage } from './pages/EvaluationPage';
+import CertificatePage from './pages/CertificatePage';
+import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { BlogListPage } from './pages/Blog/BlogListPage';
@@ -30,7 +33,7 @@ import { DocumentationPage } from './pages/DocumentationPage';
 import { SupportPage } from './pages/SupportPage';
 import { TermsPage } from './pages/TermsPage';
 import { DocViewerPage } from './pages/DocViewerPage';
-import { EvaluationPage } from './pages/EvaluationPage';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
@@ -72,6 +75,8 @@ function App() {
                   <Route index element={<WelcomePage />} />
                   <Route path="course/*" element={<CoursePage />} />
                   <Route path="evaluation/*" element={<EvaluationPage />} />
+                  <Route path="certificate/:courseId" element={<CertificatePage />} />
+                  <Route path="profile" element={<ProfilePage />} />
                 </Route>
               </Route>
 

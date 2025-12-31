@@ -115,7 +115,20 @@ export class FileSystemCourseRepository {
   }
 
   private formatTitle(name: string): string {
-    let title = name.replace(/^(teach|laoz|curso|learning|system|courses?|educacion|[ ._-]+)/i, "").trim();
+    // 1. Remove extension
+    let title = name.replace(/\.[^/.]+$/, "");
+    
+    // 2. Aggressive multi-pass cleaning
+    const originalTitle = title;
+    let prevTitle;
+    do {
+      prevTitle = title;
+      title = title.replace(/^(teach|laoz|curso|learning|system|courses?|educacion|communication|[ ._-]+)/i, "").trim();
+    } while (title !== prevTitle && title.length > 0);
+    
+    if (title.length === 0) title = originalTitle;
+    
+    // 3. Spacing and Case
     title = title.replace(/[._-]/g, " ");
     return title.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()).trim();
   }

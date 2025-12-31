@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
-import type { MenuItem } from '../services/apiService';
+import { apiService, type MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -16,9 +16,10 @@ interface NavItemProps {
   item: MenuItem;
   depth?: number;
   isCollapsed?: boolean;
+  continuePath?: string;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false }) => {
+const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false, continuePath }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
   const isActive = location.pathname === `/course/${item.path}` || location.pathname === `/evaluation/${item.path}`;
@@ -33,40 +34,51 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
 
   return (
     <div className="flex flex-col">
-      <Link
-        to={
-          item.type === 'evaluation' 
-            ? `/evaluation/${item.path}` 
-            : (item.type === 'markdown' || item.type === 'binary' || item.type === 'html') 
-              ? `/course/${item.path}` 
-              : '#'
-        }
-        onClick={toggleOpen}
-        className={cn(
-          "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
-          isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)]",
-          isCollapsed && "justify-center"
-        )}
-        title={item.title}
-      >
-        <span className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
-          {hasChildren ? (
-            isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
-          ) : (
-            item.type === 'directory' ? <Folder size={14} /> : 
-            item.path.toLowerCase().endsWith('.mp4') ? <FileVideo size={14} className="text-blue-500" /> :
-            (item.path.toLowerCase().endsWith('.mp3') || item.path.toLowerCase().endsWith('.wav') || item.path.toLowerCase().endsWith('.ogg')) ? <FileAudio size={14} className="text-purple-500" /> :
-            item.path.toLowerCase().endsWith('.html') ? <FileCode size={14} className="text-orange-500" /> :
-            item.path.toLowerCase().endsWith('.pdf') ? <FileText size={14} className="text-red-500" /> :
-            <FileText size={14} />
+      <div className="group/nav relative">
+        <Link
+          to={
+            item.type === 'evaluation' 
+              ? `/evaluation/${item.path}` 
+              : (item.type === 'markdown' || item.type === 'binary' || item.type === 'html') 
+                ? `/course/${item.path}` 
+                : '#'
+          }
+          onClick={toggleOpen}
+          className={cn(
+            "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
+            isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)]",
+            isCollapsed && "justify-center"
           )}
-        </span>
-        {!isCollapsed && (
-          <span className="text-sm font-medium leading-tight break-words line-clamp-2">
-            {item.title}
+          title={item.title}
+        >
+          <span className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
+            {hasChildren ? (
+              isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />
+            ) : (
+              item.type === 'directory' ? <Folder size={14} /> : 
+              item.path.toLowerCase().endsWith('.mp4') ? <FileVideo size={14} className="text-blue-500" /> :
+              (item.path.toLowerCase().endsWith('.mp3') || item.path.toLowerCase().endsWith('.wav') || item.path.toLowerCase().endsWith('.ogg')) ? <FileAudio size={14} className="text-purple-500" /> :
+              item.path.toLowerCase().endsWith('.html') ? <FileCode size={14} className="text-orange-500" /> :
+              item.path.toLowerCase().endsWith('.pdf') ? <FileText size={14} className="text-red-500" /> :
+              <FileText size={14} />
+            )}
           </span>
+          {!isCollapsed && (
+            <span className="text-sm font-medium leading-tight break-words line-clamp-2 flex-1">
+              {item.title}
+            </span>
+          )}
+        </Link>
+
+        {(!isCollapsed && depth === 0 && continuePath) && (
+          <Link
+            to={continuePath.includes('evaluacion') ? `/evaluation/${continuePath}` : `/course/${continuePath}`}
+            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/nav:opacity-100 transition-all bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+          >
+            Continuar
+          </Link>
         )}
-      </Link>
+      </div>
       
       {!isCollapsed && hasChildren && isOpen && (
         <div className="mt-1 flex flex-col gap-1 ml-3 pl-2 border-l border-[var(--border-color)]">
@@ -87,11 +99,50 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen }) => {
   const { courses, loading, error } = useMenu();
   const { logout, user } = useAuth();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = React.useState(true);
+  const [inProgressCourseIds, setInProgressCourseIds] = React.useState<Set<string>>(new Set());
+  const [courseLatestLessons, setCourseLatestLessons] = React.useState<Record<string, string>>({});
+
+  // Fetch all progress to determine which courses to show in sidebar and where to continue
+  React.useEffect(() => {
+    const fetchProgress = async () => {
+      if (user) {
+        try {
+          const progress = await apiService.getAllProgress();
+          
+          // Map to find latest lesson for each course
+          const latestMap: Record<string, { path: string; date: Date }> = {};
+          const ids = new Set<string>();
+          
+          progress.forEach((p: any) => {
+            ids.add(p.courseId);
+            const pDate = new Date(p.lastAccessedAt);
+            if (!latestMap[p.courseId] || pDate > latestMap[p.courseId].date) {
+              latestMap[p.courseId] = { path: p.lessonId, date: pDate };
+            }
+          });
+
+          setInProgressCourseIds(ids);
+          
+          const finalMap: Record<string, string> = {};
+          Object.entries(latestMap).forEach(([id, data]) => {
+            finalMap[id] = data.path;
+          });
+          setCourseLatestLessons(finalMap);
+        } catch (err) {
+          console.error('Failed to fetch user progress:', err);
+        }
+      }
+    };
+    fetchProgress();
+  }, [user, location.pathname]); // Update on navigation too to refresh progress
+
+  // Filter courses: only show those that are in progress
+  const visibleCourses = courses.filter(course => inProgressCourseIds.has(course.id));
 
   // Close mobile menu when navigating
-  const location = useLocation();
   React.useEffect(() => {
     if (mobileIsOpen && setMobileIsOpen) {
       setMobileIsOpen(false);
@@ -242,8 +293,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                        </Link>
                     </div>
 
-                {courses.map((course) => (
-                  <NavItem key={course.id} item={course} isCollapsed={isCollapsed} />
+                {visibleCourses.map((course) => (
+                  <NavItem 
+                    key={course.id} 
+                    item={course} 
+                    isCollapsed={isCollapsed} 
+                    continuePath={courseLatestLessons[course.id]}
+                  />
                 ))}
                </>
              )}

@@ -36,4 +36,10 @@ export interface IContentRepository {
    * @param path Ruta relativa
    */
   getMetadata(path: string): Promise<ContentMetadata>;
+
+  /**
+   * Lista recursivamente todos los archivos de un directorio
+   * @param path Ruta relativa
+   */
+  listRecursive(path: string): Promise<ContentNode[]>;
 }

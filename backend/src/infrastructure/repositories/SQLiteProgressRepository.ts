@@ -42,6 +42,12 @@ export class SQLiteProgressRepository implements IProgressRepository {
     return this.mapRow(row);
   }
 
+  async findAllByUser(userId: string): Promise<UserProgress[]> {
+    const stmt = db.prepare(`SELECT * FROM user_progress WHERE user_id = ?`);
+    const rows = stmt.all(userId) as any[];
+    return rows.map(this.mapRow);
+  }
+
   private mapRow(row: any): UserProgress {
     return {
       userId: row.user_id,

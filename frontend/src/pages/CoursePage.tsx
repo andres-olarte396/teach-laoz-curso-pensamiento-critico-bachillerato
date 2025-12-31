@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
-import { 
-  Loader2, 
-  AlertCircle, 
-  ChevronLeft, 
-  ChevronRight, 
-  Volume2, 
-  Printer, 
-  Calendar, 
-  HardDrive,
-  Music, 
-  FileText, 
-  CheckSquare, 
-  Brain,
-  Zap,
-  Home,
-  ChevronRight as ChevronRightIcon
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronRight, 
+  ChevronLeft, 
+  Calendar, 
+  FileText, 
+  Award,
+  Loader2,
+  AlertCircle,
+  Volume2,
+  Printer,
+  Brain,
+  Music,
+  CheckSquare,
+  Home,
+  ChevronRight as ChevronRightIcon,
+  Zap,
+  HardDrive
+} from 'lucide-react';
 import { ContentRenderer } from '../components/ContentRenderer';
 import { useTts } from '../hooks/useTts';
 import { TtsFloatingControls } from '../components/TtsFloatingControls';
@@ -32,6 +33,7 @@ export const CoursePage: React.FC = () => {
   const [content, setContent] = useState<ContentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [courseCompletion, setCourseCompletion] = useState<{ percentage: number; total: number; completed: number } | null>(null);
   const [navContext, setNavContext] = useState<{ prev: MenuItem | null, next: MenuItem | null } | null>(null);
   const [showAudio, setShowAudio] = useState(false);
   const [showScript, setShowScript] = useState(false);
@@ -90,6 +92,12 @@ export const CoursePage: React.FC = () => {
       try {
         const data = await apiService.getContent(path);
         setContent(data);
+
+        // Fetch completion for this course
+        if (isAuthenticated) {
+          const completion = await apiService.getCourseCompletion(courseId);
+          setCourseCompletion(completion);
+        }
         
         // Fetch menu to calculate navigation context
         const menuData = await apiService.getMenu();
@@ -226,7 +234,35 @@ export const CoursePage: React.FC = () => {
             ))}
           </nav>
           
-          <div className="flex items-center justify-between gap-4 w-full">
+            {/* Certificate Banner */}
+            {courseCompletion?.percentage === 100 && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-10 p-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 rounded-[2rem] text-white shadow-2xl shadow-emerald-500/20 flex flex-col md:flex-row items-center justify-between gap-6 border border-white/20 relative overflow-hidden"
+              >
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="flex items-center gap-6 relative z-10">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 border border-white/30 shadow-inner">
+                    <Award size={40} className="text-white drop-shadow-lg" />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h3 className="text-2xl font-black uppercase tracking-widest leading-none mb-2">¡Curso Completado!</h3>
+                    <p className="text-white/90 font-medium text-sm max-w-md">Has demostrado un compromiso excepcional. Tu certificado oficial de finalización está listo.</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => navigate(`/certificate/${path?.split('/')[0]}`)}
+                  className="px-10 py-4 bg-white text-emerald-600 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:scale-105 transition-all shrink-0 shadow-xl active:scale-95"
+                >
+                  Obtener Certificado
+                </button>
+              </motion.div>
+            )}
+
+            <div className="flex items-center justify-between gap-4 w-full">
             {/* Prev Button (Top) */}
             <div className="flex-1 flex justify-start">
               {navContext?.prev && (

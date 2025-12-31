@@ -60,6 +60,16 @@ export const apiService = {
     return response.data;
   },
 
+  getAllProgress: async () => {
+    const response = await apiClient.get<any[]>('/progress/all');
+    return response.data;
+  },
+
+  getCourseCompletion: async (courseId: string) => {
+    const response = await apiClient.get<{ total: number; completed: number; percentage: number }>(`/progress/${courseId}/completion`);
+    return response.data;
+  },
+
   getConfig: async () => {
     const response = await apiClient.get<{ data: { social: { github: string, twitter: string, linkedin: string } } }>('/config');
     return response.data;

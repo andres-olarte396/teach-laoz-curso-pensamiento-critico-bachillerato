@@ -106,4 +106,20 @@ export class LocalFileSystemRepository implements IContentRepository {
     if (ext === '.html') return ContentType.HTML;
     return ContentType.BINARY;
   }
+
+  async listRecursive(relativePath: string): Promise<ContentNode[]> {
+    const results: ContentNode[] = [];
+    const walk = async (currentPath: string) => {
+      const items = await this.list(currentPath);
+      for (const item of items) {
+        if (item.isDirectory()) {
+          await walk(item.path.toString());
+        } else {
+          results.push(item);
+        }
+      }
+    };
+    await walk(relativePath);
+    return results;
+  }
 }

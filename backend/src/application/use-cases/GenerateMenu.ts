@@ -66,7 +66,7 @@ export class GenerateMenu {
     let prevTitle;
     do {
       prevTitle = title;
-      title = title.replace(/^(teach|laoz|curso|learning|system|courses?|educacion|[ ._-]+)/i, "").trim();
+      title = title.replace(/^(teach|laoz|curso|learning|system|courses?|educacion|communication|[ ._-]+)/i, "").trim();
     } while (title !== prevTitle && title.length > 0);
     
     // Fallback if cleaning removed everything
