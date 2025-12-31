@@ -2,31 +2,28 @@
 
 La categorización permite agrupar los cursos en la biblioteca y asignarles iconos visuales premium.
 
-## Categorías Unificadas
+# Categorización de Contenidos
 
-Para asegurar la consistencia, utiliza exactamente uno de los siguientes nombres en el campo `category` del frontmatter:
+La categorización es fundamental para que los estudiantes encuentren tu curso fácilmente. El sistema utiliza etiquetas estandarizadas para filtrar el árbol de contenidos.
 
-- **Tecnología & Software**: Cursos de programación, arquitectura, devops y bases de datos.
-- **Finanzas & Economía**: Inversiones, trading, economía personal y finanzas corporativas.
-- **Educación & Soft Skills**: Comunicación, pedagogía, liderazgo y habilidades blandas.
-- **Datos & Analítica**: Power BI, Excel avanzado, Data Science y estadística.
+## Categorías Disponibles
 
-## Ejemplo de Configuración
+| Categoría                   | Slug (En Frontmatter)   | Color UI    |
+| :-------------------------- | :---------------------- | :---------- |
+| **Tecnología & Software**   | `tecnologia-software`   | Emerald     |
+| **Finanzas & Economía**     | `finanzas-economia`     | Blue        |
+| **Educación & Soft Skills** | `educacion-soft-skills` | Amber       |
+| **Datos & Analítica**       | `datos-analitica`       | Purple/Cyan |
+
+## ¿Cómo se aplica?
+
+En el frontmatter de tu archivo principal (`README.md` o `INDICE.md`), añade la propiedad `category`:
 
 ```yaml
 ---
 category: "Tecnología & Software"
 ---
 ```
-
-## Slugs y Sidebar
-
-El Sidebar utiliza "Slugs" para filtrar los cursos. La plataforma normaliza automáticamente los nombres, pero es vital mantener los nombres exactos listados arriba para que los iconos SVG se carguen correctamente.
-
-- **Tecnología & Software** -> Icono: Engranajes / Código.
-- **Finanzas & Economía** -> Icono: Gráfico / Análisis.
-- **Educación & Soft Skills** -> Icono: Rayo / Libro.
-- **Datos & Analítica** -> Icono: Red / Nodos.
 
 > [!IMPORTANT]
 > Si una categoría no existe en el sistema, los cursos se agruparán bajo la categoría predeterminada **"General"**.
