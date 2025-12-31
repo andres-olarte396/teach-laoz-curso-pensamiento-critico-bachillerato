@@ -6,6 +6,7 @@ import { GenerateMenu } from '../../../application/use-cases/GenerateMenu.js';
 import { LocalFileSystemRepository } from '../../../infrastructure/repositories/LocalFileSystemRepository.js';
 import { UnifiedMarkdownRenderer } from '../../../infrastructure/services/UnifiedMarkdownRenderer.js';
 import { FileSystemCourseRepository } from '../../../infrastructure/repositories/FileSystemCourseRepository.js';
+import { GetEvaluation } from '../../../application/use-cases/GetEvaluation.js';
 import { env } from '../../../infrastructure/config/environment.js';
 import path from 'path';
 
@@ -14,6 +15,7 @@ export class ContentController {
   private readonly getContent: GetContent;
   private readonly renderMarkdown: RenderMarkdown;
   private readonly generateMenu: GenerateMenu;
+  private readonly getEvaluationUseCase: GetEvaluation;
   private readonly courseRepository: FileSystemCourseRepository;
 
   constructor() {
@@ -25,6 +27,7 @@ export class ContentController {
     this.getContent = new GetContent(repository);
     this.renderMarkdown = new RenderMarkdown(this.getContent, markdownRenderer);
     this.generateMenu = new GenerateMenu(repository);
+    this.getEvaluationUseCase = new GetEvaluation(repository, markdownRenderer);
     
     // The CONTENT_BASE_PATH is usually ./content/courses
     this.courseRepository = new FileSystemCourseRepository(path.resolve(env.CONTENT_BASE_PATH));
@@ -71,6 +74,16 @@ export class ContentController {
         return reply.send(result);
       }
       throw error;
+    }
+  }
+
+  async getEvaluation(request: FastifyRequest<{ Params: { '*': string } }>, reply: FastifyReply) {
+    const path = request.params['*'] || '';
+    try {
+      const evaluation = await this.getEvaluationUseCase.execute(path);
+      return reply.send(evaluation);
+    } catch (error) {
+      return reply.code(404).send({ message: 'Evaluation not found or malformed' });
     }
   }
 }

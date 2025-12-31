@@ -2,10 +2,12 @@ import { FastifyInstance } from 'fastify';
 import { ContentController } from '../controllers/ContentController.js';
 import { ContactController } from '../controllers/ContactController.js';
 import { DocController } from '../controllers/DocController.js';
+import { EventsController } from '../controllers/EventsController.js';
 
 export async function contentRoutes(app: FastifyInstance) {
   const controller = new ContentController();
   const docController = new DocController();
+  const eventsController = new EventsController();
 
   // Test Route
   app.get('/ping', async () => ({ status: 'ok', message: 'pong', timestamp: new Date().toISOString() }));
@@ -161,4 +163,78 @@ export async function contentRoutes(app: FastifyInstance) {
       },
     },
   }, controller.getContentByPath.bind(controller));
+
+  // Evaluation Schema
+  app.get('/evaluation/*', {
+    schema: {
+      tags: ['Content'],
+      summary: 'Get structured evaluation (quiz) by path',
+      params: {
+        type: 'object',
+        properties: {
+          '*': { type: 'string' },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            title: { type: 'string' },
+            questions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  text: { type: 'string' },
+                  options: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        text: { type: 'string' }
+                      }
+                    }
+                  },
+                  correctAnswerId: { type: 'string' },
+                  feedback: { type: 'string' }
+                }
+              }
+            },
+            metadata: { type: 'object', additionalProperties: true }
+          }
+        },
+      },
+    },
+  }, controller.getEvaluation.bind(controller));
+
+  // Telemetry / Events Route
+  app.post('/events', {
+    schema: {
+      tags: ['Telemetry'],
+      summary: 'Track learning events',
+      body: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string' },
+          organizationId: { type: 'string' },
+          courseId: { type: 'string' },
+          lessonId: { type: 'string' },
+          type: { type: 'string', enum: ['course_started', 'lesson_viewed', 'lesson_completed', 'evaluation_started', 'evaluation_submitted'] },
+          metadata: { type: 'object', additionalProperties: true }
+        },
+        required: ['userId', 'courseId', 'type']
+      },
+      response: {
+        201: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' }
+          }
+        }
+      }
+    }
+  }, eventsController.track.bind(eventsController));
 }
