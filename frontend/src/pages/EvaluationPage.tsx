@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService';
+import type { MenuItem } from '../services/apiService';
 import { Loader2, AlertCircle, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { QuizComponent } from '../components/QuizComponent';
@@ -12,6 +13,8 @@ export const EvaluationPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [navContext, setNavContext] = useState<{ prev: MenuItem | null, next: MenuItem | null } | null>(null);
+
   useEffect(() => {
     const fetchEvaluation = async () => {
       if (!path) return;
@@ -19,6 +22,32 @@ export const EvaluationPage: React.FC = () => {
         setLoading(true);
         const data = await apiService.getEvaluation(path);
         setEvaluation(data);
+
+        // Fetch menu to calculate navigation context (next lesson)
+        const courseId = path.split('/')[0];
+        const menuData = await apiService.getMenu();
+        const course = menuData.courses.find(c => c.id === courseId);
+        
+        if (course) {
+          const flatItems: MenuItem[] = [];
+          const flatten = (items: MenuItem[]) => {
+            items.forEach(item => {
+              if (item.type === 'markdown' || item.type === 'evaluation') {
+                flatItems.push(item);
+              }
+              if (item.children) {
+                flatten(item.children);
+              }
+            });
+          };
+          flatten([course]);
+          
+          const currentIndex = flatItems.findIndex(item => item.path === path);
+          setNavContext({
+            prev: currentIndex > 0 ? flatItems[currentIndex - 1] : null,
+            next: currentIndex < flatItems.length - 1 ? flatItems[currentIndex + 1] : null
+          });
+        }
       } catch (err: any) {
         setError(err.response?.data?.message || 'Error al cargar la evaluación');
       } finally {
@@ -92,6 +121,7 @@ export const EvaluationPage: React.FC = () => {
                 title={evaluation.title} 
                 questions={evaluation.questions} 
                 onComplete={handleQuizComplete}
+                nextLesson={navContext?.next}
             />
         </motion.div>
       </div>

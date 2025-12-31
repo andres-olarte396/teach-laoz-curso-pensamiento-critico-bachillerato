@@ -1,34 +1,32 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 interface UseTtsOptions {
   contentSelector?: string;
   onEnd?: () => void;
   lang?: string;
-  rate?: number;
 }
 
 export const useTts = (options: UseTtsOptions = {}) => {
   const {
     contentSelector = '.content-area',
     lang = 'es-ES',
-    onEnd,
-    rate: rateOption = 1.0
+    onEnd
   } = options;
+
+  const { settings, updateTtsVoice, updateTtsRate } = useAccessibility();
+  const { ttsVoiceURI: selectedVoiceURI, ttsRate: rate } = settings;
 
   const [isReading, setIsReading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(localStorage.getItem('tts-preferred-voice'));
-  const [rate, setRateState] = useState(parseFloat(localStorage.getItem('tts-rate') || rateOption.toString()));
   
   const setRate = useCallback((newRate: number) => {
-    setRateState(newRate);
-    localStorage.setItem('tts-rate', newRate.toString());
-    
+    updateTtsRate(newRate);
     if (readingActive.current) {
         window.speechSynthesis.cancel();
     }
-  }, []);
+  }, [updateTtsRate]);
   
   const readingActive = useRef(false);
   const currentIndexRef = useRef(0);
@@ -40,15 +38,14 @@ export const useTts = (options: UseTtsOptions = {}) => {
   useEffect(() => {
     const loadVoices = () => {
       const allVoices = window.speechSynthesis.getVoices();
-      // Filter for Spanish or specific lang
       const esVoices = allVoices.filter(v => v.lang.startsWith('es'));
       setAvailableVoices(esVoices);
       
-      // If no preferred voice is set, try to find a "natural" or "google" one by default
-      if (!localStorage.getItem('tts-preferred-voice')) {
+      // Initialize if not set
+      if (!selectedVoiceURI && esVoices.length > 0) {
         const preferred = esVoices.find(v => v.name.includes('Google') || v.name.includes('Natural')) || esVoices[0];
         if (preferred) {
-          setSelectedVoiceURI(preferred.voiceURI);
+          updateTtsVoice(preferred.voiceURI);
         }
       }
     };
@@ -58,12 +55,11 @@ export const useTts = (options: UseTtsOptions = {}) => {
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
     };
-  }, []);
+  }, [selectedVoiceURI, updateTtsVoice]);
 
   const setVoice = useCallback((voiceURI: string) => {
-    setSelectedVoiceURI(voiceURI);
-    localStorage.setItem('tts-preferred-voice', voiceURI);
-  }, []);
+    updateTtsVoice(voiceURI);
+  }, [updateTtsVoice]);
 
   const clearHighlights = useCallback(() => {
     document.querySelectorAll('.reading-highlight, .reading-word-highlight, .tts-word').forEach(el => {

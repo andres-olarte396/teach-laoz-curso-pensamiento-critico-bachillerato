@@ -10,13 +10,17 @@ interface Question {
   feedback?: string;
 }
 
+import type { MenuItem } from '../services/apiService';
+import { Link } from 'react-router-dom';
+
 interface QuizComponentProps {
   title: string;
   questions: Question[];
   onComplete?: (score: number) => void;
+  nextLesson?: MenuItem | null;
 }
 
-export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, onComplete }) => {
+export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, onComplete, nextLesson }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -87,9 +91,17 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
             >
                 <RotateCcw size={18} /> Reintentar
             </button>
+            {nextLesson && (
+              <Link 
+                  to={nextLesson.type === 'evaluation' ? `/evaluation/${nextLesson.path}` : `/course/${nextLesson.path}`}
+                  className="flex items-center justify-center gap-2 px-10 py-4 rounded-full bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+              >
+                  Siguiente Lección <ChevronRight size={18} />
+              </Link>
+            )}
             <button 
                 onClick={() => window.history.back()}
-                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-main)] font-bold uppercase tracking-wider hover:bg-[var(--bg-surface)] transition-all shadow-sm"
+                className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-main)] font-bold uppercase tracking-wider hover:bg-[var(--bg-surface)] transition-all shadow-sm text-xs"
             >
                 Regresar al Curso
             </button>

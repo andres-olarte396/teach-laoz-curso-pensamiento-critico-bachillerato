@@ -5,7 +5,6 @@ import type { MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { ThemeToggle } from './ThemeToggle';
 import { AccessibilityMenu } from './AccessibilityMenu';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,7 +34,13 @@ const NavItem: React.FC<NavItemProps> = ({ item, depth = 0, isCollapsed = false 
   return (
     <div className="flex flex-col">
       <Link
-        to={(item.type === 'markdown' || item.type === 'binary' || item.type === 'html') ? `/course/${item.path}` : '#'}
+        to={
+          item.type === 'evaluation' 
+            ? `/evaluation/${item.path}` 
+            : (item.type === 'markdown' || item.type === 'binary' || item.type === 'html') 
+              ? `/course/${item.path}` 
+              : '#'
+        }
         onClick={toggleOpen}
         className={cn(
           "flex items-center gap-2 py-2 px-3 rounded-lg transition-all duration-200 group relative",
@@ -95,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
 
   return (
     <aside className={cn(
-      "h-screen border-r border-[var(--border-color)] bg-[var(--bg-surface)] flex flex-col sticky top-0 print:hidden text-[var(--text-main)] transition-all duration-300",
+      "h-screen border-r border-[var(--border-color)] bg-[var(--bg-surface)] flex flex-col sticky top-0 z-50 print:hidden text-[var(--text-main)] transition-all duration-300",
       isCollapsed ? "w-20" : "w-72",
       // Simple mobile visibility toggle
       "hidden lg:flex",
@@ -428,8 +433,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-4 py-4 px-2">
-            <ThemeToggle isCollapsed={isCollapsed} />
+        <div className="flex items-center justify-center py-4 px-2">
             <AccessibilityMenu />
         </div>
         

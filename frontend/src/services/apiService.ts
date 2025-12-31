@@ -3,6 +3,7 @@ import { API_BASE_URL } from '../config/apiConfig';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -12,7 +13,7 @@ export interface MenuItem {
   id: string;
   title: string;
   path: string;
-  type: 'directory' | 'markdown' | 'binary' | 'html';
+  type: 'directory' | 'markdown' | 'binary' | 'html' | 'evaluation';
   children?: MenuItem[];
 }
 
@@ -46,6 +47,16 @@ export const apiService = {
   
   getContent: async (path: string) => {
     const response = await apiClient.get<ContentResponse>(`/content/${path}`);
+    return response.data;
+  },
+
+  saveProgress: async (courseId: string, lessonId: string, completed?: boolean) => {
+    const response = await apiClient.post('/progress', { courseId, lessonId, completed });
+    return response.data;
+  },
+
+  getProgress: async (courseId: string) => {
+    const response = await apiClient.get<{ latest: any; all: any[] }>(`/progress/${courseId}`);
     return response.data;
   },
 

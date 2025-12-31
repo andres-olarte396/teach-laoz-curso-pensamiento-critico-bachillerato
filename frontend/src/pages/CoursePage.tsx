@@ -2,7 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import type { ContentResponse, MenuItem } from '../services/apiService';
-import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon, Volume2 } from 'lucide-react';
+import { 
+  Loader2, 
+  AlertCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  Volume2, 
+  Printer, 
+  Calendar, 
+  HardDrive,
+  Music, 
+  FileText, 
+  CheckSquare, 
+  Brain,
+  Zap,
+  Home,
+  ChevronRight as ChevronRightIcon
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentRenderer } from '../components/ContentRenderer';
 import { useTts } from '../hooks/useTts';
@@ -83,7 +99,7 @@ export const CoursePage: React.FC = () => {
           const flatItems: MenuItem[] = [];
           const flatten = (items: MenuItem[]) => {
             items.forEach(item => {
-              if (item.type === 'markdown') {
+              if (item.type === 'markdown' || item.type === 'evaluation') {
                 flatItems.push(item);
               }
               if (item.children) {
@@ -215,7 +231,7 @@ export const CoursePage: React.FC = () => {
             <div className="flex-1 flex justify-start">
               {navContext?.prev && (
                 <Link 
-                  to={`/course/${navContext.prev.path}`}
+                  to={navContext.prev.type === 'evaluation' ? `/evaluation/${navContext.prev.path}` : `/course/${navContext.prev.path}`}
                   className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all group text-[10px] font-black uppercase tracking-[0.15em] shadow-sm"
                   title={navContext.prev.title}
                 >
@@ -268,7 +284,7 @@ export const CoursePage: React.FC = () => {
             <div className="flex-1 flex justify-end items-center gap-2 sm:gap-4">
               {navContext?.next && (
                 <Link 
-                  to={`/course/${navContext.next.path}`}
+                  to={navContext.next.type === 'evaluation' ? `/evaluation/${navContext.next.path}` : `/course/${navContext.next.path}`}
                   className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-[var(--bg-app)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)]/30 transition-all group text-[10px] font-black uppercase tracking-[0.15em] shadow-sm"
                   title={navContext.next.title}
                 >
@@ -281,8 +297,30 @@ export const CoursePage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Content Section */}
+ 
+         {/* Evaluation Call-to-Action */}
+         {path?.toLowerCase().includes('evaluacion') && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.98 }}
+             animate={{ opacity: 1, scale: 1 }}
+             className="mt-4 p-8 rounded-3xl bg-purple-500/10 border border-purple-500/20 text-center flex flex-col items-center gap-4 shadow-sm"
+           >
+             <Brain className="text-purple-500" size={40} />
+             <div className="space-y-1">
+               <h3 className="text-xl font-bold text-white">¡Evaluación Detectada!</h3>
+               <p className="text-sm text-slate-400">Este contenido es un examen interactivo. Para una mejor experiencia, inícialo en el modo dedicado.</p>
+             </div>
+             <Link 
+               to={`/evaluation/${path}`}
+               className="mt-2 flex items-center gap-2 px-8 py-4 rounded-2xl bg-purple-500 text-white hover:bg-purple-600 transition-all font-black uppercase tracking-widest text-xs shadow-lg shadow-purple-500/20"
+             >
+               <Zap size={16} fill="currentColor" />
+               Comenzar Examen
+             </Link>
+           </motion.div>
+         )}
+ 
+         {/* Content Section */}
         <ContentRenderer 
           html={content.html || ''} 
           path={path}
@@ -346,14 +384,13 @@ export const CoursePage: React.FC = () => {
                 )}
               </div>
             )}
-
         </div>
 
         {/* Sequential Navigation */}
         <div className="mt-8 flex flex-row flex-nowrap items-stretch justify-between gap-1.5 sm:gap-4 print:hidden text-sm">
           {navContext?.prev ? (
             <Link 
-              to={`/course/${navContext.prev.path}`}
+              to={navContext.prev.type === 'evaluation' ? `/evaluation/${navContext.prev.path}` : `/course/${navContext.prev.path}`}
               className="flex-1 min-w-0 flex items-center justify-start gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
               title={navContext.prev.title}
             >
@@ -377,7 +414,7 @@ export const CoursePage: React.FC = () => {
 
           {navContext?.next ? (
             <Link 
-              to={`/course/${navContext.next.path}`}
+              to={navContext.next.type === 'evaluation' ? `/evaluation/${navContext.next.path}` : `/course/${navContext.next.path}`}
               className="flex-1 min-w-0 flex items-center justify-end gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm text-right"
               title={navContext.next.title}
             >

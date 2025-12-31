@@ -35,7 +35,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkAuth = async () => {
     try {
       // We need to add a method to apiService or use fetch directly
-      const response = await fetch('/api/auth/me');
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include'
+      });
       if (response.ok) {
          const data = await response.json();
          setUser(data.user);

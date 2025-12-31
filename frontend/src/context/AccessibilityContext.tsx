@@ -5,6 +5,8 @@ interface AccessibilitySettings {
   lineSpacing: number; // Multiplier for line height
   dyslexicFont: boolean;
   highContrast: boolean;
+  ttsVoiceURI: string | null;
+  ttsRate: number;
 }
 
 interface AccessibilityContextType {
@@ -13,6 +15,8 @@ interface AccessibilityContextType {
   updateLineSpacing: (spacing: number) => void;
   toggleDyslexicFont: () => void;
   toggleHighContrast: () => void;
+  updateTtsVoice: (uri: string) => void;
+  updateTtsRate: (rate: number) => void;
   resetSettings: () => void;
 }
 
@@ -21,6 +25,8 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   lineSpacing: 1.6,
   dyslexicFont: false,
   highContrast: false,
+  ttsVoiceURI: null,
+  ttsRate: 1,
 };
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
@@ -56,6 +62,8 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
   const updateLineSpacing = (lineSpacing: number) => setSettings(prev => ({ ...prev, lineSpacing }));
   const toggleDyslexicFont = () => setSettings(prev => ({ ...prev, dyslexicFont: !prev.dyslexicFont }));
   const toggleHighContrast = () => setSettings(prev => ({ ...prev, highContrast: !prev.highContrast }));
+  const updateTtsVoice = (ttsVoiceURI: string) => setSettings(prev => ({ ...prev, ttsVoiceURI }));
+  const updateTtsRate = (ttsRate: number) => setSettings(prev => ({ ...prev, ttsRate }));
   const resetSettings = () => setSettings(DEFAULT_SETTINGS);
 
   return (
@@ -65,7 +73,9 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
             updateFontSize, 
             updateLineSpacing, 
             toggleDyslexicFont, 
-            toggleHighContrast, 
+            toggleHighContrast,
+            updateTtsVoice,
+            updateTtsRate,
             resetSettings 
         }}
     >
