@@ -5,13 +5,14 @@ import type { ContentResponse, MenuItem } from '../services/apiService';
 import { Loader2, AlertCircle, Calendar, HardDrive, ChevronLeft, ChevronRight, Printer, Home, Music, FileText, CheckSquare, Brain, ChevronRight as ChevronRightIcon, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContentRenderer } from '../components/ContentRenderer';
-
 import { useTts } from '../hooks/useTts';
 import { TtsFloatingControls } from '../components/TtsFloatingControls';
+import { useAuth } from '../context/AuthContext';
 
 export const CoursePage: React.FC = () => {
   const { '*' : path } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [content, setContent] = useState<ContentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +31,6 @@ export const CoursePage: React.FC = () => {
     stopReading,
     seekForward,
     seekBackward,
-    setVoice,
-    rate,
-    setRate
   } = useTts({
     contentSelector: '.content-area'
   });
@@ -52,6 +50,23 @@ export const CoursePage: React.FC = () => {
   useEffect(() => {
     const fetchContent = async () => {
       if (!path) return;
+      
+      const courseId = path.split('/')[0];
+      const isCourseRoot = path === courseId || path === `${courseId}/` || path.endsWith('INDICE.md') || path.endsWith('README.md');
+
+      // 1. If at course root and authenticated, check for progress to resume
+      if (isCourseRoot && isAuthenticated) {
+        try {
+          const progress = await apiService.getProgress(courseId);
+          if (progress.latest && progress.latest.lessonId !== path) {
+            navigate(`/course/${progress.latest.lessonId}`, { replace: true });
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to fetch progress:', err);
+        }
+      }
+
       setLoading(true);
       setError(null);
       stopReading();
@@ -62,7 +77,6 @@ export const CoursePage: React.FC = () => {
         
         // Fetch menu to calculate navigation context
         const menuData = await apiService.getMenu();
-        const courseId = path.split('/')[0];
         const course = menuData.courses.find(c => c.id === courseId);
         
         if (course) {
@@ -85,9 +99,15 @@ export const CoursePage: React.FC = () => {
             next: currentIndex < flatItems.length - 1 ? flatItems[currentIndex + 1] : null
           });
 
+          // 2. Save progress if authenticated and it's a markdown lesson
+          if (isAuthenticated && data.type === 'markdown') {
+             apiService.saveProgress(courseId, path, false)
+              .catch(err => console.error('Failed to save progress:', err));
+          }
+
           // Telemetry: Track lesson view
           apiService.trackEvent({
-            userId: 'anonymous_user', // Placeholder for upcoming Auth Phase
+            userId: user?.id || 'anonymous_user',
             organizationId: 'default_org',
             courseId: courseId,
             lessonId: path,
@@ -106,7 +126,7 @@ export const CoursePage: React.FC = () => {
     };
 
     fetchContent();
-  }, [path]);
+  }, [path, isAuthenticated, navigate, stopReading, user?.id]);
 
   if (loading) {
     return (
@@ -159,9 +179,6 @@ export const CoursePage: React.FC = () => {
         onSeekBackward={seekBackward}
         availableVoices={availableVoices}
         selectedVoiceURI={selectedVoiceURI}
-        onVoiceChange={setVoice}
-        rate={rate}
-        onRateChange={setRate}
       />
 
       <AnimatePresence mode="wait">
@@ -212,13 +229,15 @@ export const CoursePage: React.FC = () => {
 
             {/* Center Actions */}
             <div className="flex items-center gap-2">
-              {/* Universal Back Button */}
-              <button 
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all text-[10px] font-black uppercase tracking-[0.15em] shadow-sm whitespace-nowrap"
-              >
-                <ChevronLeft size={14} /> REGRESAR
-              </button>
+              {/* Universal Back Button - Only shown if there is no "Previous" lesson button */}
+              {!navContext?.prev && (
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all text-[10px] font-black uppercase tracking-[0.15em] shadow-sm whitespace-nowrap"
+                >
+                  <ChevronLeft size={14} /> REGRESAR
+                </button>
+              )}
 
               {!isReading ? (
                 <button 
@@ -331,17 +350,17 @@ export const CoursePage: React.FC = () => {
         </div>
 
         {/* Sequential Navigation */}
-        <div className="mt-8 flex flex-col sm:flex-row items-stretch justify-between gap-4 print:hidden text-sm">
+        <div className="mt-8 flex flex-row flex-nowrap items-stretch justify-between gap-1.5 sm:gap-4 print:hidden text-sm">
           {navContext?.prev ? (
             <Link 
               to={`/course/${navContext.prev.path}`}
-              className="flex-1 min-w-0 flex items-center justify-start gap-3 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
+              className="flex-1 min-w-0 flex items-center justify-start gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
               title={navContext.prev.title}
             >
               <ChevronLeft size={16} className="shrink-0 group-hover:-translate-x-1 transition-transform" />
               <div className="flex flex-col items-start overflow-hidden">
-                 <span className="text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Anterior</span>
-                 <span className="font-bold uppercase tracking-wide truncate w-full">{navContext.prev.title}</span>
+                 <span className="text-[8px] sm:text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Anterior</span>
+                 <span className="hidden sm:block font-bold uppercase tracking-wide truncate w-full text-[10px]">{navContext.prev.title}</span>
               </div>
             </Link>
           ) : <div className="flex-1" />}
@@ -349,22 +368,22 @@ export const CoursePage: React.FC = () => {
           {/* Back to Top */}
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="shrink-0 flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
+            className="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm"
             title="Volver arriba"
           >
             <ChevronLeft size={16} className="rotate-90 group-hover:-translate-y-1 transition-transform" />
-            <span className="font-bold uppercase tracking-widest text-[10px]">Subir</span>
+            <span className="font-bold uppercase tracking-widest text-[9px] sm:text-[10px]">Subir</span>
           </button>
 
           {navContext?.next ? (
             <Link 
               to={`/course/${navContext.next.path}`}
-              className="flex-1 min-w-0 flex items-center justify-end gap-3 px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm text-right"
+              className="flex-1 min-w-0 flex items-center justify-end gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 rounded-full bg-[var(--bg-surface)] border border-[var(--border-color)] hover:border-[var(--color-primary)] hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--color-primary)] transition-all group shadow-sm text-right"
               title={navContext.next.title}
             >
               <div className="flex flex-col items-end overflow-hidden">
-                 <span className="text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Siguiente</span>
-                 <span className="font-bold uppercase tracking-wide truncate w-full">{navContext.next.title}</span>
+                 <span className="text-[8px] sm:text-[9px] font-extrabold opacity-50 uppercase tracking-widest">Siguiente</span>
+                 <span className="hidden sm:block font-bold uppercase tracking-wide truncate w-full text-[10px]">{navContext.next.title}</span>
               </div>
               <ChevronRight size={16} className="shrink-0 group-hover:translate-x-1 transition-transform" />
             </Link>
