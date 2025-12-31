@@ -47,6 +47,16 @@ export const errorHandler = (error: Error, _request: FastifyRequest, reply: Fast
     });
   }
 
+  // Handle standard Fastify errors or errors with statusCode (like JWT errors)
+  if ((error as any).statusCode) {
+    return reply.status((error as any).statusCode).send({
+      error: (error as any).name || 'Error',
+      message: error.message,
+      code: (error as any).code || 'HTTP_ERROR',
+    });
+  }
+
+
   return reply.status(500).send({
     error: 'Internal Server Error',
     message: 'An unexpected error occurred',
