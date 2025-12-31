@@ -26,14 +26,12 @@ export class MarkdownEvaluationParser {
     let currentSection: 'none' | 'ficha' | 'cuestionario' | 'solucionario' = 'none';
     let currentQuestion: Partial<Question> | null = null;
 
-    // Si no hay secciones explícitas, empezamos asumiendo cuestionario
     if (!markdown.includes('## FICHA TÉCNICA') && !markdown.includes('## CUESTIONARIO')) {
       currentSection = 'cuestionario';
     }
 
     const pushQuestion = () => {
       if (currentQuestion && currentQuestion.text) {
-        // Solo pushear si tiene texto, las opciones podrían venir después o estar implícitas
         questions.push(currentQuestion as Question);
         currentQuestion = null;
       }
@@ -68,9 +66,8 @@ export class MarkdownEvaluationParser {
             }
         }
 
-        // Procesar CUESTIONARIO (O detección automática si no hay secciones)
+        // Procesar CUESTIONARIO
         if (currentSection === 'cuestionario' || currentSection === 'none') {
-            // Soporte para "### Pregunta X", "## Pregunta X", "### Question X"
             const questionMatch = line.match(/^(?:###?|##)\s*(?:Pregunta|Question)\s*(\d+)?:?\s*(.*)/i);
             
             if (questionMatch) {
@@ -85,10 +82,9 @@ export class MarkdownEvaluationParser {
                 const optionMatch = line.match(/^(?:[-*]\s+)?([a-d1-4])(?:\.|\))\s+(.*)/i);
                 
                 if (optionMatch) {
-                    const optId = optionMatch[1].toLowerCase();
+                    const optId = optionMatch[1].toLowerCase().trim();
                     let optText = optionMatch[2].trim();
                     
-                    // Detección inline de respuesta correcta: "a) Texto (Correcta)" o "a) **Texto**"
                     let isCorrect = false;
                     if (optText.includes('(Correcta)') || optText.includes('(Correcto)') || (optText.startsWith('**') && optText.endsWith('**'))) {
                         isCorrect = true;
@@ -100,7 +96,6 @@ export class MarkdownEvaluationParser {
                         currentQuestion.correctAnswerId = optId;
                     }
                 } else if (line !== '' && !line.startsWith('---')) {
-                    // Acumular texto de la pregunta
                     if (currentQuestion.text) {
                         currentQuestion.text += '\n' + line;
                     } else {
@@ -110,7 +105,7 @@ export class MarkdownEvaluationParser {
             }
         }
 
-        // Procesar SOLUCIONARIO explicito
+        // Procesar SOLUCIONARIO explicito - Mas flexible
         if (currentSection === 'solucionario' && line.startsWith('### Respuesta')) {
             const qNumMatch = line.match(/Respuesta (\d+)/);
             if (qNumMatch) {
@@ -118,9 +113,11 @@ export class MarkdownEvaluationParser {
                 const targetQuestion = questions[qIndex];
                 
                 if (targetQuestion) {
-                    const ansMatch = line.match(/\*\*([a-d1-4])(?:\.|\))\s*(\*\*)?/i);
+                    // Buscar la letra de la respuesta mas agresivamente
+                    // Soporta: **B) Mito**, B) Mito, **B**, B.
+                    const ansMatch = line.match(/(?:\*\*)?([a-d1-4])(?:\.|\))\s*(?:\*\*)?/i);
                     if (ansMatch) {
-                        targetQuestion.correctAnswerId = ansMatch[1].toLowerCase();
+                        targetQuestion.correctAnswerId = ansMatch[1].toLowerCase().trim();
                     }
 
                     // Buscar justificación
@@ -150,10 +147,10 @@ export class MarkdownEvaluationParser {
       throw new Error('No questions found in evaluation markdown. Ensure questions start with "### Pregunta X"');
     }
 
-    // Renderizar
-    console.log(`[Parser] Processing evaluation: "${title}" with ${questions.length} questions`);
+    // Renderizar y Log Final
+    console.log(`[Parser] Evaluation parsed: "${title}" (${questions.length} questions)`);
     for (const question of questions) {
-        console.log(`[Parser] Q: "${question.id}" - Correct: "${question.correctAnswerId}" - Options: ${question.options.length}`);
+        console.log(`[Parser] Q:${question.id} CorrectID:[${question.correctAnswerId}] Options:[${question.options.map(o => o.id).join(',')}]`);
         question.text = await this.markdownRenderer.render(question.text);
         if (question.feedback) {
             question.feedback = await this.markdownRenderer.render(question.feedback);
