@@ -58,10 +58,11 @@ export const AccessibilityMenu: React.FC = () => {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-primary hover:bg-primary/5 hover:scale-105 transition-all border border-[var(--border-color)] shadow-sm"
-        title="Personalización y Accesibilidad"
+        className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-surface)] rounded-md transition-colors"
+        title="Accesibilidad"
       >
-        <Settings size={20} />
+        <span className="sr-only">Menú de accesibilidad</span>
+        <Settings size={16} />
       </button>
 
       {isOpen && (

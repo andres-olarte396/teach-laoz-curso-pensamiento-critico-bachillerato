@@ -94,6 +94,30 @@ const StaticContent: React.FC<{
               const cleanCode = decodeHtml(textContent)
                 .replace(/\\n/g, "\n")
                 .replace(/\\"/g, '"')
+                // Fix: Escape brackets and parentheses in node labels if they cause issues, 
+                // OR wrap content in quotes if it looks like a node definition
+                // Heuristic: Replace Id[Content] with Id["Content"] if Content has special chars and no quotes
+                .replace(/([A-Za-z0-9_]+)\[(?!")(.+?)(?!")\]/g, (match, id, content) => {
+                   // If content already has quotes or is simple, leave it.
+                   // But if it has () or [] inside, quote it.
+                   if (content.match(/[()[\]]/)) {
+                     return `${id}["${content.replace(/"/g, "'")}"]`;
+                   }
+                   return match;
+                })
+                 // Also handle () for rounded edges: Id(Content) -> Id("Content")
+                .replace(/([A-Za-z0-9_]+)\((?!")(.+?)(?!")\)/g, (match, id, content) => {
+                   if (content.match(/[()[\]]/)) {
+                      return `${id}("${content.replace(/"/g, "'")}")`;
+                   }
+                   return match;
+                })
+                // Fix: Remove backslashes that shouldn't be there, esp before <, >, or -
+                .replace(/\\</g, "<")
+                .replace(/\\>/g, ">")
+                .replace(/\\-/g, "-") // Fix for potential -\-> or ->\<-
+                // Fix: Ensure gitGraph tags are quoted
+                .replace(/tag:\s*(?!")([a-zA-Z0-9_.-]+)/g, 'tag: "$1"')
                 .trim()
                 .replace(/^"|"$/g, "")
                 .replace(/^'|'$/g, "")

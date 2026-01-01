@@ -448,59 +448,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
         </div>
       </nav>
 
-      <div className="p-4 border-t border-[var(--border-color)] flex flex-col gap-4">
-        {/* Integrated Account Card */}
+      <div className="border-t border-[var(--border-color)] bg-[var(--bg-surface)]">
         <div className={cn(
-          "rounded-2xl bg-[var(--bg-app)]/50 border border-[var(--border-color)] overflow-hidden transition-all shadow-sm",
-          isCollapsed ? "p-1 space-y-1" : "p-0"
+          "transition-all",
+          isCollapsed ? "p-3 flex flex-col items-center gap-4" : "p-4"
         )}>
           {isCollapsed ? (
             <>
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-lg shadow-emerald-500/10">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md">
                 {user?.name?.[0]?.toUpperCase() || 'U'}
               </div>
-              <button 
-                onClick={logout}
-                className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                title="Cerrar Sesión"
-              >
-                <LogOut size={14} />
-              </button>
+              
+              <div className="flex flex-col gap-2">
+                <div className="relative z-50 flex justify-center">
+                    <AccessibilityMenu />
+                </div>
+                <button 
+                  onClick={logout}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-500/10 transition-all"
+                  title="Cerrar Sesión"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
             </>
           ) : (
-            <>
-              <div className="flex items-center gap-3 p-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-base shrink-0 shadow-lg shadow-emerald-500/20">
+            <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-bold text-[var(--text-main)] truncate">{user?.name || 'Estudiante'}</span>
-                  <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Plan Premium</span>
-                </div>
-              </div>
-              <button 
-                onClick={logout}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[var(--text-main)] text-[var(--bg-surface)] hover:bg-primary hover:text-white transition-all text-[11px] font-black uppercase tracking-[0.2em] group border-t border-[var(--border-color)]/20"
-              >
-                <LogOut size={14} className="group-hover:-translate-x-1 transition-transform" />
-                <span>Cerrar Sesión</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        <div className="flex items-center justify-center py-4 px-2">
-            <AccessibilityMenu />
-        </div>
-        
-        <div className="flex items-center gap-3 p-2 bg-[var(--bg-app)]/30 rounded-xl border border-[var(--border-color)]/50">
-          <div className="w-7 h-7 rounded-lg bg-[var(--bg-surface)] flex items-center justify-center border border-[var(--border-color)]/30">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-          </div>
-          {!isCollapsed && (
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-[10px] font-bold text-[var(--text-main)] whitespace-nowrap opacity-80 uppercase tracking-tighter">LMS Core v1.0</span>
-              <span className="text-[9px] text-[var(--text-muted)] font-medium whitespace-nowrap uppercase tracking-widest">System Online</span>
+               </div>
+               <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-sm font-bold text-[var(--text-main)] truncate leading-tight">{user?.name || 'Estudiante'}</span>
+                  <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Premium Plan</span>
+               </div>
+               <div className="flex items-center gap-1">
+                 <div className="relative z-50">
+                    <AccessibilityMenu />
+                 </div>
+                 <button 
+                    onClick={logout}
+                    className="p-2 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Cerrar Sesión"
+                 >
+                    <LogOut size={18} />
+                 </button>
+               </div>
             </div>
           )}
         </div>

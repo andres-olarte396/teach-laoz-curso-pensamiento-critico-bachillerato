@@ -50,6 +50,17 @@ db.exec(`
     PRIMARY KEY (user_id, course_id, lesson_id),
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS evaluation_results (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 logger.info('✅ Database schema initialized');

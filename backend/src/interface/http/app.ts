@@ -9,6 +9,7 @@ import { authRoutes } from './routes/authRoutes.js';
 import { blogRoutes } from './routes/blogRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 import { progressRoutes } from './routes/progressRoutes.js';
+import { evaluationRoutes } from './routes/evaluationRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import staticFiles from '@fastify/static';
@@ -124,6 +125,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(blogRoutes, { prefix: '/api' });
   await app.register(adminRoutes, { prefix: '/api' });
   await app.register(progressRoutes, { prefix: '/api' });
+  await app.register(evaluationRoutes, { prefix: '/api/evaluations' });
 
   // Health check
   app.get('/health', async () => {
