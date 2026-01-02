@@ -107,4 +107,23 @@ export const apiService = {
     const response = await apiClient.post<{ status: string }>('/events', event);
     return response.data;
   },
+
+  getToken: () => {
+    return null; // Deprecated
+  },
+
+  submitAIEvaluation: async (payload: { submissionId: string, question: string, answer: string, context: string[] }) => {
+    const response = await apiClient.post<{ 
+      success: boolean, 
+      data: { result: any, score: number, passed: boolean } 
+    }>('/evaluations/ai-proxy', payload, {
+      timeout: 600000 // 10 minutes
+    });
+    return response.data;
+  },
+
+  getEvaluations: async () => {
+    const response = await apiClient.get<any[]>('/admin/evaluations');
+    return response.data;
+  },
 };

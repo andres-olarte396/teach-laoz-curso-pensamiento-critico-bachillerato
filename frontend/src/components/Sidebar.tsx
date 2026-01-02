@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio, Activity } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import { apiService, type MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -329,6 +329,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
             >
               <span className="w-4 h-4 flex items-center justify-center"><Award size={14} /></span>
               {!isCollapsed && <span>Certificaciones</span>}
+            </Link>
+
+            <Link 
+              to="/admin/evaluations" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
+               title="Monitor IA"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Activity size={14} /></span>
+              {!isCollapsed && <span>Monitor IA</span>}
             </Link>
           </div>
         </div>

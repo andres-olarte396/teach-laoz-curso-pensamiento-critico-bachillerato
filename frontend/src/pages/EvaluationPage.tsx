@@ -5,6 +5,7 @@ import type { MenuItem } from '../services/apiService';
 import { Loader2, AlertCircle, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { QuizComponent } from '../components/QuizComponent';
+import { OpenResponseComponent } from '../components/OpenResponseComponent';
 
 export const EvaluationPage: React.FC = () => {
   const { '*' : path } = useParams();
@@ -117,12 +118,20 @@ export const EvaluationPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
         >
-            <QuizComponent 
-                title={evaluation.title} 
-                questions={evaluation.questions} 
-                onComplete={handleQuizComplete}
-                nextLesson={navContext?.next}
-            />
+            {evaluation.type === 'ai_open' ? (
+                <OpenResponseComponent 
+                    question={evaluation.questions[0]?.text || 'Pregunta no encontrada'}
+                    submissionId={evaluation.id + '-' + Date.now()} // Simple ID generation
+                    context={[]} // Can be populated from metadata if available
+                />
+            ) : (
+                <QuizComponent 
+                    title={evaluation.title} 
+                    questions={evaluation.questions} 
+                    onComplete={handleQuizComplete}
+                    nextLesson={navContext?.next}
+                />
+            )}
         </motion.div>
       </div>
     </div>

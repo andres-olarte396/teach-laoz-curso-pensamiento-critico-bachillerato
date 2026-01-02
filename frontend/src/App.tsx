@@ -10,6 +10,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { BlogListPage } from './pages/Blog/BlogListPage';
 import { BlogPostPage } from './pages/Blog/BlogPostPage';
 import { CourseListPage } from './pages/CourseListPage';
+import { SimulacroPage } from './pages/SimulacroPage';
+import { EvaluationsMonitorPage } from './pages/EvaluationsMonitorPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ProtectedRoute = () => {
@@ -77,6 +79,8 @@ function App() {
                   <Route path="evaluation/*" element={<EvaluationPage />} />
                   <Route path="certificate/:courseId" element={<CertificatePage />} />
                   <Route path="profile" element={<ProfilePage />} />
+                  <Route path="simulacro" element={<SimulacroPage />} />
+                  <Route path="admin/evaluations" element={<EvaluationsMonitorPage />} />
                 </Route>
               </Route>
 
