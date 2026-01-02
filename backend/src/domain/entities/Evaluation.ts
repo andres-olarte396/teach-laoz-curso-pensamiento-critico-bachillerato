@@ -18,14 +18,15 @@ export class Evaluation {
     public readonly id: string,
     public readonly title: string,
     public readonly questions: Question[],
+    public readonly type: 'quiz' | 'ai_open' = 'quiz',
     public readonly metadata: Record<string, any> = {}
   ) {}
 
   /**
    * Crea una instancia de Evaluation.
    */
-  static create(id: string, title: string, questions: Question[], metadata?: Record<string, any>): Evaluation {
-    return new Evaluation(id, title, questions, metadata);
+  static create(id: string, title: string, questions: Question[], metadata?: Record<string, any>, type: 'quiz' | 'ai_open' = 'quiz'): Evaluation {
+    return new Evaluation(id, title, questions, type, metadata);
   }
 
   /**
@@ -35,6 +36,7 @@ export class Evaluation {
     return {
       id: this.id,
       title: this.title,
+      type: this.type,
       questions: this.questions,
       metadata: this.metadata,
     };

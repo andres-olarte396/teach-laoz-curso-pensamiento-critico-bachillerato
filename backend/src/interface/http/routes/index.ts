@@ -181,6 +181,7 @@ export async function contentRoutes(app: FastifyInstance) {
           properties: {
             id: { type: 'string' },
             title: { type: 'string' },
+            type: { type: 'string' },
             questions: {
               type: 'array',
               items: {

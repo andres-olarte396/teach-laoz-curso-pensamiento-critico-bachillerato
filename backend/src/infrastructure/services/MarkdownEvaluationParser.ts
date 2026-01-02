@@ -160,6 +160,10 @@ export class MarkdownEvaluationParser {
         }
     }
 
-    return Evaluation.create(id, title, questions, metadata);
+    // Determine type based on metadata
+    const type = metadata['type'] === 'ai_open' ? 'ai_open' : 'quiz';
+    console.log(`[Parser Debug] Parsed type for ${id}: ${type} (Metadata Type: ${metadata['type']})`);
+
+    return Evaluation.create(id, title, questions, metadata, type);
   }
 }

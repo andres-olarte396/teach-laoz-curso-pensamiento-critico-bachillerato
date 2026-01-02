@@ -13,5 +13,5 @@ export interface EvaluationResult {
   totalQuestions: number;
   correctAnswers: number;
   submittedAt: Date;
-  answers: EvaluationAnswer[];
+  answers: any;
 }

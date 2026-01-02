@@ -46,4 +46,39 @@ export class SQLiteEvaluationResultRepository implements IEvaluationResultReposi
       answers: JSON.parse(row.data)
     };
   }
+  async update(result: EvaluationResult): Promise<void> {
+    const stmt = this.db.prepare(`
+      UPDATE evaluation_results 
+      SET score = ?, data = ?, submitted_at = ?
+      WHERE id = ?
+    `);
+
+    stmt.run(
+      result.score,
+      JSON.stringify(result.answers),
+      result.submittedAt.toISOString(),
+      result.id
+    );
+  }
+
+  async findAll(): Promise<EvaluationResult[]> {
+    const stmt = this.db.prepare(`
+      SELECT * FROM evaluation_results
+      ORDER BY submitted_at DESC
+    `);
+
+    const rows = stmt.all() as any[];
+
+    return rows.map(row => ({
+      id: row.id,
+      userId: row.user_id,
+      courseId: row.course_id,
+      lessonId: row.lesson_id,
+      score: row.score,
+      totalQuestions: 0,
+      correctAnswers: 0,
+      submittedAt: new Date(row.submitted_at),
+      answers: JSON.parse(row.data)
+    }));
+  }
 }

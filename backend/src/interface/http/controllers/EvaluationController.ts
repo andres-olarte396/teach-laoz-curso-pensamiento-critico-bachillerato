@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { SubmitEvaluation } from '../../../application/use-cases/evaluation/SubmitEvaluation.js';
+import { ListEvaluations } from '../../../application/use-cases/evaluation/ListEvaluations.js';
 import { z } from 'zod';
 
 const submitBodySchema = z.object({
@@ -10,7 +11,10 @@ const submitBodySchema = z.object({
 });
 
 export class EvaluationController {
-  constructor(private submitEvaluation: SubmitEvaluation) {}
+  constructor(
+    private submitEvaluation: SubmitEvaluation,
+    private listEvaluations: ListEvaluations
+  ) {}
 
   async submit(req: FastifyRequest, reply: FastifyReply) {
     const user = req.user as any;
@@ -33,4 +37,15 @@ export class EvaluationController {
       return reply.code(500).send({ message: 'Error submitting evaluation', error });
     }
   }
+
+  async list(req: FastifyRequest, reply: FastifyReply) {
+    try {
+        const results = await this.listEvaluations.execute();
+        return reply.code(200).send(results);
+    } catch (error) {
+        req.log.error(error);
+        return reply.code(500).send({ message: 'Error fetching evaluations', error });
+    }
+  }
 }
+
