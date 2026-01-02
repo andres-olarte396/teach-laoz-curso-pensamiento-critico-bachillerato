@@ -45,3 +45,4 @@ Thumbs.db
 content/*
 !content/blog/
 !content/docs/
+!content/courses/
