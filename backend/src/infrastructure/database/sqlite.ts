@@ -51,6 +51,18 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
 
+  CREATE TABLE IF NOT EXISTS student_evidence (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    content TEXT,
+    media_url TEXT,
+    type TEXT CHECK(type IN ('text', 'image')) NOT NULL DEFAULT 'text',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
   CREATE TABLE IF NOT EXISTS evaluation_results (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,

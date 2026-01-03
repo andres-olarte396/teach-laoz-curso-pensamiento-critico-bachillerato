@@ -10,6 +10,7 @@ import { blogRoutes } from './routes/blogRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 import { progressRoutes } from './routes/progressRoutes.js';
 import { evaluationRoutes } from './routes/evaluationRoutes.js';
+import { evidenceRoutes } from './routes/evidenceRoutes.js';
 import { commentRoutes } from './routes/commentRoutes.js';
 // import { aiRoutes } from '../../bounded-contexts/ai-evaluation/interface/http/routes.js';
 import swagger from '@fastify/swagger';
@@ -129,7 +130,8 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(progressRoutes, { prefix: '/api' });
   await evaluationRoutes(app); // evaluationRoutes registered with prefix inside the function to avoid double prefixing issue if any, but wait, previous code had { prefix: '/api/evaluations' } for evaluationRoutes.
   // Correcting pattern:
-  await app.register(evaluationRoutes, { prefix: '/api/evaluations' });
+  await  app.register(evaluationRoutes, { prefix: '/api/evaluation' });
+  app.register(evidenceRoutes, { prefix: '/api/evidence' });
   await app.register(commentRoutes, { prefix: '/api/comments' });
   // await app.register(aiRoutes, { prefix: '/api/ai' }); // Decoupled to microservice
 

@@ -39,7 +39,30 @@ export interface ContentResponse {
   };
 }
 
+export interface Evidence {
+  id: string;
+  userId: string;
+  courseId: string;
+  lessonId: string;
+  content: string;
+  mediaUrl?: string;
+  type: 'text' | 'image';
+  createdAt: string;
+}
+
 export const apiService = {
+  // ... existing methods ...
+
+  async getEvidence(courseId: string, lessonId: string): Promise<Evidence[]> {
+    const response = await apiClient.get(`/evidence/${courseId}/${encodeURIComponent(lessonId)}`);
+    return response.data;
+  },
+
+  async addEvidence(courseId: string, lessonId: string, content: string, type: 'text' | 'image' = 'text', mediaUrl?: string): Promise<Evidence> {
+    const response = await apiClient.post(`/evidence/${courseId}/${encodeURIComponent(lessonId)}`, { content, type, mediaUrl });
+    return response.data;
+  },
+
   getMenu: async () => {
     const response = await apiClient.get<{ courses: MenuItem[] }>('/menu');
     return response.data;
