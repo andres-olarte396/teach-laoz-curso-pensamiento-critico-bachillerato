@@ -17,6 +17,7 @@ const envSchema = z.object({
   GITHUB_URL: z.string().optional().default('https://github.com'),
   TWITTER_URL: z.string().optional().default('https://twitter.com'),
   LINKEDIN_URL: z.string().optional().default('https://linkedin.com'),
+  COOKIE_SECURE: z.string().transform(v => v === 'true').default('false'), // Default false for easier PoC/Dev
 });
 
 const result = envSchema.safeParse(process.env);

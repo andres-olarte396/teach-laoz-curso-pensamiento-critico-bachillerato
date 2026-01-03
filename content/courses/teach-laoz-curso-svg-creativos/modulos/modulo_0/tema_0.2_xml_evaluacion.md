@@ -7,7 +7,7 @@
 ¿Cuál de las siguientes etiquetas renderizará un círculo válido en SVG?
 
 - a) `<CIRCLE cx="10" ... />`
-- b) `<circle cx="10" ... />`
+- b) `<circle cx="10" ... />` (Correcta)
 - c) `<Circle cx="10" ... />`
 
 ### Pregunta 2: Cierre de Etiquetas
@@ -15,7 +15,7 @@
 ¿Qué sintaxis es correcta para un elemento sin contenido interno (como una línea)?
 
 - a) `<line x1="0" y1="0" ... >` (sin cerrar)
-- b) `<line x1="0" y1="0" ... />` (autocierre)
+- b) `<line x1="0" y1="0" ... />` (autocierre) (Correcta)
 - c) `<line x1="0" y1="0" ... > <end>`
 
 ### Pregunta 3: Atributos
@@ -24,7 +24,7 @@
 
 - a) `fill="red"`
 - b) `width='100'` (comillas simples)
-- c) `height=100` (sin comillas)
+- c) `height=100` (sin comillas) (Correcta)
 
 ---
 

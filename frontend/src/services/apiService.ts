@@ -115,6 +115,7 @@ export const apiService = {
   submitAIEvaluation: async (payload: { submissionId: string, question: string, answer: string, context: string[] }) => {
     const response = await apiClient.post<{ 
       success: boolean, 
+      status?: string,
       data: { result: any, score: number, passed: boolean } 
     }>('/evaluations/ai-proxy', payload, {
       timeout: 600000 // 10 minutes
@@ -122,8 +123,21 @@ export const apiService = {
     return response.data;
   },
 
-  getEvaluations: async () => {
-    const response = await apiClient.get<any[]>('/admin/evaluations');
+  getEvaluations: async (userId?: string) => {
+    const url = userId 
+      ? `/evaluations/admin/evaluations?userId=${encodeURIComponent(userId)}`
+      : '/evaluations/admin/evaluations';
+    const response = await apiClient.get<any[]>(url);
+    return response.data;
+  },
+
+  getMyGrades: async () => {
+      const response = await apiClient.get<any[]>('/evaluations/my-results');
+      return response.data;
+  },
+
+  submitEvaluation: async (courseId: string, lessonId: string, answers: { questionId: string; selectedOptionId: string }[]) => {
+    const response = await apiClient.post(`/evaluations/${courseId}/${encodeURIComponent(lessonId)}/submit`, { answers });
     return response.data;
   },
 };

@@ -46,7 +46,9 @@ export class AIEvaluationProxyController {
       };
 
       // 2. Save Pending State
+      console.log('[ProxyController] Saving pending result...', pendingResult.id);
       await this.repository.save(pendingResult);
+      console.log('[ProxyController] Saved pending result.');
 
       // 3. Trigger Background Process (Fire & Forget)
       this.processBackgroundEvaluation(body, pendingResult);

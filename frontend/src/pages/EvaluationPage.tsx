@@ -59,11 +59,19 @@ export const EvaluationPage: React.FC = () => {
     fetchEvaluation();
   }, [path]);
 
-  const handleQuizComplete = (score: number) => {
+  const handleQuizComplete = async (score: number, answers: { questionId: string; selectedOptionId: string }[]) => {
+    const courseId = path?.split('/')[0] || 'teach-laoz-unknown';
+    
+    try {
+        await apiService.submitEvaluation(courseId, path!, answers);
+        console.log('Evaluation submitted successfully');
+    } catch (err) {
+        console.error('Failed to submit evaluation:', err);
+    }
+
     // Telemetry: Track evaluation submission
-    const courseId = path?.split('/')[0] || 'unknown';
     apiService.trackEvent({
-        userId: 'anonymous_user',
+        userId: 'session_user',
         organizationId: 'default_org',
         courseId: courseId,
         lessonId: path,

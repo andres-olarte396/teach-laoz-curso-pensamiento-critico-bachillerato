@@ -8,13 +8,13 @@ import { GetEvaluation } from '../../../application/use-cases/GetEvaluation.js';
 import { UnifiedMarkdownRenderer } from '../../../infrastructure/services/UnifiedMarkdownRenderer.js';
 import { LocalFileSystemRepository } from '../../../infrastructure/repositories/LocalFileSystemRepository.js';
 import { db } from '../../../infrastructure/database/sqlite.js';
-import { env } from '../../../infrastructure/config/environment.js';
+
 import { ListEvaluations } from '../../../application/use-cases/evaluation/ListEvaluations.js';
 
 export async function evaluationRoutes(app: FastifyInstance) {
   // Dependency Injection Wiring (Local for this route module)
   const evaluationResultRepository = new SQLiteEvaluationResultRepository(db);
-  const progressRepository = new SQLiteProgressRepository(db);
+  const progressRepository = new SQLiteProgressRepository();
   
   const markdownRenderer = new UnifiedMarkdownRenderer();
   const localFileSystem = new LocalFileSystemRepository();
@@ -29,6 +29,11 @@ export async function evaluationRoutes(app: FastifyInstance) {
   app.post('/:courseId/:lessonId/submit', {
     onRequest: [app.authenticate]
   }, controller.submit.bind(controller));
+
+  // User Route for Their Grades
+  app.get('/my-results', {
+      onRequest: [app.authenticate]
+  }, controller.listMine.bind(controller));
 
   // Admin Route for Monitoring
   app.get('/admin/evaluations', {

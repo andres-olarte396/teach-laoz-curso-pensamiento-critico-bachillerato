@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio, Activity } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, Search, LogOut, Mail, Map, Users, Award, Book, LifeBuoy, Shield, PanelLeftClose, FileCode, FileVideo, FileAudio, Activity, LogIn } from 'lucide-react';
 import { useMenu } from '../hooks/useMenu';
 import { apiService, type MenuItem } from '../services/apiService';
 import { Link, useLocation } from 'react-router-dom';
@@ -98,7 +98,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen }) => {
   const { courses, loading, error } = useMenu();
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated } = useAuth();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isCoursesOpen, setIsCoursesOpen] = React.useState(true);
@@ -197,6 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
       <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 custom-scrollbar">
         
         {/* PLATAFORMA SECTION */}
+        {isAuthenticated && (
         <div>
           {!isCollapsed && <h2 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3 px-3">Plataforma</h2>}
           <div className="space-y-1">
@@ -339,8 +340,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
               <span className="w-4 h-4 flex items-center justify-center"><Activity size={14} /></span>
               {!isCollapsed && <span>Monitor IA</span>}
             </Link>
+
+            <Link 
+              to="/grades" 
+              className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--bg-app)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all font-medium"
+               title="Mis Calificaciones"
+            >
+              <span className="w-4 h-4 flex items-center justify-center"><Award size={14} /></span>
+              {!isCollapsed && <span>Mis Calificaciones</span>}
+            </Link>
           </div>
         </div>
+
+        )}
 
         {/* RECURSOS SECTION */}
         <div>
@@ -453,6 +465,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
               <span className="w-4 h-4 flex items-center justify-center"><Mail size={14} /></span>
                {!isCollapsed && <span>Contáctanos</span>}
             </Link>
+
+            {!isAuthenticated && (
+              <Link 
+                to="/login" 
+                className="flex items-center gap-2 py-2 px-3 rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-all font-bold mt-4"
+                title="Iniciar Sesión"
+              >
+                <span className="w-4 h-4 flex items-center justify-center"><LogIn size={14} /></span>
+                {!isCollapsed && <span>Iniciar Sesión</span>}
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -464,43 +487,53 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
         )}>
           {isCollapsed ? (
             <>
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md">
-                {user?.name?.[0]?.toUpperCase() || 'U'}
-              </div>
+              {isAuthenticated && (
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md">
+                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                </div>
+              )}
               
               <div className="flex flex-col gap-2">
                 <div className="relative z-50 flex justify-center">
                     <AccessibilityMenu />
                 </div>
-                <button 
-                  onClick={logout}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-500/10 transition-all"
-                  title="Cerrar Sesión"
-                >
-                  <LogOut size={16} />
-                </button>
+                {isAuthenticated && (
+                  <button 
+                    onClick={logout}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-500/10 transition-all"
+                    title="Cerrar Sesión"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                )}
               </div>
             </>
           ) : (
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
-                  {user?.name?.[0]?.toUpperCase() || 'U'}
-               </div>
-               <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-sm font-bold text-[var(--text-main)] truncate leading-tight">{user?.name || 'Estudiante'}</span>
-                  <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Premium Plan</span>
-               </div>
+               {isAuthenticated && (
+                 <>
+                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
+                      {user?.name?.[0]?.toUpperCase() || 'U'}
+                   </div>
+                   <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-sm font-bold text-[var(--text-main)] truncate leading-tight">{user?.name || 'Estudiante'}</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Premium Plan</span>
+                   </div>
+                 </>
+               )}
                <div className="flex items-center gap-1">
                  <div className="relative z-50">
                     <AccessibilityMenu />
                  </div>
-                 <button 
-                    onClick={logout}
-                    className="p-2 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                    title="Cerrar Sesión"
-                 >
-                    <LogOut size={18} />
-                 </button>
+                 {isAuthenticated && (
+                   <button 
+                      onClick={logout}
+                      className="p-2 text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                      title="Cerrar Sesión"
+                   >
+                      <LogOut size={18} />
+                   </button>
+                 )}
                </div>
             </div>
           )}

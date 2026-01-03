@@ -12,6 +12,7 @@ import { BlogPostPage } from './pages/Blog/BlogPostPage';
 import { CourseListPage } from './pages/CourseListPage';
 import { SimulacroPage } from './pages/SimulacroPage';
 import { EvaluationsMonitorPage } from './pages/EvaluationsMonitorPage';
+import { GradesPage } from './pages/GradesPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 const ProtectedRoute = () => {
@@ -72,14 +73,17 @@ function App() {
                 <Route path="/support" element={<SupportPage />} />
                 <Route path="/terms" element={<TermsPage />} />
 
+                {/* Public Home Page */}
+                <Route index element={<WelcomePage />} />
+
                 {/* Protected Course Routes */}
                 <Route element={<ProtectedRoute />}>
-                  <Route index element={<WelcomePage />} />
                   <Route path="course/*" element={<CoursePage />} />
                   <Route path="evaluation/*" element={<EvaluationPage />} />
                   <Route path="certificate/:courseId" element={<CertificatePage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="simulacro" element={<SimulacroPage />} />
+                  <Route path="grades" element={<GradesPage />} />
                   <Route path="admin/evaluations" element={<EvaluationsMonitorPage />} />
                 </Route>
               </Route>

@@ -22,10 +22,7 @@ export const DocViewerPage: React.FC = () => {
     resumeReading, 
     stopReading,
     seekForward,
-    seekBackward,
-    setVoice,
-    rate,
-    setRate
+    seekBackward
   } = useTts({
     contentSelector: '.content-area'
   });
@@ -102,9 +99,6 @@ export const DocViewerPage: React.FC = () => {
         onSeekBackward={seekBackward}
         availableVoices={availableVoices}
         selectedVoiceURI={selectedVoiceURI}
-        onVoiceChange={setVoice}
-        rate={rate}
-        onRateChange={setRate}
       />
     <div className="max-w-4xl mx-auto py-12 px-6">
       <motion.button

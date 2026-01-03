@@ -10,6 +10,7 @@ import { blogRoutes } from './routes/blogRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 import { progressRoutes } from './routes/progressRoutes.js';
 import { evaluationRoutes } from './routes/evaluationRoutes.js';
+// import { aiRoutes } from '../../bounded-contexts/ai-evaluation/interface/http/routes.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import staticFiles from '@fastify/static';
@@ -126,6 +127,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(adminRoutes, { prefix: '/api' });
   await app.register(progressRoutes, { prefix: '/api' });
   await app.register(evaluationRoutes, { prefix: '/api/evaluations' });
+  // await app.register(aiRoutes, { prefix: '/api/ai' }); // Decoupled to microservice
 
   // Health check
   app.get('/health', async () => {

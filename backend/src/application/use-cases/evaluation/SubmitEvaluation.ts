@@ -1,7 +1,7 @@
-import { IEvaluationResultRepository } from '../../domain/repositories/IEvaluationResultRepository.js';
-import { IProgressRepository } from '../../domain/repositories/IProgressRepository.js';
-import { GetEvaluation, GetEvaluationDTO } from './GetEvaluation.js';
-import { EvaluationResult } from '../../domain/entities/EvaluationResult.js';
+import { IEvaluationResultRepository } from '../../../domain/repositories/IEvaluationResultRepository.js';
+import { IProgressRepository } from '../../../domain/repositories/IProgressRepository.js';
+import { GetEvaluation } from '../GetEvaluation.js';
+import { EvaluationResult } from '../../../domain/entities/EvaluationResult.js';
 import { randomUUID } from 'crypto';
 
 interface SubmitEvaluationDTO {
@@ -23,11 +23,7 @@ export class SubmitEvaluation {
 
   async execute(dto: SubmitEvaluationDTO): Promise<EvaluationResult> {
     // 1. Get the evaluation definition to check answers
-    const evaluation = await this.getEvaluation.execute({
-      courseId: dto.courseId,
-      lessonId: dto.lessonId,
-      evalFileName: dto.lessonId // Assuming lessonId is the filename for now
-    });
+    const evaluation = await this.getEvaluation.execute(dto.lessonId);
 
     // 2. Calculate Score
     let correctCount = 0;

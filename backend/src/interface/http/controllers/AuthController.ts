@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../../../application/services/AuthService.js';
 import { z } from 'zod';
+import { env } from '../../../infrastructure/config/environment.js';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -33,11 +34,12 @@ export class AuthController {
     });
 
     // Set Cookie
+    const isSecure = env.COOKIE_SECURE;
     reply.setCookie('token', token, {
       path: '/',
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' requires 'secure: true'
+      sameSite: isSecure ? 'none' : 'lax', 
       maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     });
 
@@ -56,11 +58,12 @@ export class AuthController {
         role: user.role 
       });
   
+      const isSecure = env.COOKIE_SECURE;
       reply.setCookie('token', token, {
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isSecure,
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: isSecure ? 'none' : 'lax',
       });
       return { user, token };
     } catch (error: any) {

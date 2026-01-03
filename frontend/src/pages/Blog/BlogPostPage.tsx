@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { blogService, type BlogPost } from '../../services/blogService';
 import { ContentRenderer } from '../../components/ContentRenderer';
 import { CommentSection } from '../../components/blog/CommentSection';
-import { Layout } from '../../components/Layout';
+
 import { Volume2 } from 'lucide-react';
 import { useTts } from '../../hooks/useTts';
 
@@ -24,10 +24,7 @@ export const BlogPostPage: React.FC = () => {
     resumeReading, 
     stopReading,
     seekForward,
-    seekBackward,
-    setVoice,
-    rate,
-    setRate
+    seekBackward
   } = useTts({
     contentSelector: '.blog-content-area'
   });
@@ -77,9 +74,6 @@ export const BlogPostPage: React.FC = () => {
         onSeekBackward={seekBackward}
         availableVoices={availableVoices}
         selectedVoiceURI={selectedVoiceURI}
-        onVoiceChange={setVoice}
-        rate={rate}
-        onRateChange={setRate}
       />
 
       <div className="flex justify-between items-center mb-8">

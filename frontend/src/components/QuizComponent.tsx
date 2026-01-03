@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 interface QuizComponentProps {
   title: string;
   questions: Question[];
-  onComplete?: (score: number) => void;
+  onComplete?: (score: number, answers: { questionId: string; selectedOptionId: string }[]) => void;
   nextLesson?: MenuItem | null;
 }
 
@@ -26,6 +26,8 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
+
+  const [userAnswers, setUserAnswers] = useState<{ questionId: string; selectedOptionId: string }[]>([]);
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -37,6 +39,11 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
   const handleNext = () => {
     const isCorrect = selectedOption === currentQuestion.correctAnswerId;
     
+    // Track Answer
+    const newAnswer = { questionId: currentQuestion.id, selectedOptionId: selectedOption! };
+    const updatedAnswers = [...userAnswers, newAnswer];
+    setUserAnswers(updatedAnswers);
+    
     if (isCorrect) {
         setScore(prev => prev + 1);
     }
@@ -47,7 +54,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
       setShowFeedback(false);
     } else {
       setQuizComplete(true);
-      if (onComplete) onComplete(isCorrect ? score + 1 : score);
+      if (onComplete) onComplete(isCorrect ? score + 1 : score, updatedAnswers);
     }
   };
 
@@ -57,6 +64,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
     setShowFeedback(false);
     setScore(0);
     setQuizComplete(false);
+    setUserAnswers([]);
   };
 
   if (quizComplete) {
@@ -94,9 +102,9 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
             {nextLesson && (
               <Link 
                   to={nextLesson.type === 'evaluation' ? `/evaluation/${nextLesson.path}` : `/course/${nextLesson.path}`}
-                  className="flex items-center justify-center gap-2 px-10 py-4 rounded-full bg-emerald-500 text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+                  className="flex items-center justify-center gap-2 px-10 py-4 rounded-full bg-emerald-500 !text-white font-black uppercase tracking-widest text-xs hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
               >
-                  Siguiente Lección <ChevronRight size={18} />
+                  <span className="text-white">Siguiente Lección</span> <ChevronRight size={18} className="text-white" />
               </Link>
             )}
             <button 

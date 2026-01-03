@@ -96,10 +96,43 @@ export class MarkdownEvaluationParser {
                         currentQuestion.correctAnswerId = optId;
                     }
                 } else if (line !== '' && !line.startsWith('---')) {
-                    if (currentQuestion.text) {
-                        currentQuestion.text += '\n' + line;
+                    // Check for Inline Answer Block - RELAXED REGEX
+                    // Matches: > **Respuesta...** B) ...
+                    // Matches: > **Respuesta**: B)
+                    // Matches: > **Solución:** B
+                    const answerMatch = line.match(/^>\s*\*\*.*(?:Respuesta|Solución).*?\*\*\s*([a-d1-4])/i);
+                    const justificationHeaderMatch = line.match(/^>\s*\*\*(?:Justificación|Explicación):?\*\*:?/i);
+
+                    if (answerMatch) {
+                        // Found correct answer line
+                        if (answerMatch[1]) {
+                             currentQuestion.correctAnswerId = answerMatch[1].toLowerCase().trim();
+                        }
+                    } else if (justificationHeaderMatch) {
+                        // Found justification header, start capturing feedback
+                        currentQuestion.feedback = line.replace(/^>\s*\*\*(?:Justificación|Explicación):?\*\*:?\s*/i, '').trim();
+                    } else if (line.startsWith('>')) {
+                         // Continuation of blockquote (likely justification)
+                         // ... same logic as before ...
+                         const blockContent = line.replace(/^>\s*/, '').trim();
+                         if (blockContent) {
+                             if (currentQuestion.feedback !== undefined) {
+                                 // Append to feedback if we already started capturing it
+                                 currentQuestion.feedback += '\n' + blockContent;
+                             } else {
+                                 // If we have an answer ID, assume this > block is feedback/explanation
+                                 if (currentQuestion.correctAnswerId) {
+                                     currentQuestion.feedback = (currentQuestion.feedback || '') + blockContent;
+                                 }
+                             }
+                         }
                     } else {
-                        currentQuestion.text = line;
+                        // Normal text line
+                        if (currentQuestion.text) {
+                            currentQuestion.text += '\n' + line;
+                        } else {
+                            currentQuestion.text = line;
+                        }
                     }
                 }
             }

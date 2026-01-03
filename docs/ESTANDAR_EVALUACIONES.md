@@ -80,3 +80,11 @@ Puedes agregar una sección de "Solucionario" al final para dar feedback detalla
 
 > **Justificación**: La opción b es correcta porque HTML es un lenguaje de marcado...
 ```
+
+## Checklist de Calidad Visual (UI)
+
+El Agente Evaluador debe verificar los siguientes puntos en la interfaz final:
+
+1.  **Visibilidad de Botones:** Verificar que los botones de acción (especialmente "Siguiente Lección" en verde/emerald) tengan texto blanco (`text-white` o `!text-white`) para asegurar contraste suficiente.
+2.  **Ocultamiento de Respuestas:** Confirmar que la respuesta correcta NO sea visible antes de que el usuario interactúe.
+3.  **Feedback Claro:** Asegurar que los mensajes de éxito/error sean distinguibles por color e icono.
