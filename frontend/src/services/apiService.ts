@@ -140,4 +140,14 @@ export const apiService = {
     const response = await apiClient.post(`/evaluations/${courseId}/${encodeURIComponent(lessonId)}/submit`, { answers });
     return response.data;
   },
+
+  getComments: async (resourceId: string) => {
+    const response = await apiClient.get<any[]>(`/comments/${encodeURIComponent(resourceId)}`);
+    return response.data;
+  },
+
+  addComment: async (resourceId: string, content: string, authorName?: string) => {
+    const response = await apiClient.post(`/comments/${encodeURIComponent(resourceId)}`, { content, authorName });
+    return response.data;
+  },
 };
