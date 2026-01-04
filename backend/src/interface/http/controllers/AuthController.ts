@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../../../application/services/AuthService.js';
+import { UpdateUser } from '../../../application/use-cases/user/UpdateUser.js';
 import { z } from 'zod';
 import { env } from '../../../infrastructure/config/environment.js';
 
@@ -15,7 +16,10 @@ const registerSchema = z.object({
 });
 
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private updateUserUseCase: UpdateUser
+  ) {}
 
   async login(req: FastifyRequest, reply: FastifyReply) {
     const body = loginSchema.parse(req.body);
@@ -87,5 +91,30 @@ export class AuthController {
         role: user.role
       } 
     };
+  }
+
+  async update(req: FastifyRequest, reply: FastifyReply) {
+    const user = req.user as any;
+    if (!user) {
+      return reply.code(401).send({ message: 'Not authenticated' });
+    }
+
+    const { name } = req.body as { name?: string };
+    
+    try {
+      const updatedUser = await this.updateUserUseCase.execute(user.id, { name });
+       // Logic to refresh token could go here if name is in token, but for now just return updated user
+      return { 
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role
+        } 
+      };
+    } catch (error) {
+       console.error(error);
+       return reply.code(500).send({ message: 'Failed to update profile' });
+    }
   }
 }

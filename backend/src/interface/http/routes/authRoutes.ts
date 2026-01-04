@@ -3,10 +3,13 @@ import { AuthController } from '../controllers/AuthController.js';
 import { AuthService } from '../../../application/services/AuthService.js';
 import { SQLiteUserRepository } from '../../../infrastructure/repositories/SQLiteUserRepository.js';
 
+import { UpdateUser } from '../../../application/use-cases/user/UpdateUser.js';
+
 export async function authRoutes(app: FastifyInstance) {
   const userRepository = new SQLiteUserRepository();
   const authService = new AuthService(userRepository);
-  const controller = new AuthController(authService);
+  const updateUserUseCase = new UpdateUser(userRepository);
+  const controller = new AuthController(authService, updateUserUseCase);
 
   // Login Schema
   app.post('/auth/login', {
@@ -98,4 +101,36 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
   }, controller.me.bind(controller));
+
+  // Update Profile Schema
+  app.put('/auth/me', {
+    onRequest: [app.authenticate],
+    schema: {
+      tags: ['Auth'],
+      summary: 'Update current user profile',
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', minLength: 2 },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                email: { type: 'string' },
+                name: { type: 'string' },
+                role: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, controller.update.bind(controller));
 }

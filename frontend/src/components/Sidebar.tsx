@@ -488,9 +488,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
           {isCollapsed ? (
             <>
               {isAuthenticated && (
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md">
+                <Link to="/profile" className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md hover:scale-105 transition-transform" title="Mi Perfil">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
-                </div>
+                </Link>
               )}
               
               <div className="flex flex-col gap-2">
@@ -511,7 +511,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
           ) : (
             <div className="flex items-center gap-3">
                {isAuthenticated && (
-                 <>
+                 <Link to="/profile" className="flex items-center gap-3 flex-1 min-w-0 hover:bg-[var(--bg-app)] rounded-lg p-1 transition-colors -ml-1">
                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
                       {user?.name?.[0]?.toUpperCase() || 'U'}
                    </div>
@@ -519,7 +519,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
                       <span className="text-sm font-bold text-[var(--text-main)] truncate leading-tight">{user?.name || 'Estudiante'}</span>
                       <span className="text-[10px] text-[var(--text-muted)] font-black uppercase tracking-widest opacity-70">Premium Plan</span>
                    </div>
-                 </>
+                 </Link>
                )}
                <div className="flex items-center gap-1">
                  <div className="relative z-50">
