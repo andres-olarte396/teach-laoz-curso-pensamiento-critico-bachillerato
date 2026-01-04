@@ -264,11 +264,15 @@ export const useTts = (options: UseTtsOptions = {}) => {
 
     const blocks = Array.from(container.querySelectorAll<HTMLElement>('h1, h2, h3, h4, p, li, blockquote, .mermaid, table'));
     const textBlocks = blocks.filter(el => {
+      // Prevent duplication: if a container (blockquote, li) has 'p' children which are also selected,
+      // ignore the container and let the 'p' children be read.
+      if ((el.tagName === 'BLOCKQUOTE' || el.tagName === 'LI') && el.querySelector('p')) {
+        return false;
+      }
+      
       const text = el.innerText?.trim();
       return text && text.length > 0;
     });
-
-    if (textBlocks.length === 0) return;
     textBlocksRef.current = textBlocks;
 
     window.speechSynthesis.cancel();

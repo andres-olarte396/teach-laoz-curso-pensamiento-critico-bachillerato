@@ -11,6 +11,7 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkFrontmatter from 'remark-frontmatter';
 import YAML from 'yaml';
+import { remarkAlert } from 'remark-github-blockquote-alert';
 import { IMarkdownRenderer, RenderOptions, RenderResult, TocItem } from '../../domain/services/IMarkdownRenderer.js';
 import { env } from '../config/environment.js';
 
@@ -35,6 +36,7 @@ export class UnifiedMarkdownRenderer implements IMarkdownRenderer {
           }
         }
       })
+      .use(remarkAlert)
       .use(remarkGfm)
       .use(remarkMath)
       .use(remarkRehype, { allowDangerousHtml: env.MARKDOWN_ALLOW_HTML })

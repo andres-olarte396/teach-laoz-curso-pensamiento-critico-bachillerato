@@ -63,6 +63,17 @@ export const apiService = {
     return response.data;
   },
 
+  async uploadFile(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post('/uploads', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data as { url: string; filename: string };
+  },
+
   getMenu: async () => {
     const response = await apiClient.get<{ courses: MenuItem[] }>('/menu');
     return response.data;

@@ -20,8 +20,10 @@ export const EvidenceSection: React.FC<EvidenceSectionProps> = ({ courseId, less
   const [newEvidence, setNewEvidence] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchEvidence();
@@ -76,6 +78,27 @@ export const EvidenceSection: React.FC<EvidenceSectionProps> = ({ courseId, less
 
     setNewEvidence(newText);
     setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos); }, 0);
+    setTimeout(() => { textareaRef.current?.focus(); textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos); }, 0);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { url } = await apiService.uploadFile(file);
+      // Insert image markdown or link depending on type
+      const isImage = file.type.startsWith('image/');
+      const markdown = isImage ? `\n![${file.name}](${url})\n` : `\n[📎 ${file.name}](${url})\n`;
+      setNewEvidence(prev => prev + markdown);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Error al subir el archivo');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const onEmojiClick = (emojiData: any) => {
@@ -113,6 +136,19 @@ export const EvidenceSection: React.FC<EvidenceSectionProps> = ({ courseId, less
                  <button type="button" onClick={() => insertFormat('bold')} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-app)] rounded transition-colors"><Bold size={14}/></button>
                  <button type="button" onClick={() => insertFormat('italic')} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-app)] rounded transition-colors"><Italic size={14}/></button>
                  <button type="button" onClick={() => insertFormat('code')} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-app)] rounded transition-colors"><Code size={14}/></button>
+                 
+                 <div className="relative inline-block">
+                    <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-app)] rounded transition-colors disabled:opacity-50">
+                        {uploading ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Paperclip size={14}/>}
+                    </button>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        onChange={handleFileUpload}
+                        accept="image/*,.pdf,.doc,.docx,.txt"
+                    />
+                 </div>
                  
                  <div className="relative">
                     <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-app)] rounded transition-colors"><Smile size={14}/></button>

@@ -16,7 +16,9 @@ import { commentRoutes } from './routes/commentRoutes.js';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import staticFiles from '@fastify/static';
+import multipart from '@fastify/multipart';
 import path from 'path';
+import { uploadRoutes } from './routes/uploadRoutes.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -118,9 +120,18 @@ export async function createServer(): Promise<FastifyInstance> {
   // Static files for course assets (images, etc)
   await app.register(staticFiles, {
     root: path.resolve(env.CONTENT_BASE_PATH),
-    prefix: '/api/content-assets/', // Changed to avoid collision with frontend /assets/
+    prefix: '/api/content-assets/',
     decorateReply: false,
   });
+
+  // Static files for uploads
+  await app.register(staticFiles, {
+    root: path.join(process.cwd(), 'uploads'),
+    prefix: '/api/uploads/',
+    decorateReply: false,
+  });
+
+  await app.register(multipart);
 
   // Routes
   await app.register(contentRoutes, { prefix: '/api' });
@@ -132,6 +143,7 @@ export async function createServer(): Promise<FastifyInstance> {
   // Correcting pattern:
   await  app.register(evaluationRoutes, { prefix: '/api/evaluation' });
   app.register(evidenceRoutes, { prefix: '/api/evidence' });
+  app.register(uploadRoutes, { prefix: '/api/uploads' });
   await app.register(commentRoutes, { prefix: '/api/comments' });
   // await app.register(aiRoutes, { prefix: '/api/ai' }); // Decoupled to microservice
 

@@ -22,7 +22,7 @@
 }
 
 .dyslexic-font {
-  font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+  font-family: "OpenDyslexic", "Comic Sans MS", sans-serif !important;
 }
 
 .high-contrast-mode {
@@ -189,6 +189,54 @@
 .content-area blockquote {
   @apply my-8 pl-6 pr-4 py-4 border-l-4 border-[var(--color-primary)] bg-[var(--bg-surface)] rounded-r-xl italic text-[var(--text-muted)];
 }
+
+/* GitHub Alerts Styling */
+.markdown-alert {
+  @apply my-6 border-l-4 rounded-r-xl p-4 bg-[var(--bg-surface)] not-italic;
+}
+
+.markdown-alert-title {
+  @apply flex items-center gap-2 font-bold text-sm mb-2 uppercase tracking-wide;
+}
+
+.markdown-alert-note {
+  border-left-color: #3b82f6; /* Blue-500 */
+}
+.markdown-alert-note .markdown-alert-title {
+  color: #3b82f6;
+}
+
+.markdown-alert-tip {
+  border-left-color: #10b981; /* Emerald-500 */
+}
+.markdown-alert-tip .markdown-alert-title {
+  color: #10b981;
+}
+
+.markdown-alert-important {
+  border-left-color: #8b5cf6; /* Violet-500 */
+}
+.markdown-alert-important .markdown-alert-title {
+  color: #8b5cf6;
+}
+
+.markdown-alert-warning {
+  border-left-color: #f59e0b; /* Amber-500 */
+}
+.markdown-alert-warning .markdown-alert-title {
+  color: #f59e0b;
+}
+
+.markdown-alert-caution {
+  border-left-color: #ef4444; /* Red-500 */
+}
+.markdown-alert-caution .markdown-alert-title {
+  color: #ef4444;
+}
+
+/* SVG Icons colors logic is handled via inheritance or direct SVG styling if needed,
+   but typically remark-github-blockquote-alert outputs SVGs or we style the title text.
+   The plugin puts the title text. */
 
 .content-area table {
   @apply w-full my-8 border-collapse text-left text-sm;
