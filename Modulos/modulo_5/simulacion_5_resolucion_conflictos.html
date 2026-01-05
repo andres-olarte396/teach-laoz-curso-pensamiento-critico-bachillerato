@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala de Guerra: 6 Sombreros - Módulo 5</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #e2e8f0;
+            --border-color: #334155;
+            
+            /* Hat Colors */
+            --hat-white: #f1f5f9;
+            --hat-red: #ef4444;
+            --hat-black: #0f172a; /* Handled via border/text usually */
+            --hat-yellow: #eab308;
+            --hat-green: #22c55e;
+            --hat-blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Tactical font */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .dashboard {
+            width: 900px;
+            background-color: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dashboard::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.1) 4px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        header {
+            background-color: #0f172a;
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; color: var(--hat-blue); }
+
+        .status { font-size: 0.9rem; color: var(--hat-green); }
+
+        .main-screen {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            height: 500px;
+        }
+
+        .sidebar {
+            background-color: rgba(0,0,0,0.3);
+            border-right: 2px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .hat-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .hat-btn:hover { background-color: rgba(255,255,255,0.05); }
+        .hat-btn.active { border-color: var(--hat-blue); background-color: rgba(59, 130, 246, 0.1); }
+        
+        .hat-btn::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .btn-white::before { background-color: var(--hat-white); }
+        .btn-red::before { background-color: var(--hat-red); }
+        .btn-black::before { background-color: #64748b; }
+        .btn-yellow::before { background-color: var(--hat-yellow); }
+        .btn-green::before { background-color: var(--hat-green); }
+        .btn-blue::before { background-color: var(--hat-blue); }
+
+        .hat-done::after {
+            content: "✓";
+            position: absolute;
+            right: 10px;
+            color: var(--hat-green);
+        }
+
+        .content-area {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .scenario-box {
+            background-color: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-left: 4px solid var(--hat-white);
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .instruction {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+
+        .thought-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .thought-card {
+            background-color: #334155;
+            padding: 15px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .thought-card:hover {
+            border-color: var(--hat-blue);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background-color: #0f172a;
+            padding: 15px;
+            border-top: 2px solid var(--border-color);
+            text-align: right;
+        }
+        
+        /* Modal Style */
+        .modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .hidden { display: none !important; }
+
+        .btn-action {
+            background-color: var(--hat-blue);
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-family: inherit;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <header>
+            <h1>Sala de Guerra: Análisis Estratégico</h1>
+            <div class="status">SISTEMA ONLINE</div>
+        </header>
+
+        <div class="main-screen">
+            <div class="sidebar">
+                <button class="hat-btn btn-white" id="hat-white" onclick="selectHat('white')">Sombrero Blanco</button>
+                <button class="hat-btn btn-red" id="hat-red" onclick="selectHat('red')">Sombrero Rojo</button>
+                <button class="hat-btn btn-black" id="hat-black" onclick="selectHat('black')">Sombrero Negro</button>
+                <button class="hat-btn btn-yellow" id="hat-yellow" onclick="selectHat('yellow')">Sombrero Amarillo</button>
+                <button class="hat-btn btn-green" id="hat-green" onclick="selectHat('green')">Sombrero Verde</button>
+                <button class="hat-btn btn-blue" id="hat-blue" onclick="selectHat('blue')">Sombrero Azul</button>
+            </div>
+
+            <div class="content-area" id="content-area">
+                <div class="scenario-box">
+                    <strong>SITUACIÓN:</strong>
+                    "Tus amigos quieren ir de vacaciones a la playa en fin de año, pero tú estás ahorrando para una computadora nueva y te preocupa gastar tus ahorros."
+                </div>
+                
+                <div id="game-interface">
+                    <p class="instruction">Selecciona un Sombrero a la izquierda para analizar esta parte del problema.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Progreso: <span id="progress">0</span>/6
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="modal hidden">
+            <h2 style="color:var(--hat-green); font-size:2rem; margin-bottom:10px;">ANÁLISIS COMPLETADO</h2>
+            <p style="max-width: 600px; line-height: 1.6; margin-bottom: 30px;">
+                Has desglosado el problema desde todas las perspectivas.
+                <br><br>
+                Ya no es un "lío mental", es un mapa de decisiones. Ahora puedes decidir:
+                ¿Vale la pena el riesgo (Negro) por la diversión (Amarillo)? ¿Cómo te sientes realmente (Rojo)?
+            </p>
+            <button class="btn-action" onclick="location.reload()">NUEVA MISIÓN</button>
+        </div>
+    </div>
+
+    <script>
+        const hatData = {
+            white: {
+                name: "Sombrero Blanco (Datos)",
+                thoughts: [
+                    { text: "Tengo $500 ahorrados. El viaje cuesta $300.", correct: true },
+                    { text: "Me da miedo quedarme sin dinero.", correct: false }, // Rojo
+                    { text: "Podría pedir prestado.", correct: false } // Verde
+                ]
+            },
+            red: {
+                name: "Sombrero Rojo (Emociones)",
+                thoughts: [
+                    { text: "Siento envidia si van sin mí, pero ansiedad si gasto.", correct: true },
+                    { text: "Es una mala idea ir.", correct: false }, // Negro
+                    { text: "El viaje es de 3 días.", correct: false } // Blanco
+                ]
+            },
+            black: {
+                name: "Sombrero Negro (Riesgos)",
+                thoughts: [
+                    { text: "Si me enfermo o pasa algo, no tendré ahorros de emergencia.", correct: true },
+                    { text: "Será muy divertido.", correct: false }, // Amarillo
+                    { text: "Odio la playa.", correct: false } // Rojo
+                ]
+            },
+            yellow: {
+                name: "Sombrero Amarillo (Beneficios)",
+                thoughts: [
+                    { text: "Crearé recuerdos inolvidables y descansaré del estudio.", correct: true },
+                    { text: "Podemos vender galletas para ganar dinero.", correct: false }, // Verde
+                    { text: "Hay un 50% de probabilidad de lluvia.", correct: false } // Blanco
+                ]
+            },
+            green: {
+                name: "Sombrero Verde (Creatividad)",
+                thoughts: [
+                    { text: "Podría ir solo 2 días o buscar un hostal más barato.", correct: true },
+                    { text: "Es muy caro.", correct: false }, // Negro
+                    { text: "Quiero la computadora.", correct: false } // Rojo
+                ]
+            },
+            blue: {
+                name: "Sombrero Azul (Control)",
+                thoughts: [
+                    { text: "Primero revisemos el presupuesto (Blanco), luego decidamos.", correct: true },
+                    { text: "Vamos a la playa.", correct: false }, // Decisión final
+                    { text: "Tengo hambre.", correct: false } // Rojo/Fisiológico
+                ]
+            }
+        };
+
+        let completedHats = [];
+        let currentHat = null;
+
+        function selectHat(color) {
+            if (completedHats.includes(color)) return;
+            
+            // Remove active class from buttons
+            document.querySelectorAll('.hat-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`hat-${color}`).classList.add('active');
+            
+            currentHat = color;
+            renderThoughts(color);
+        }
+
+        function renderThoughts(color) {
+            const data = hatData[color];
+            const container = document.getElementById('game-interface');
+            
+            let html = `
+                <p class="instruction" style="color:var(--hat-${color === 'black' ? 'white' : color})">
+                    <strong>${data.name}</strong>: Selecciona el pensamiento que corresponde a este sombrero.
+                </p>
+                <div class="thought-cards">
+            `;
+            
+            // Shuffle thoughts
+            const shuffled = [...data.thoughts].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((thought, index) => {
+                html += `<div class="thought-card" onclick="checkThought('${color}', ${thought.correct})">${thought.text}</div>`;
+            });
+            
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function checkThought(color, isCorrect) {
+            if (isCorrect) {
+                // Success
+                completedHats.push(color);
+                document.getElementById(`hat-${color}`).classList.add('hat-done');
+                document.getElementById(`hat-${color}`).classList.remove('active');
+                
+                document.getElementById('progress').innerText = completedHats.length;
+
+                // Clear Area
+                document.getElementById('game-interface').innerHTML = `
+                    <div style="text-align:center; padding: 40px;">
+                        <span style="font-size:3rem;">✅</span>
+                        <p>Datos analizados correctamente.</p>
+                        <p class="instruction">Selecciona el siguiente sombrero.</p>
+                    </div>
+                `;
+                
+                if (completedHats.length === 6) {
+                    setTimeout(() => {
+                        document.getElementById('success-modal').classList.remove('hidden');
+                    }, 1000);
+                }
+
+            } else {
+                // Error animation
+                alert("Incorrecto. Ese pensamiento pertenece a otro sombrero.");
+            }
+        }
+
+    </script>
+</body>
+</html>

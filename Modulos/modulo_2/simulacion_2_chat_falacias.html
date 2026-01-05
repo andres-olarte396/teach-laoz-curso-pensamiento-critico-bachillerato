@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Falacias - Módulo 2</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --chat-bg: #1e293b;
+            --header-bg: #334155;
+            --user-msg-bg: #2563eb;
+            --bot-msg-bg: #475569;
+            --text-color: #f1f5f9;
+            --accent-color: #f472b6; /* Pink for contrast */
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .phone-container {
+            width: 380px;
+            height: 700px;
+            background-color: var(--chat-bg);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+            border: 8px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-header {
+            background-color: var(--header-bg);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .contact-info h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .contact-info span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .msg-bot {
+            background-color: var(--bot-msg-bg);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .msg-user {
+            background-color: var(--user-msg-bg);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .controls {
+            background-color: var(--header-bg);
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-option {
+            background-color: #1e293b;
+            color: white;
+            border: 1px solid #475569;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-option:hover {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border-color: var(--accent-color);
+        }
+
+        .notification {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .notification.show { opacity: 1; }
+
+        .hidden { display: none !important; }
+        
+        /* Win screen overlay */
+        .win-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="chat-header">
+            <div class="avatar">🤖</div>
+            <div class="contact-info">
+                <h3>DebateBot 3000</h3>
+                <span>En línea - Intentando manipularte</span>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">¡Correcto! Falacia Bloqueada.</div>
+
+        <div class="chat-area" id="chat">
+            <div class="message msg-bot">Hola humano. Vamos a debatir. Creo que la educación debería ser gratuita para todos.</div>
+            <div class="message msg-user">Yo creo que es complicado porque alguien tiene que pagar los costos, ¿no?</div>
+            <!-- Bot response with fallacy will appear here -->
+        </div>
+
+        <div class="controls">
+            <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: #94a3b8;">Detecta la FALACIA del Bot:</p>
+            <div class="options-grid" id="options">
+                <!-- Options injected by JS -->
+            </div>
+        </div>
+
+        <div id="win-screen" class="win-screen hidden">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🛡️</div>
+            <h2>¡Escudo Lógico Activo!</h2>
+            <p style="padding: 0 30px; color: #cbd5e1;">Has detectado todas las trampas lógicas. DebateBot no ha podido manipularte.</p>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-option" style="width:auto; padding: 10px 20px;" onclick="location.reload()">Reiniciar</button>
+                <button class="btn-option" style="width:auto; padding: 10px 20px; background: transparent; border: 1px solid #94a3b8;" onclick="document.getElementById('win-screen').classList.add('hidden')">👁️ Ver Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                botText: "¡Ja! Dices eso porque eres solo un estudiante y no sabes nada de la vida real.",
+                correct: "Ad Hominem",
+                options: ["Hombre de Paja", "Ad Hominem", "Falsa Causalidad", "Ninguna"],
+                response: "Mi edad no invalida mi argumento. Hablemos de los costos."
+            },
+            {
+                botText: "Ah, o sea que quieres que los profesores trabajen gratis y se mueran de hambre. ¡Qué cruel!",
+                correct: "Hombre de Paja",
+                options: ["Ad Hominem", "Falsa Dicotomía", "Hombre de Paja", "Ad Populum"],
+                response: "No he dicho eso. Estás distorsionando mis palabras. Dije que alguien debe pagar."
+            },
+            {
+                botText: "Mira, todo el mundo sabe que la educación gratuita es imposible. Si todos lo dicen, es verdad.",
+                correct: "Ad Populum",
+                options: ["Ad Populum", "Post Hoc", "Falsa Dicotomía", "Ad Hominem"],
+                response: "Que todos lo crean no lo hace cierto. Necesitamos datos, no popularidad."
+            },
+            {
+                botText: "O apoyas mi plan perfecto al 100%, o eres enemigo del progreso y quieres que el país fracase.",
+                correct: "Falsa Dicotomía",
+                options: ["Post Hoc", "Hombre de Paja", "Falsa Dicotomía", "Ad Hominem"],
+                response: "Falso. Hay muchas opciones intermedias entre tu plan y el fracaso total."
+            }
+        ];
+
+        let currentLevel = 0;
+        let isWaiting = true;
+
+        function initLevel() {
+            if (currentLevel >= levels.length) {
+                setTimeout(() => {
+                    document.getElementById('win-screen').classList.remove('hidden');
+                    // Add restart button to background options
+                    document.getElementById('options').innerHTML = '<button class="btn-option" onclick="location.reload()" style="grid-column: span 2; background: #334155;">🔄 Reiniciar Debate</button>';
+                }, 1000);
+                return;
+            }
+
+            const levelData = levels[currentLevel];
+            
+            // Bot types...
+            setTimeout(() => {
+                addMessage(levelData.botText, 'bot');
+                renderOptions(levelData);
+                isWaiting = false;
+            }, 1000);
+        }
+
+        function addMessage(text, type) {
+            const chat = document.getElementById('chat');
+            const msg = document.createElement('div');
+            msg.className = `message msg-${type}`;
+            msg.innerText = text;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function renderOptions(data) {
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if (isWaiting) return;
+
+            const data = levels[currentLevel];
+            
+            if (selected === data.correct) {
+                // Correct
+                showNotification("¡Correcto! Bloqueado 🛡️");
+                addMessage(`(Tú): ${data.correct}! ${data.response}`, 'user');
+                currentLevel++;
+                isWaiting = true;
+                document.getElementById('options').innerHTML = ''; // Clear options
+                initLevel();
+            } else {
+                // Incorrect
+                showNotification("❌ Incorrecto. Intenta de nuevo.");
+                const btn = Array.from(document.querySelectorAll('.btn-option')).find(b => b.innerText === selected);
+                btn.style.borderColor = '#f87171';
+                btn.style.color = '#f87171';
+                setTimeout(() => {
+                    btn.style.borderColor = '#475569';
+                    btn.style.color = 'white';
+                }, 1000);
+            }
+        }
+
+        function showNotification(text) {
+            const notif = document.getElementById('notification');
+            notif.innerText = text;
+            notif.classList.add('show');
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 2000);
+        }
+
+        // Start first bot turn after delays
+        setTimeout(initLevel, 1500);
+
+    </script>
+</body>
+</html>
