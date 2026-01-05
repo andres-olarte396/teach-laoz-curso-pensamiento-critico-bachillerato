@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desafío de Decisiones Rápidas - Módulo 1</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --text-color: #e2e8f0;
+        --accent-color: #38bdf8;
+        --success-color: #4ade80;
+        --danger-color: #f87171;
+        --warning-color: #fbbf24;
+      }
+
+      body {
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        background-color: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        max-width: 600px;
+        width: 100%;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid #334155;
+        position: relative;
+        overflow: hidden;
+      }
+
+      h1 {
+        color: var(--accent-color);
+        margin-bottom: 10px;
+        font-size: 1.8rem;
+      }
+
+      .subtitle {
+        color: #94a3b8;
+        margin-bottom: 30px;
+      }
+
+      .game-area {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .timer-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #334155;
+        border-radius: 3px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        display: none;
+      }
+
+      .timer-fill {
+        height: 100%;
+        background-color: var(--accent-color);
+        width: 100%;
+        transition: width 1s linear;
+      }
+
+      .scenario-text {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+        line-height: 1.5;
+      }
+
+      .options {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .btn {
+        background-color: #334155;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex: 1;
+        max-width: 200px;
+        font-weight: 600;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+      }
+
+      .btn-primary {
+        background-color: var(--accent-color);
+        color: #0f172a;
+      }
+      .btn-yes {
+        background-color: var(--success-color);
+        color: #064e3b;
+      }
+      .btn-no {
+        background-color: var(--danger-color);
+        color: #450a0a;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .feedback-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border-left: 4px solid var(--accent-color);
+        text-align: left;
+      }
+
+      .heuristic-tag {
+        display: inline-block;
+        background-color: var(--warning-color);
+        color: #451a03;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Glassmorphism decoration */
+      .blob {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.15;
+        z-index: -1;
+      }
+      .blob-1 {
+        top: -50px;
+        left: -50px;
+      }
+      .blob-2 {
+        bottom: -50px;
+        right: -50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container">
+      <!-- Start Screen -->
+      <div id="start-screen">
+        <h1>🧠 El Cerebro Rápido</h1>
+        <p class="subtitle">Módulo 1: Heurísticos y Atajos Mentales</p>
+        <p style="margin-bottom: 30px">
+          Tomarás 4 decisiones bajo presión. Tienes 5 segundos para cada una.<br />
+          ¿Podrás pensar con claridad o caerás en la trampa?
+        </p>
+        <button class="btn btn-primary" onclick="startGame()">
+          ¡Comenzar Reto!
+        </button>
+      </div>
+
+      <!-- Game Screen -->
+      <div id="game-screen" class="hidden">
+        <div class="timer-bar"><div class="timer-fill" id="timer"></div></div>
+        <div id="scenario-container" class="game-area">
+          <!-- Scenario injected here -->
+        </div>
+      </div>
+
+      <!-- Feedback Screen -->
+      <div id="feedback-screen" class="hidden">
+        <h2>Análisis de tu Decisión</h2>
+        <div id="feedback-content" class="feedback-card"></div>
+        <button
+          class="btn btn-primary"
+          style="margin-top: 20px"
+          onclick="nextLevel()"
+        >
+          Siguiente
+        </button>
+      </div>
+
+      <!-- End Screen -->
+      <div id="end-screen" class="hidden">
+        <h1>🏁 ¡Reto Completado!</h1>
+        <p class="subtitle">Has experimentado cómo tu cerebro usa atajos.</p>
+        <p>
+          Los heurísticos (atajos) son útiles para sobrevivir, pero en el mundo
+          moderno nos hacen gastar dinero o temer cosas inofensivas.
+          <br /><br />
+          <strong>Lección Clave:</strong> Cuando sientas urgencia o miedo, haz
+          una PAUSA de 3 segundos.
+        </p>
+        <button class="btn btn-primary" onclick="location.reload()">
+          Jugar de Nuevo
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const scenarios = [
+        {
+          id: 1,
+          text: "Ves unos zapatos de $200 rebajados a $100. ¡Es una oferta del 50%! ¿Son baratos?",
+          options: ["SÍ, ¡Gangazo!", "NO necesariamente"],
+          correctIndex: 1, // No necesariamente (Logic)
+          heuristic: "Heurístico de Anclaje",
+          explanation:
+            "Tu cerebro se 'ancló' al primer precio ($200). Comparado con eso, $100 parece barato. Pero si hubieras visto los mismos zapatos a $100 sin la etiqueta de rebaja, ¿los habrías comprado? Quizás su valor real es $50.",
+        },
+        {
+          id: 2,
+          text: "Noticia de última hora: 'Ataque de tiburón en la costa'. Tienes un viaje a la playa mañana. ¿Cancelas el baño en el mar?",
+          options: ["SÍ, qué miedo", "NO, voy igual"],
+          correctIndex: 1, // No, voy igual (Logic)
+          heuristic: "Heurístico de Disponibilidad",
+          explanation:
+            "Juzgas el riesgo por lo fácil que es recordar un ejemplo dramático (la noticia). Estadísticamente, es más peligroso el viaje en auto a la playa que el tiburón. Pero el miedo vende más periódicos.",
+        },
+        {
+          id: 3,
+          text: "Roberto es introvertido, ama el orden y los detalles. ¿Es más probable que Roberto sea Bibliotecario o Vendedor?",
+          options: ["Bibliotecario", "Vendedor"],
+          correctIndex: 1, // Vendedor (Logic because there are many more sales jobs than librarian jobs)
+          heuristic: "Heurístico de Representatividad",
+          explanation:
+            "Te guiaste por el estereotipo (Roberto se parece a un bibliotecario). Pero ignoraste la estadística base: hay millones de vendedores y muy pocos bibliotecarios. Por pura probabilidad, es más seguro que sea un vendedor tímido.",
+        },
+        {
+          id: 4,
+          text: "Web de reservas: '¡Solo queda 1 habitación a este precio! 15 personas la están viendo ahora'.",
+          options: ["Reservar YA", "Comparar precios"],
+          correctIndex: 1, // Comparar (Logic)
+          heuristic: "Escasez y Presión Social",
+          explanation:
+            "La web usa la urgencia para apagar tu pensamiento crítico. Quieren que actúes por miedo a perder la oportunidad (FOMO) en lugar de verificar si el precio es realmente bueno.",
+        },
+      ];
+
+      let currentScenario = 0;
+      let timerInterval;
+      const TIME_LIMIT = 5; // seconds
+
+      function startGame() {
+        document.getElementById("start-screen").classList.add("hidden");
+        document.getElementById("game-screen").classList.remove("hidden");
+        showScenario();
+      }
+
+      function showScenario() {
+        const data = scenarios[currentScenario];
+        const container = document.getElementById("scenario-container");
+
+        container.innerHTML = `
+                <div class="scenario-text fade-in">${data.text}</div>
+                <div class="options fade-in">
+                    <button class="btn btn-yes" onclick="handleChoice(0)">${data.options[0]}</button>
+                    <button class="btn btn-no" onclick="handleChoice(1)">${data.options[1]}</button>
+                </div>
+            `;
+
+        startTimer();
+      }
+
+      function startTimer() {
+        const timerBar = document.querySelector(".timer-bar");
+        const timerFill = document.getElementById("timer");
+        timerBar.style.display = "block";
+        timerFill.style.width = "100%";
+
+        let timeLeft = TIME_LIMIT;
+
+        // Reset transition for instant refill
+        timerFill.style.transition = "none";
+        timerFill.offsetHeight; // Trigger reflow
+        timerFill.style.transition = `width ${TIME_LIMIT}s linear`;
+        timerFill.style.width = "0%";
+
+        clearTimeout(timerInterval);
+        timerInterval = setTimeout(() => {
+          handleTimeout();
+        }, TIME_LIMIT * 1000);
+      }
+
+      function handleTimeout() {
+        showFeedback(-1); // -1 indicates timeout
+      }
+
+      function handleChoice(optionIndex) {
+        clearTimeout(timerInterval);
+        showFeedback(optionIndex);
+      }
+
+      function showFeedback(choiceIndex) {
+        document.getElementById("game-screen").classList.add("hidden");
+        document.getElementById("feedback-screen").classList.remove("hidden");
+
+        const data = scenarios[currentScenario];
+        const content = document.getElementById("feedback-content");
+
+        let title = "";
+        let color = "";
+
+        if (choiceIndex === -1) {
+          title = "⏳ ¡Se acabó el tiempo!";
+          color = "#fbbf24";
+        } else if (choiceIndex === data.correctIndex) {
+          title = "✅ ¡Pensamiento Lógico!";
+          color = "#4ade80";
+        } else {
+          title = "🧠 ¡Caíste en la trampa!";
+          color = "#f87171"; // Red
+        }
+
+        content.innerHTML = `
+                <h3 style="color: ${color}; margin-top:0;">${title}</h3>
+                <span class="heuristic-tag">${data.heuristic}</span>
+                <p>${data.explanation}</p>
+            `;
+      }
+
+      function nextLevel() {
+        currentScenario++;
+        if (currentScenario < scenarios.length) {
+          document.getElementById("feedback-screen").classList.add("hidden");
+          document.getElementById("game-screen").classList.remove("hidden");
+          showScenario();
+        } else {
+          document.getElementById("feedback-screen").classList.add("hidden");
+          document.getElementById("end-screen").classList.remove("hidden");
+        }
+      }
+    </script>
+  </body>
+</html>
