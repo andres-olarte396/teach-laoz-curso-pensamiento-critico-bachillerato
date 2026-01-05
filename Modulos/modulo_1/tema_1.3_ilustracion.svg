@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
-  <path d="M50 10 L80 30 L20 30 Z" fill="#333"/>
-  <line x1="20" y1="30" x2="30" y2="70" stroke="#333" stroke-width="1"/>
-  <line x1="50" y1="30" x2="50" y2="70" stroke="#333" stroke-width="1"/>
-  <line x1="80" y1="30" x2="70" y2="70" stroke="#333" stroke-width="1"/>
-  <circle cx="50" cy="80" r="15" fill="#ddd"/>
-  <text x="50" y="85" text-anchor="middle" font-size="20">🤯</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"><path fill="#333" d="M50 10 L80 30 L20 30 Z"/><line x1="20" x2="30" y1="30" y2="70" stroke="#333" stroke-width="1"/><line x1="50" x2="50" y1="30" y2="70" stroke="#333" stroke-width="1"/><line x1="80" x2="70" y1="30" y2="70" stroke="#333" stroke-width="1"/><circle cx="50" cy="80" r="15" fill="#ddd"/><text x="50" y="85" font-size="20" text-anchor="middle">🤯</text></svg>
