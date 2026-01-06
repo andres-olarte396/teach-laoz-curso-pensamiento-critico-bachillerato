@@ -24,7 +24,7 @@ export async function evaluationRoutes(app: FastifyInstance) {
   const submitEvaluation = new SubmitEvaluation(getEvaluation, evaluationResultRepository, progressRepository);
   const listEvaluations = new ListEvaluations(evaluationResultRepository);
   
-  const controller = new EvaluationController(submitEvaluation, listEvaluations);
+  const controller = new EvaluationController(submitEvaluation, listEvaluations, getEvaluation);
 
   app.post('/:courseId/:lessonId/submit', {
     onRequest: [app.authenticate]
@@ -39,6 +39,12 @@ export async function evaluationRoutes(app: FastifyInstance) {
   app.get('/admin/evaluations', {
     onRequest: [app.authenticate]
   }, controller.list.bind(controller));
+
+  // GET Evaluation Definition (Wildcard must be last usually, or carefully placed)
+  // Since we use prefix /api/evaluations, this will be /api/evaluations/*
+  // We need to ensure it doesn't conflict with /api/evaluations/my-results or /admin/evaluations
+  // Fastify matches specific routes first, so this is fine.
+  app.get('/*', controller.get.bind(controller));
 
   const proxyController = new AIEvaluationProxyController(evaluationResultRepository);
   app.post('/ai-proxy', {
