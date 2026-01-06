@@ -34,4 +34,28 @@ export class AuthService {
 
     return user;
   }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValid) {
+        throw new Error('Invalid current password');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    
+    // Check if repository has updatePassword method (Cast to avoid interface limitation if not updated yet in IUserRepository)
+    // Assuming we updated interface or implementation.
+    const repo = this.userRepository as any; 
+    if (typeof repo.updatePassword === 'function') {
+        await repo.updatePassword(userId, newHash);
+    } else {
+        // Fallback or Error
+        throw new Error('Repository does not support password updates');
+    }
+  }
 }

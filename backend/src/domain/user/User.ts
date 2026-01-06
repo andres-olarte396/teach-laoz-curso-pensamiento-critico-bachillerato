@@ -4,6 +4,7 @@ export interface User {
   passwordHash: string;
   name: string;
   role: 'student' | 'admin';
+  avatarUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

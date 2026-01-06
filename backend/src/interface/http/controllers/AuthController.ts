@@ -79,16 +79,25 @@ export class AuthController {
   }
 
   async me(req: FastifyRequest, reply: FastifyReply) {
-    const user = req.user as any;
-    if (!user) {
+    const userPayload = req.user as any;
+    if (!userPayload) {
       return reply.code(401).send({ message: 'Not authenticated' });
     }
+    
+    // Fetch fresh user data from DB instead of relying on stale token payload
+    const user = await this.updateUserUseCase['userRepository'].findById(userPayload.id);
+    
+    if (!user) {
+        return reply.code(404).send({ message: 'User not found' });
+    }
+
     return { 
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        avatarUrl: user.avatarUrl
       } 
     };
   }
@@ -99,22 +108,48 @@ export class AuthController {
       return reply.code(401).send({ message: 'Not authenticated' });
     }
 
-    const { name } = req.body as { name?: string };
+    const body = req.body as { name?: string, email?: string, avatarUrl?: string };
     
     try {
-      const updatedUser = await this.updateUserUseCase.execute(user.id, { name });
-       // Logic to refresh token could go here if name is in token, but for now just return updated user
+      const updatedUser = await this.updateUserUseCase.execute(user.id, body);
+       
+      // If email changed, we might want to issue a new token or invalidate old ones, but for now simple update.
+      
       return { 
         user: {
           id: updatedUser.id,
           email: updatedUser.email,
           name: updatedUser.name,
-          role: updatedUser.role
+          role: updatedUser.role,
+          avatarUrl: updatedUser.avatarUrl
         } 
       };
-    } catch (error) {
+    } catch (error: any) {
+       if (error.message === 'Email already taken') {
+           return reply.code(409).send({ message: 'Email already taken' });
+       }
        console.error(error);
        return reply.code(500).send({ message: 'Failed to update profile' });
     }
+  }
+
+  async changePassword(req: FastifyRequest, reply: FastifyReply) {
+      const user = req.user as any;
+      if (!user) {
+          return reply.code(401).send({ message: 'Not authenticated' });
+      }
+
+      const { currentPassword, newPassword } = req.body as any;
+
+      try {
+          await this.authService.changePassword(user.id, currentPassword, newPassword);
+          return reply.code(200).send({ message: 'Password updated successfully' });
+      } catch (error: any) {
+          if (error.message === 'Invalid current password') {
+              return reply.code(400).send({ message: 'Invalid current password' });
+          }
+          console.error(error);
+          return reply.code(500).send({ message: 'Failed to change password' });
+      }
   }
 }

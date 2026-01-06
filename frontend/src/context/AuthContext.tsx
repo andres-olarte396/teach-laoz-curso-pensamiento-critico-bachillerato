@@ -5,6 +5,7 @@ interface User {
   email: string;
   name: string;
   role: 'student' | 'admin';
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
@@ -36,10 +37,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // We need to add a method to apiService or use fetch directly
       const response = await fetch('/api/auth/me', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
       });
       if (response.ok) {
          const data = await response.json();
+         console.log('Auth check response:', data); 
          setUser(data.user);
       } else {
         setUser(null);

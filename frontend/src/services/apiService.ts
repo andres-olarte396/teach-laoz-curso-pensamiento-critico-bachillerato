@@ -58,9 +58,14 @@ export const apiService = {
     return response.data;
   },
 
-  async updateProfile(data: { name: string }) {
+  async updateProfile(data: { name?: string, email?: string, avatarUrl?: string }) {
      const response = await apiClient.put('/auth/me', data);
      return response.data;
+  },
+
+  async changePassword(data: { currentPassword: string, newPassword: string }) {
+      const response = await apiClient.post('/auth/change-password', data);
+      return response.data;
   },
 
   async addEvidence(courseId: string, lessonId: string, content: string, type: 'text' | 'image' = 'text', mediaUrl?: string): Promise<Evidence> {

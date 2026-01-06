@@ -113,6 +113,8 @@ export async function authRoutes(app: FastifyInstance) {
         type: 'object',
         properties: {
           name: { type: 'string', minLength: 2 },
+          email: { type: 'string', format: 'email' },
+          avatarUrl: { type: 'string' }
         },
       },
       response: {
@@ -126,6 +128,7 @@ export async function authRoutes(app: FastifyInstance) {
                 email: { type: 'string' },
                 name: { type: 'string' },
                 role: { type: 'string' },
+                avatarUrl: { type: 'string' }
               },
             },
           },
@@ -133,4 +136,29 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
   }, controller.update.bind(controller));
+
+  // Change Password
+  app.post('/auth/change-password', {
+      onRequest: [app.authenticate],
+      schema: {
+          tags: ['Auth'],
+          summary: 'Change password',
+          body: {
+              type: 'object',
+              required: ['currentPassword', 'newPassword'],
+              properties: {
+                  currentPassword: { type: 'string' },
+                  newPassword: { type: 'string', minLength: 6 }
+              }
+          },
+          response: {
+              200: {
+                  type: 'object',
+                  properties: {
+                      message: { type: 'string' }
+                  }
+              }
+          }
+      }
+  }, controller.changePassword.bind(controller));
 }
