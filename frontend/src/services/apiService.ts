@@ -131,7 +131,7 @@ export const apiService = {
         feedback?: string;
       }[];
       metadata: Record<string, any>;
-    }>(`/evaluation/${path}`);
+    }>(`/evaluations/${path}`);
     return response.data;
   },
 

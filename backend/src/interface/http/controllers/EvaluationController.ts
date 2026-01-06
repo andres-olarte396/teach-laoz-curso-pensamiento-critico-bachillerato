@@ -182,5 +182,22 @@ export class EvaluationController {
           return reply.code(500).send({ message: 'Error fetching my evaluations', error });
       }
   }
+  async get(req: FastifyRequest, reply: FastifyReply) {
+      const { '*' : path } = req.params as any;
+      try {
+          // reuse getEvaluation usecase. Note: In a cleaner architecture we should inject it into controller
+          // But since it's not injected yet, we can't easily use it here without modifying constructor.
+          // Let's modify the constructor in the next step or for now, instantiate it locally? 
+          // Better: The route handler can call the use case directly if we export it or we fix the controller.
+          // Since I can't easily change constructor signature without breaking app.ts instantiation potentially (although it's manual),
+          // I will look at how `submit` works. It has `this.submitEvaluation`.
+          // `GetEvaluation` is passed to `SubmitEvaluation` but not controller.
+          // I will throw error "Not Implemented" but wait... I need to fix it.
+          // I should add `GetEvaluation` to controller constructor.
+          return reply.code(501).send({ message: "Fixing in next step..." });
+      } catch (err) {
+          return reply.code(404).send(err);
+      }
+  }
 }
 

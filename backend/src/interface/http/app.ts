@@ -19,6 +19,7 @@ import staticFiles from '@fastify/static';
 import multipart from '@fastify/multipart';
 import path from 'path';
 import { uploadRoutes } from './routes/uploadRoutes.js';
+import { db } from '../../infrastructure/database/sqlite.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -109,6 +110,15 @@ export async function createServer(): Promise<FastifyInstance> {
   app.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       await request.jwtVerify();
+      // Validate user existence in DB to prevent foreign key errors with stale tokens
+      const user = request.user as any;
+      if (user && user.id) {
+          // Quick existence check
+          const dbUser = db.prepare('SELECT id FROM users WHERE id = ?').get(user.id);
+          if (!dbUser) {
+              return reply.code(401).send({ message: 'User session invalid. Please login again.' });
+          }
+      }
     } catch (err) {
       reply.send(err);
     }
@@ -139,9 +149,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(blogRoutes, { prefix: '/api' });
   await app.register(adminRoutes, { prefix: '/api' });
   await app.register(progressRoutes, { prefix: '/api' });
-  await evaluationRoutes(app); // evaluationRoutes registered with prefix inside the function to avoid double prefixing issue if any, but wait, previous code had { prefix: '/api/evaluations' } for evaluationRoutes.
-  // Correcting pattern:
-  await  app.register(evaluationRoutes, { prefix: '/api/evaluation' });
+  await app.register(evaluationRoutes, { prefix: '/api/evaluations' });
   app.register(evidenceRoutes, { prefix: '/api/evidence' });
   app.register(uploadRoutes, { prefix: '/api/uploads' });
   await app.register(commentRoutes, { prefix: '/api/comments' });

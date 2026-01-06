@@ -8,22 +8,11 @@ Plataforma para crear, distribuir y comercializar cursos técnicos especializado
 
 ## 🎯 Características principales
 
-- ✅ Renderizado de Markdown a HTML con soporte técnico
-- ✅ Navegación tipo repositorio (GitHub-style)
-- ✅ Soporte para Mermaid (diagramas)
-- ✅ Soporte para LaTeX (fórmulas matemáticas)
-- ✅ Gestión de recursos (PDFs, imágenes, audio, video)
-- ✅ Arquitectura limpia y extensible
-- ✅ Independencia del contenido
 
 ## 🏗️ Arquitectura
 
 Este proyecto sigue principios de **Clean Architecture**:
 
-- **Domain**: Entidades y contratos
-- **Application**: Casos de uso
-- **Infrastructure**: Implementaciones concretas
-- **Interface**: API HTTP
 
 Ver [TECHNICAL_ARCHITECTURE.md](./docs/TECHNICAL_ARCHITECTURE.md) para más detalles.
 
@@ -31,8 +20,6 @@ Ver [TECHNICAL_ARCHITECTURE.md](./docs/TECHNICAL_ARCHITECTURE.md) para más deta
 
 ### Prerequisitos
 
-- Node.js 20+ LTS
-- npm 10+
 
 ### Instalación
 

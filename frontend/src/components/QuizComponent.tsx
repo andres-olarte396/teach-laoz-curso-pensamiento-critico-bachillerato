@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, XCircle, ChevronRight, RotateCcw, Award, Info } from 'lucide-react';
+import { CheckCircle2, XCircle, ChevronRight, RotateCcw, Award, Info, Loader2 } from 'lucide-react';
 
 interface Question {
   id: string;
@@ -36,7 +36,10 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
     setSelectedOption(optionId);
   };
 
-  const handleNext = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleNext = async () => {
     const isCorrect = selectedOption === currentQuestion.correctAnswerId;
     
     // Track Answer
@@ -44,6 +47,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
     const updatedAnswers = [...userAnswers, newAnswer];
     setUserAnswers(updatedAnswers);
     
+    const nextScore = isCorrect ? score + 1 : score;
     if (isCorrect) {
         setScore(prev => prev + 1);
     }
@@ -53,8 +57,23 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
       setSelectedOption(null);
       setShowFeedback(false);
     } else {
-      setQuizComplete(true);
-      if (onComplete) onComplete(isCorrect ? score + 1 : score, updatedAnswers);
+      // Final Question
+      if (onComplete) {
+          setIsSubmitting(true);
+          setSubmitError(null);
+          try {
+              // We cast result to Promise to support async handlers
+              await Promise.resolve(onComplete(nextScore, updatedAnswers));
+              setQuizComplete(true);
+          } catch (error) {
+              console.error(error);
+              setSubmitError("Hubo un problema al guardar tus resultados. Por favor intenta nuevamente.");
+          } finally {
+              setIsSubmitting(false);
+          }
+      } else {
+          setQuizComplete(true);
+      }
     }
   };
 
@@ -203,10 +222,15 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
           )}
 
           <div className="pt-6 flex justify-end">
+            {submitError && (
+                 <div className="mr-auto text-red-500 text-xs font-bold bg-red-50 px-3 py-2 rounded-lg border border-red-100 flex items-center gap-2">
+                    <XCircle size={14} /> {submitError}
+                 </div>
+            )}
             {!showFeedback ? (
                 <button
                     onClick={() => setShowFeedback(true)}
-                    disabled={!selectedOption}
+                    disabled={!selectedOption || isSubmitting}
                     className="flex items-center gap-2 px-10 py-4 rounded-full bg-[var(--text-main)] text-[var(--bg-surface)] font-black uppercase tracking-widest text-xs hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl"
                 >
                     Comprobar <ChevronRight size={16} />
@@ -214,9 +238,18 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
             ) : (
                 <button
                     onClick={handleNext}
-                    className="flex items-center gap-2 px-10 py-4 rounded-full bg-primary text-white font-black uppercase tracking-widest text-xs hover:opacity-90 transition-all shadow-xl"
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 px-10 py-4 rounded-full bg-primary text-white font-black uppercase tracking-widest text-xs hover:opacity-90 disabled:opacity-70 transition-all shadow-xl"
                 >
-                    {currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Test'} <ChevronRight size={16} />
+                    {isSubmitting ? (
+                        <>
+                           <Loader2 className="animate-spin" size={16} /> Guardando...
+                        </>
+                    ) : (
+                        <>
+                           {currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Test'} <ChevronRight size={16} />
+                        </>
+                    )}
                 </button>
             )}
           </div>

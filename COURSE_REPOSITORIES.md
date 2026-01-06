@@ -34,3 +34,4 @@ Agrega los cursos en el formato: `- [Nombre del Curso](URL_DEL_GIT_REPO)`
 - [Curso de Arquitectura de Software Moderna](https://github.com/andres-olarte396/teach-laoz-curso_modelos_organizacionales.git)
 - [Power BI para Talento Humano, SST, HSCQ y Contabilidad](https://github.com/andres-olarte396/teach-laoz-curso-power-bi-integral.git)
 - [Trading e Inversiones para Ingenieros](https://github.com/andres-olarte396/teach-laoz-curso-trading-ingenieros.git)
+- [Pensamiento Crítico Bachillerato](https://github.com/andres-olarte396/teach-laoz-curso-pensamiento-critico-bachillerato.git)

@@ -67,6 +67,7 @@ export const EvaluationPage: React.FC = () => {
         console.log('Evaluation submitted successfully');
     } catch (err) {
         console.error('Failed to submit evaluation:', err);
+        throw err; // Propagate to QuizComponent
     }
 
     // Telemetry: Track evaluation submission

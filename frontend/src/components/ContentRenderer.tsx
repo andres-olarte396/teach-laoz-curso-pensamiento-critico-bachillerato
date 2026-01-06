@@ -426,6 +426,28 @@ export const ContentRendererBase: React.FC<ContentRendererProps> = ({
         </div>
       );
     }
+    if (mime === "application/pdf") {
+      return (
+        <div className="pdf-container mt-8 animate-slide-up h-[800px]">
+          <iframe
+            src={url}
+            className="w-full h-full rounded-2xl border border-slate-700 bg-slate-900"
+            title={metadata.name}
+          />
+        </div>
+      );
+    }
+    if (mime.startsWith("image/")) {
+      return (
+        <div className="image-container mt-8 animate-slide-up flex justify-center">
+          <img
+            src={url}
+            alt={metadata.name}
+            className="max-w-full h-auto rounded-2xl border border-slate-700 bg-slate-950"
+          />
+        </div>
+      );
+    }
     return (
       <div className="p-8 text-center text-slate-400">
         Tipo de archivo no soportado para previsualización.{" "}
