@@ -151,7 +151,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(progressRoutes, { prefix: '/api' });
   await app.register(evaluationRoutes, { prefix: '/api/evaluations' });
   app.register(evidenceRoutes, { prefix: '/api/evidence' });
-  app.register(uploadRoutes, { prefix: '/api/uploads' });
+  app.register(uploadRoutes, { prefix: '/api/media' });
   await app.register(commentRoutes, { prefix: '/api/comments' });
   // await app.register(aiRoutes, { prefix: '/api/ai' }); // Decoupled to microservice
 

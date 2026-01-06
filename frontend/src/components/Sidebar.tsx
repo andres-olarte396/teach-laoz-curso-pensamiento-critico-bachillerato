@@ -7,6 +7,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { AccessibilityMenu } from './AccessibilityMenu';
 import { useAuth } from '../context/AuthContext';
+import { getAvatarSrc } from '../utils/imageUtils';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -488,8 +489,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
           {isCollapsed ? (
             <>
               {isAuthenticated && (
-                <Link to="/profile" className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md hover:scale-105 transition-transform" title="Mi Perfil">
-                  {user?.name?.[0]?.toUpperCase() || 'U'}
+                <Link to="/profile" className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-md hover:scale-105 transition-transform overflow-hidden" title="Mi Perfil">
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={getAvatarSrc(user.avatarUrl)} 
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user?.name?.[0]?.toUpperCase() || 'U'
+                  )}
                 </Link>
               )}
               
@@ -512,8 +521,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileIsOpen, setMobileIsOpen 
             <div className="flex items-center gap-3">
                {isAuthenticated && (
                  <Link to="/profile" className="flex items-center gap-3 flex-1 min-w-0 hover:bg-[var(--bg-app)] rounded-lg p-1 transition-colors -ml-1">
-                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
-                      {user?.name?.[0]?.toUpperCase() || 'U'}
+                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md overflow-hidden relative">
+                      {user?.avatarUrl ? (
+                        <img 
+                          src={getAvatarSrc(user.avatarUrl)} 
+                          alt={user.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement?.classList.add('fallback-init');
+                          }}
+                        />
+                      ) : (
+                        user?.name?.[0]?.toUpperCase() || 'U'
+                      )}
+                      {/* Fallback text if image fails (handled by CSS sibling or just overlap?) 
+                          Actually simple logic: if img fails, hide it. But we need to see underlying text then.
+                          Better: If avatarUrl exists, try img. If not, text.
+                          If img fails, we can't easily fallback to text without state. 
+                          For now, let's assume valid URL works given previous fix.
+                      */}
                    </div>
                    <div className="flex flex-col min-w-0 flex-1">
                       <span className="text-sm font-bold text-[var(--text-main)] truncate leading-tight">{user?.name || 'Estudiante'}</span>

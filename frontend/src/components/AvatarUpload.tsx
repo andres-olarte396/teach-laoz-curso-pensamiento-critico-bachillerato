@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Camera, RefreshCw } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
+import { getAvatarSrc } from '../utils/imageUtils';
+
 interface AvatarUploadProps {
   currentUrl?: string;
   onUploadSuccess: (url: string) => void;
@@ -109,40 +111,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ currentUrl, onUpload
       .substring(0, 2);
   };
 
-  const getAvatarSrc = (url: string) => {
-      if (!url) return '';
-      if (url.startsWith('http')) return url;
-      
-      // Construct absolute URL mapping to backend
-      // API_BASE_URL is typically http://localhost:3000/api
-      // URL from DB is /api/uploads/filename.jpg
-      
-      // We want: http://localhost:3000/api/uploads/filename.jpg
-      // So if url starts with /api, and API_BASE_URL ends with /api, we can replace or merge.
-      
-      // Robust way: Get the origin from API_BASE_URL
-      try {
-          // If we have a configured base URL, use its origin
-           // We'll import API_BASE_URL from config. 
-           // But since I don't want to add imports if I can avoid it or reuse existing apiService... 
-           // Actually, let's just assume we need to point to the backend port (3000) if we are on dev.
-           
-           // Simple strategy:
-           // If url starts with '/', allow browser to handle it (via proxy).
-           // BUT user says it doesn't work. Proxy might be flaky or cached.
-           
-           // Let's force using the API_BASE_URL's host.
-           // apiService typically holds the axios instance but doesn't expose the config URL easily directly.
-           // Let's deduce it.
-           
-           // Hard fix for common dev setup:
-           if (window.location.hostname === 'localhost' && url.startsWith('/api/')) {
-               return `http://localhost:3000${url}`;
-           }
-      } catch (e) { console.error(e); }
 
-      return url; 
-  };
 
   return (
     <div className="relative group w-24 h-24 mx-auto md:mx-0">
@@ -155,13 +124,14 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({ currentUrl, onUpload
             onError={(e) => {
                 console.error('Image load failed:', e.currentTarget.src);
                 e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('bg-red-500');
             }}
           />
         ) : (
           <span>{getInitials(name)}</span>
         )}
-      </div>
-
+      </div> 
+      
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading}

@@ -94,6 +94,7 @@ export async function authRoutes(app: FastifyInstance) {
                 email: { type: 'string' },
                 name: { type: 'string' },
                 role: { type: 'string' },
+                avatarUrl: { type: 'string' }
               },
             },
           },
