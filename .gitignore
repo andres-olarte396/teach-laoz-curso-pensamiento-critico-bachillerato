@@ -42,5 +42,5 @@ Thumbs.db
 # Husky
 .husky/_
 
-content/*
-content/courses/
+# Los archivos de contenido
+content/
