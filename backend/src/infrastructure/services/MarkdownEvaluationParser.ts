@@ -100,13 +100,21 @@ export class MarkdownEvaluationParser {
                     // Matches: > **Respuesta...** B) ...
                     // Matches: > **Respuesta**: B)
                     // Matches: > **Solución:** B
-                    const answerMatch = line.match(/^>\s*\*\*.*(?:Respuesta|Solución).*?\*\*\s*([a-d1-4])/i);
+                    const answerMatch = line.match(/^>\s*\*\*.*(?:Respuesta|Solución).*?\*\*\s*(.*)/i);
                     const justificationHeaderMatch = line.match(/^>\s*\*\*(?:Justificación|Explicación):?\*\*:?/i);
 
                     if (answerMatch) {
                         // Found correct answer line
-                        if (answerMatch[1]) {
-                             currentQuestion.correctAnswerId = answerMatch[1].toLowerCase().trim();
+                        const answerText = answerMatch[1];
+                        if (answerText) {
+                             // Extract all valid IDs (A, B, C, D or 1, 2, 3, 4)
+                             // Matches: "A) y B)", "A, B", "A", "1. y 2."
+                             const ids = answerText.match(/([a-d1-4])/gi);
+                             if (ids && ids.length > 0) {
+                                 const normalizedIds = ids.map(id => id.toLowerCase());
+                                 currentQuestion.correctAnswerIds = normalizedIds;
+                                 currentQuestion.correctAnswerId = normalizedIds[0]; // Backward compatibility
+                             }
                         }
                     } else if (justificationHeaderMatch) {
                         // Found justification header, start capturing feedback
@@ -148,9 +156,22 @@ export class MarkdownEvaluationParser {
                 if (targetQuestion) {
                     // Buscar la letra de la respuesta mas agresivamente
                     // Soporta: **B) Mito**, B) Mito, **B**, B.
-                    const ansMatch = line.match(/(?:\*\*)?([a-d1-4])(?:\.|\))\s*(?:\*\*)?/i);
-                    if (ansMatch) {
-                        targetQuestion.correctAnswerId = ansMatch[1].toLowerCase().trim();
+                    // Soporta multiple: "A) y B)", "**A** y **B**"
+                    // Extract all valid IDs
+                    const ids = line.match(/([a-d1-4])(?:\.|\))/gi);
+                    if (ids && ids.length > 0) {
+                         // Extract the letter/number from the match (remove . or ))
+                         const normalizedIds = ids.map(m => m.replace(/[\.\)]/, '').toLowerCase());
+                         targetQuestion.correctAnswerIds = normalizedIds;
+                         targetQuestion.correctAnswerId = normalizedIds[0];
+                    } else {
+                        // Fallback simple match if the above complex one fails or if format is just "A" without parens
+                        const ansMatchSimple = line.match(/(?:\*\*)?([a-d1-4])(?:\.|\))?\s*(?:\*\*)?/i);
+                        if (ansMatchSimple) {
+                           const id = ansMatchSimple[1].toLowerCase();
+                           targetQuestion.correctAnswerIds = [id];
+                           targetQuestion.correctAnswerId = id;
+                        }
                     }
 
                     // Buscar justificación

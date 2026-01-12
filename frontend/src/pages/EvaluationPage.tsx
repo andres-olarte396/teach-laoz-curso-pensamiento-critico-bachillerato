@@ -59,7 +59,7 @@ export const EvaluationPage: React.FC = () => {
     fetchEvaluation();
   }, [path]);
 
-  const handleQuizComplete = async (score: number, answers: { questionId: string; selectedOptionId: string }[]) => {
+  const handleQuizComplete = async (score: number, answers: { questionId: string; selectedOptionIds: string[] }[]) => {
     const courseId = path?.split('/')[0] || 'teach-laoz-unknown';
     
     try {

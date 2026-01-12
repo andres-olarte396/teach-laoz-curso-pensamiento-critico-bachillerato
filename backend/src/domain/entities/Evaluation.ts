@@ -5,7 +5,8 @@ export interface Question {
   id: string;
   text: string;
   options: { id: string; text: string }[];
-  correctAnswerId: string;
+  correctAnswerId?: string; // Deprecated, kept for backward compatibility if needed, though robust parsers should populate ids
+  correctAnswerIds?: string[];
   feedback?: string;
 }
 

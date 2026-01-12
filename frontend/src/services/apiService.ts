@@ -180,7 +180,7 @@ export const apiService = {
       return response.data;
   },
 
-  submitEvaluation: async (courseId: string, lessonId: string, answers: { questionId: string; selectedOptionId: string }[]) => {
+  submitEvaluation: async (courseId: string, lessonId: string, answers: { questionId: string; selectedOptionIds: string[] }[]) => {
     const response = await apiClient.post(`/evaluations/${courseId}/${encodeURIComponent(lessonId)}/submit`, { answers });
     return response.data;
   },

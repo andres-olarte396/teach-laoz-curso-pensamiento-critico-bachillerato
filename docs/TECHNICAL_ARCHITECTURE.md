@@ -1,23 +1,3 @@
-# Arquitectura Técnica - Teach LAOZ LMS
-
-## 1. Visión general
-
-Este documento define las decisiones técnicas concretas para implementar el sistema de gestión de aprendizaje técnico descrito en [REQUERIMENT.md](./REQUERIMENT.md).
-
----
-
-## 2. Stack tecnológico
-
-### 2.1 Runtime y lenguaje
-
-- **Node.js** v20+ (LTS)
-- **TypeScript** 5.x
-  - Type safety
-  - Mejor experiencia de desarrollo
-  - Interfaces explícitas para contratos
-
-### 2.2 Framework web
-
 - **Fastify** 4.x
   - Alto rendimiento
   - TypeScript-first
@@ -315,14 +295,14 @@ export class ContentPath {
   }
 
   private validate(): void {
-    if (this.value.includes('..')) {
-      throw new InvalidPathError('Path traversal detected');
+    if (this.value.includes("..")) {
+      throw new InvalidPathError("Path traversal detected");
     }
     // Normalizar y validar
   }
 
   static create(path: string): ContentPath {
-    const normalized = path.replace(/\\/g, '/').replace(/^\/+/, '');
+    const normalized = path.replace(/\\/g, "/").replace(/^\/+/, "");
     return new ContentPath(normalized);
   }
 }
@@ -344,7 +324,7 @@ await fastify.register(helmet, {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"], // Para Mermaid
-      imgSrc: ["'self'", 'data:', 'https:'],
+      imgSrc: ["'self'", "data:", "https:"],
     },
   },
 });
@@ -389,8 +369,8 @@ fastify.setErrorHandler((error, request, reply) => {
 
   fastify.log.error(error);
   return reply.status(500).send({
-    error: 'InternalServerError',
-    message: 'An unexpected error occurred',
+    error: "InternalServerError",
+    message: "An unexpected error occurred",
   });
 });
 ```

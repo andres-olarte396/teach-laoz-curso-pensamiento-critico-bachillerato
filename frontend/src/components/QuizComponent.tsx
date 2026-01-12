@@ -6,7 +6,8 @@ interface Question {
   id: string;
   text: string;
   options: { id: string; text: string }[];
-  correctAnswerId: string;
+  correctAnswerId?: string;
+  correctAnswerIds?: string[]; // Source of truth for multiple answers
   feedback?: string;
 }
 
@@ -16,34 +17,57 @@ import { Link } from 'react-router-dom';
 interface QuizComponentProps {
   title: string;
   questions: Question[];
-  onComplete?: (score: number, answers: { questionId: string; selectedOptionId: string }[]) => void;
+  onComplete?: (score: number, answers: { questionId: string; selectedOptionIds: string[] }[]) => void;
   nextLesson?: MenuItem | null;
 }
 
 export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, onComplete, nextLesson }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
 
-  const [userAnswers, setUserAnswers] = useState<{ questionId: string; selectedOptionId: string }[]>([]);
+  const [userAnswers, setUserAnswers] = useState<{ questionId: string; selectedOptionIds: string[] }[]>([]);
 
   const currentQuestion = questions[currentQuestionIndex];
+  
+  // Determine if question is multiple choice
+  const isMultipleChoice = (currentQuestion.correctAnswerIds && currentQuestion.correctAnswerIds.length > 1);
 
   const handleOptionSelect = (optionId: string) => {
     if (showFeedback) return;
-    setSelectedOption(optionId);
+    
+    if (isMultipleChoice) {
+        // Toggle selection
+        setSelectedOptions(prev => {
+            if (prev.includes(optionId)) {
+                return prev.filter(id => id !== optionId);
+            } else {
+                return [...prev, optionId];
+            }
+        });
+    } else {
+        // Single selection
+        setSelectedOptions([optionId]);
+    }
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleNext = async () => {
-    const isCorrect = selectedOption === currentQuestion.correctAnswerId;
+    // Determine correctness
+    let isCorrect = false;
+    const correctIds = currentQuestion.correctAnswerIds || (currentQuestion.correctAnswerId ? [currentQuestion.correctAnswerId] : []);
+    
+    // Check if lengths match and all selected are in correct list
+    if (selectedOptions.length === correctIds.length) {
+        isCorrect = selectedOptions.every(id => correctIds.includes(id));
+    }
     
     // Track Answer
-    const newAnswer = { questionId: currentQuestion.id, selectedOptionId: selectedOption! };
+    const newAnswer = { questionId: currentQuestion.id, selectedOptionIds: selectedOptions };
     const updatedAnswers = [...userAnswers, newAnswer];
     setUserAnswers(updatedAnswers);
     
@@ -54,7 +78,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
 
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setSelectedOption(null);
+      setSelectedOptions([]);
       setShowFeedback(false);
     } else {
       // Final Question
@@ -79,7 +103,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
 
   const restartQuiz = () => {
     setCurrentQuestionIndex(0);
-    setSelectedOption(null);
+    setSelectedOptions([]);
     setShowFeedback(false);
     setScore(0);
     setQuizComplete(false);
@@ -169,22 +193,27 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
           />
 
           <div className="grid gap-4">
-            {currentQuestion.options.map((option) => (
+            {currentQuestion.options.map((option) => {
+               const isSelected = selectedOptions.includes(option.id);
+               const correctIds = currentQuestion.correctAnswerIds || (currentQuestion.correctAnswerId ? [currentQuestion.correctAnswerId] : []);
+               const isCorrectOption = correctIds.includes(option.id);
+
+               return (
               <button
                 key={option.id}
                 onClick={() => handleOptionSelect(option.id)}
                 disabled={showFeedback}
                 className={`flex items-center justify-between p-6 rounded-2xl border-2 transition-all text-left group ${
-                  selectedOption === option.id
+                  isSelected
                     ? 'bg-primary/10 border-primary text-[var(--text-main)]'
                     : 'bg-[var(--bg-surface)] border-[var(--border-color)] text-[var(--text-muted)] hover:border-primary/30 hover:text-[var(--text-main)]'
-                } ${showFeedback && option.id === currentQuestion.correctAnswerId ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ''} 
-                  ${showFeedback && selectedOption === option.id && selectedOption !== currentQuestion.correctAnswerId ? 'border-red-500 bg-red-500/10 text-red-600 dark:text-red-400' : ''}
+                } ${showFeedback && isCorrectOption ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ''} 
+                  ${showFeedback && isSelected && !isCorrectOption ? 'border-red-500 bg-red-500/10 text-red-600 dark:text-red-400' : ''}
                 `}
               >
                 <div className="flex items-center gap-4">
                   <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-                    selectedOption === option.id ? 'bg-primary text-white' : 'bg-[var(--bg-app)] text-[var(--text-muted)] group-hover:bg-[var(--bg-surface)]'
+                    isSelected ? 'bg-primary text-white' : 'bg-[var(--bg-app)] text-[var(--text-muted)] group-hover:bg-[var(--bg-surface)]'
                   }`}>
                     {option.id.toUpperCase()}
                   </span>
@@ -194,14 +223,15 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
                   />
                 </div>
                 
-                {showFeedback && option.id === currentQuestion.correctAnswerId && (
+                {showFeedback && isCorrectOption && (
                   <CheckCircle2 size={24} className="text-emerald-500" />
                 )}
-                {showFeedback && selectedOption === option.id && selectedOption !== currentQuestion.correctAnswerId && (
+                {showFeedback && isSelected && !isCorrectOption && (
                   <XCircle size={24} className="text-red-500" />
                 )}
               </button>
-            ))}
+            );
+            })}
           </div>
 
           {showFeedback && currentQuestion.feedback && (
@@ -230,7 +260,7 @@ export const QuizComponent: React.FC<QuizComponentProps> = ({ title, questions, 
             {!showFeedback ? (
                 <button
                     onClick={() => setShowFeedback(true)}
-                    disabled={!selectedOption || isSubmitting}
+                    disabled={selectedOptions.length === 0 || isSubmitting}
                     className="flex items-center gap-2 px-10 py-4 rounded-full bg-[var(--text-main)] text-[var(--bg-surface)] font-black uppercase tracking-widest text-xs hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl"
                 >
                     Comprobar <ChevronRight size={16} />
