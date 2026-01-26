@@ -1,0 +1,82 @@
+# EVALUACIÓN: ELIMINACIÓN DE VOZ PASIVA
+
+## FICHA TÉCNICA
+
+- **Tema**: 1.1.1 Eliminación de Voz Pasiva
+- **Tiempo límite**: 10 minutos
+- **Puntaje total**: 100 puntos (20 pts por pregunta)
+- **Nivel**: Intermedio
+
+---
+
+## CUESTIONARIO
+
+### Pregunta 1: Identificación
+
+¿Cuál de las siguientes oraciones utiliza correctamente la **Voz Activa**?
+
+a) Los datos son validados por el controlador antes de ser guardados.
+b) El controlador valida los datos antes de guardarlos.
+c) Se validan los datos en el controlador.
+d) La validación es realizada por el controlador.
+
+### Pregunta 2: Impacto Cognitivo
+
+Según la analogía del curso, ¿por qué la Voz Pasiva es menos eficiente para el lector?
+
+a) Porque ocupa menos espacio en disco.
+b) Porque tiene una complejidad equivalente a O(n^2) cognitiva.
+c) Porque es gramaticalmente incorrecta en español.
+d) Porque suena menos profesional.
+
+### Pregunta 3: Refactorización
+
+Selecciona la mejor refactorización para: *"El despliegue fue abortado por el sistema de seguridad debido a un error."*
+
+a) El sistema de seguridad abortó el despliegue debido a un error.
+b) Debido a un error, el despliegue fue abortado.
+c) Se abortó el despliegue por un error en el sistema de seguridad.
+d) El error causó que el despliegue fuera abortado.
+
+### Pregunta 4: Agentes Ocultos
+
+En la frase *"Se decidió aumentar el timeout a 30 segundos"*, ¿cuál es el problema principal?
+
+a) La frase es demasiado larga.
+b) "Decidió" es un verbo débil.
+c) No se especifica quién tomó la decisión (Agencia oculta).
+d) El timeout es muy alto.
+
+### Pregunta 5: Excepciones
+
+¿En qué escenario es **aceptable** usar Voz Pasiva?
+
+a) Cuando queremos sonar más académicos.
+b) Cuando el actor es desconocido o irrelevante para el contexto.
+c) En los títulos de los documentos.
+d) Nunca, está prohibida en ingeniería.
+
+---
+
+## SOLUCIONARIO
+
+### Respuesta 1: **b) El controlador valida los datos antes de guardarlos.**
+>
+> **Justificación**: Sigue la estructura Sujeto (Controlador) -> Verbo (Valida) -> Objeto (Datos). Las otras opciones ocultan o posponen al actor.
+
+### Respuesta 2: **b) Porque tiene una complejidad equivalente a O(n^2) cognitiva.**
+>
+> **Justificación**: El cerebro debe esperar al final de la frase para identificar al actor y reconstruir la relación, aumentando la carga mental.
+
+### Respuesta 3: **a) El sistema de seguridad abortó el despliegue debido a un error.**
+>
+> **Justificación**: Coloca al agente responsable (Sistema de seguridad) al principio, tomando control de la acción.
+
+### Respuesta 4: **c) No se especifica quién tomó la decisión (Agencia oculta).**
+>
+> **Justificación**: El uso de "Se + verbo" (pasiva refleja) difumina la responsabilidad. ¿Fue el equipo? ¿El CTO? ¿Un proceso automático?
+
+### Respuesta 5: **b) Cuando el actor es desconocido o irrelevante para el contexto.**
+>
+> **Justificación**: Ejemplo: "El servidor se reinició". No importa qué electrón específico causó el reinicio, importa el estado resultante.
+

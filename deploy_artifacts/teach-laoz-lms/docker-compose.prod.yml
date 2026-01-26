@@ -1,0 +1,33 @@
+services:
+  backend:
+    build: ./backend
+    container_name: laoz-lms-backend-prod
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./content:/app/content
+      - ./backend/lms.db:/app/lms.db
+      - ./COURSE_REPOSITORIES.md:/app/COURSE_REPOSITORIES.md
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - COOKIE_SECURE=false
+      - CONTENT_BASE_PATH=./content/courses
+      - DATABASE_URL=file:./lms.db
+      - JWT_SECRET=${JWT_SECRET:-change_me_in_production_please}
+      - CORS_ORIGIN=*
+
+  frontend:
+    build: ./frontend
+    container_name: laoz-lms-frontend-prod
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+networks:
+  default:
+    driver: bridge

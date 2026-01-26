@@ -1,0 +1,70 @@
+
+> teach-laoz-lms@0.1.0 start
+> node dist/index.js
+
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'student',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+CREATE TABLE IF NOT EXISTS comments (
+    id TEXT PRIMARY KEY,
+    post_id TEXT NOT NULL,
+    author_name TEXT NOT NULL,
+    author_email TEXT,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+CREATE TABLE IF NOT EXISTS user_progress (
+    user_id TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    completed BOOLEAN DEFAULT 0,
+    last_accessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, course_id, lesson_id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+CREATE TABLE IF NOT EXISTS evaluation_results (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    course_id TEXT NOT NULL,
+    lesson_id TEXT NOT NULL,
+    score INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+[DocController] Docs path initialized at: /app/content/docs
+[Routes] Registering /docs/:category/:docId
+[05:10:44] [32mINFO[39m: [36m💾 Opening SQLite database at /app/lms.db[39m
+[05:10:44] [32mINFO[39m: [36m✅ Database schema initialized[39m
+[05:10:44] [32mINFO[39m: [36m🚀 Starting Teach LAOZ LMS...[39m
+[05:10:44] [32mINFO[39m: [36mEnvironment: development[39m
+[05:10:44] [32mINFO[39m: [36mHost: 0.0.0.0[39m
+[05:10:44] [32mINFO[39m: [36mPort: 3000[39m
+[05:10:44] [32mINFO[39m: [36m📚 Server listening on http://0.0.0.0:3000[39m
+[05:10:44] [32mINFO[39m: [36m📂 Content base path: ./content/courses[39m
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM users WHERE email = 'student@teachlaoz.com'
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
+SELECT * FROM user_progress WHERE user_id = 'ba3540c5-24b1-40b6-8f69-22450ec2'/*+4 bytes*/
