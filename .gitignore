@@ -44,3 +44,4 @@ Thumbs.db
 
 # Los archivos de contenido
 content/
+verification_results*.json
