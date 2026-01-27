@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CommentSection } from '../CommentSection';
-import { EvidenceSection } from '../EvidenceSection';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CommentSection } from "../CommentSection";
+import { EvidenceSection } from "../EvidenceSection";
 
 interface CourseToolsSidebarProps {
   sidebarMode: "none" | "forum" | "evidence";
@@ -10,11 +10,11 @@ interface CourseToolsSidebarProps {
   courseId: string | undefined;
 }
 
-export const CourseToolsSidebar: React.FC<CourseToolsSidebarProps> = ({ 
-  sidebarMode, 
-  setSidebarMode, 
-  path, 
-  courseId 
+export const CourseToolsSidebar: React.FC<CourseToolsSidebarProps> = ({
+  sidebarMode,
+  setSidebarMode,
+  path,
+  courseId,
 }) => {
   return (
     <AnimatePresence>
@@ -24,7 +24,7 @@ export const CourseToolsSidebar: React.FC<CourseToolsSidebarProps> = ({
           animate={{ width: 400, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="hidden lg:block h-[calc(100vh-120px)] sticky top-4 overflow-hidden"
+          className="hidden lg:block h-[calc(100vh-120px)] sticky top-4 overflow-hidden print:hidden"
         >
           {sidebarMode === "forum" && (
             <CommentSection

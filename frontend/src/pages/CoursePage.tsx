@@ -211,7 +211,7 @@ export const CoursePage: React.FC = () => {
         />
 
         {/* Mobile Forum (Below content) */}
-        <div className="lg:hidden mt-8">
+        <div className="lg:hidden mt-8 print:hidden">
           <CommentSection resourceId={path || "root"} />
         </div>
       </div>
