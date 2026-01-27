@@ -8,8 +8,9 @@ if ! command -v docker &> /dev/null; then
     echo "Docker not found. Installing..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     sh get-docker.sh
-    sudo usermod -aG docker \
-    echo "Docker installed. You may need to logout and login for group changes to take effect."
+    TARGET_USER=${SUDO_USER:-$(whoami)}
+    sudo usermod -aG docker $TARGET_USER
+    echo "Docker installed. User $TARGET_USER added to docker group."
 fi
 
 # Check for Compose
