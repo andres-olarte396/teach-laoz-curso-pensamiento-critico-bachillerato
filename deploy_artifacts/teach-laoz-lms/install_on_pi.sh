@@ -30,9 +30,13 @@ if [ -d "$DEST_DIR" ]; then
     git pull
 else
     echo "Cloning repository..."
-    git clone $REPO_URL $DEST_DIR
+    git clone -b blog-articulos-escritura $REPO_URL $DEST_DIR
     cd $DEST_DIR
 fi
+
+# Ensure we are on the latest commit of the branch
+git fetch origin blog-articulos-escritura
+git reset --hard origin/blog-articulos-escritura
 
 echo "Building and starting services..."
 # Build images for ARM64 (native on Pi)
