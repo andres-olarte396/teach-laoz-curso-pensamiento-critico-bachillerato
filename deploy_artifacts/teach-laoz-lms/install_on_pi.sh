@@ -18,9 +18,25 @@ if ! docker compose version &> /dev/null; then
      sudo apt-get update && sudo apt-get install -y docker-compose-plugin
 fi
 
+
+# Repo Config
+REPO_URL="https://github.com/andres-olarte396/teach-laoz-learning-management-system.git"
+DEST_DIR="teach-laoz-lms"
+
+echo "Checking for existing installation..."
+if [ -d "$DEST_DIR" ]; then
+    echo "Directory $DEST_DIR exists. Updating..."
+    cd $DEST_DIR
+    git pull
+else
+    echo "Cloning repository..."
+    git clone $REPO_URL $DEST_DIR
+    cd $DEST_DIR
+fi
+
 echo "Building and starting services..."
 # Build images for ARM64 (native on Pi)
 sudo docker compose up -d --build
 
 echo "Deployment Complete!"
-echo "Access the LMS at http://<RASPBERRY_PI_IP>"
+echo "Access the LMS at http://$(hostname -I | awk '{print $1}')"
