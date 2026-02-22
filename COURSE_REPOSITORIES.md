@@ -45,3 +45,7 @@ Agrega los cursos en el formato: `- [Nombre del Curso](URL_DEL_GIT_REPO)`
 - [Curso de Uso de la Plataforma](https://github.com/andres-olarte396/teach-laoz-curso-uso-plataforma)
 - [Curso de Inteligencia Financiera (Developer)](https://github.com/developer-laoz396/teach-laoz-curso_inteligencia-financiera)
 - [Curso de Security (Underscore)](https://github.com/andres-olarte396/teach-laoz-curso_security)
+- [Curso de Gemini Agents](https://github.com/andres-olarte396/teach-laoz-curso-gemini-agents)
+- [Curso de MCP](https://github.com/andres-olarte396/teach-laoz-curso-mcp)
+- [Curso de Nano Pi](https://github.com/andres-olarte396/teach-laoz-curso-nano-pi)
+- [Curso de TOGAF](https://github.com/andres-olarte396/teach-laoz-curso-togaf)
